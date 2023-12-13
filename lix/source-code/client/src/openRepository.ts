@@ -27,7 +27,7 @@ const {
 	commit: isoCommit,
 } = isoGit
 
-const verbose = false
+const verbose = true
 
 // TODO addd tests for whitelist
 
@@ -53,6 +53,8 @@ export async function openRepository(
 	}
 ): Promise<Repository> {
 	const rawFs = args.nodeishFs
+
+	window["rawFs"] = rawFs
 
 	const [errors, setErrors] = createSignal<Error[]>([])
 
@@ -87,6 +89,24 @@ export async function openRepository(
 		},
 	})
 
+	async function doCheckout(filepaths: string[] = []) {
+		const res = await checkout({
+			fs: withLazyFetching({
+				nodeishFs: rawFs,
+				verbose,
+				description: "checkout",
+			}),
+			dir,
+			ref: args.branch,
+			// filepaths,
+		})
+
+		console.log(await rawFs.readdir("/"))
+
+		console.log("checked out", filepaths)
+		return res
+	}
+
 	// TODO: support for url scheme to use local repo already in the fs
 	const gitUrl = `https://${repoHost}/${owner}/${repoName}`
 
@@ -108,7 +128,7 @@ export async function openRepository(
 	// TODO: check for same origin
 	const maybeGitDir = await rawFs.lstat("/.git").catch((error) => ({ error }))
 	if ("error" in maybeGitDir) {
-		pending = clone({
+		await clone({
 			fs: withLazyFetching({ nodeishFs: rawFs, verbose, description: "clone" }),
 			http: makeHttpClient({
 				verbose,
@@ -129,34 +149,51 @@ export async function openRepository(
 			depth: 1,
 			noTags: true,
 		})
-			.then(() => {
-				return checkout({
-					fs: withLazyFetching({
-						nodeishFs: rawFs,
-						verbose,
-						description: "checkout",
-					}),
-					dir,
-					ref: args.branch,
-					// filepaths: ["resources/en.json", "resources/de.json", "project.inlang.json"],
-				})
-			})
-			.finally(() => {
-				pending = undefined
-			})
+			.then(() => doCheckout())
 			.catch((newError: Error) => {
 				setErrors((previous) => [...(previous || []), newError])
 			})
-
-		await pending
 	}
 
+	const checkedOut = new Set()
 	// delay all fs and repo operations until the repo clone and checkout have finished, this is preparation for the lazy feature
-	function delayedAction({ execute }: { execute: () => any }) {
+	function delayedAction({
+		execute,
+		prop,
+		argumentsList,
+	}: {
+		execute: () => any
+		prop: any
+		argumentsList: any[]
+	}) {
+		const filename = argumentsList?.[0].replace(/^(\.)?\//, "")
+		const pathParts = filename?.split("/") || []
+		const rootObject = pathParts[0]
+
+		console.info(prop, argumentsList)
+		// if (
+		// 	rootObject !== ".git" &&
+		// 	["readFile", "readdir", "stat", "readlink"].includes(prop) &&
+		// 	rootObject &&
+		// 	!checkedOut.has(rootObject)
+		// ) {
+		// 	if (pending) {
+		// 		pending = pending
+		// 			.then(() => doCheckout([rootObject]))
+		// 			.finally(() => checkedOut.add(rootObject))
+		// 	} else {
+		// 		pending = doCheckout([rootObject]).finally(() => checkedOut.add(rootObject))
+		// 	}
+		// }
+
 		if (pending) {
-			return pending.then(execute)
+			return pending.then(execute).finally(() => {
+				console.warn("executed", filename, prop)
+				pending = undefined
+			})
 		}
 
+		console.warn("executing...", filename, prop)
 		return execute()
 	}
 

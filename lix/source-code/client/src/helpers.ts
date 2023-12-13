@@ -8,7 +8,11 @@ type Args = {
 	nodeishFs: NodeishFilesystem
 	verbose?: boolean
 	description?: string
-	intercept?: (args: { prop: keyof NodeishFilesystem; execute: () => any }) => any
+	intercept?: (args: {
+		prop: keyof NodeishFilesystem
+		execute: () => any
+		argumentsList: any[]
+	}) => any
 }
 export const withLazyFetching = ({
 	nodeishFs,
@@ -31,6 +35,7 @@ export const withLazyFetching = ({
 							? intercept({ prop, argumentsList, execute } as {
 									prop: keyof typeof nodeishFs
 									execute: () => any
+									argumentsList: any[]
 							  })
 							: execute()
 					},
