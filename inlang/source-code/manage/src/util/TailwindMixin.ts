@@ -1,6 +1,6 @@
 import { adoptStyles, LitElement, unsafeCSS } from "lit"
 
-import style from "../styles/tailwind.global.css"
+import style from "../styles/tailwind.global.css?inline"
 
 declare global {
 	/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
