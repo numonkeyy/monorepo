@@ -405,6 +405,8 @@ export class InlangManage extends TwLitElement {
 				this.shadowRoot?.querySelector("#projects")?.classList.add("hidden")
 			}}
 		>
+			<inlang-create></inlang-create>
+
 			<header class="bg-white border-b border-slate-200 py-3.5 px-4 sticky top-0 z-50">
 				<div class="max-w-7xl mx-auto flex flex-row justify-between relative sm:static">
 					<div class="flex items-center">
