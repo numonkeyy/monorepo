@@ -556,6 +556,9 @@ importers:
 
   inlang/source-code/ide-extension:
     dependencies:
+      '@inlang/env-variables':
+        specifier: workspace:*
+        version: link:../env-variables
       '@inlang/result':
         specifier: workspace:*
         version: link:../result

@@ -8,6 +8,7 @@ import { findRepoRoot } from "@lix-js/client"
 import { setState, state } from "../state.js"
 import { _import } from "../import/_import.js"
 import { isInWorkspaceRecommendation } from "../recommendation/recommendation.js"
+import { getGitUsername } from "../settings/getGitUsername.js"
 
 let projectViewNodes: ProjectViewNode[] = []
 
@@ -123,6 +124,10 @@ export async function handleTreeSelection(args: {
 				isInWorkspaceRecommendation: await isInWorkspaceRecommendation({
 					workspaceFolder: args.workspaceFolder,
 				}),
+				git: {
+					username: await getGitUsername(),
+					// do NOT add the git origin to telemetry, as it might contain sensitive information
+				},
 			},
 		})
 	} catch (error) {

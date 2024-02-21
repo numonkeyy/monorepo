@@ -152,6 +152,7 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
+		"@inlang/env-variables": "workspace:*",
 		"@inlang/result": "workspace:*",
 		"@inlang/sdk": "workspace:*",
 		"@inlang/telemetry": "workspace:*",
