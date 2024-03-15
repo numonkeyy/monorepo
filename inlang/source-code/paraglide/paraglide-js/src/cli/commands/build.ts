@@ -41,11 +41,11 @@ export const buildCommand = new Command()
 		// resolve the directory for each language
 		const languageDirectories: Record<string, string> = {}
 		for (const language of projectSettings.languageTags) {
-			languageDirectories[language] = resolve(tmpDir, language)
+			languageDirectories[language] = resolve(routesDirectory, language)
 		}
 
 		// create a language directory for each language
-		for (const [, languageDir] of Object.entries(languageDirectories)) {
+		for (const languageDir of Object.values(languageDirectories)) {
 			await repo.nodeishFs.cp(tmpDir, languageDir, { recursive: true })
 		}
 
