@@ -38,9 +38,13 @@ export const buildCommand = new Command()
 		// copy the routes directory to a temporary directory
 		await fs.cp(routesDirectory, tmpDir, { recursive: true })
 
+		//wipe the routes directory
+		await fs.rm(routesDirectory, { recursive: true, force: true })
+
 		// resolve the directory for each language
 		const languageDirectories: Record<string, string> = {}
 		for (const language of projectSettings.languageTags) {
+			//TODO keep source-langauge in root
 			languageDirectories[language] = resolve(routesDirectory, language)
 		}
 
@@ -51,16 +55,15 @@ export const buildCommand = new Command()
 
 		// Walk through the language directories and rewrite imports
 		for (const [language, languageDir] of Object.entries(languageDirectories)) {
+			//TODO keep source-langauge in root
 			await walk(languageDir, ({ path, content }) =>
 				rewriteFile({ content, path, targetLanguage: language })
 			)
 		}
 
-		try {
-			// run the build command
-			execSync(buildCommand, { stdio: "inherit" })
-		} catch (err) {
-			console.error(err)
+		const build = safeExecSync(buildCommand, { stdio: "inherit" })
+		if (!build.ok) {
+			console.error(build.stderr)
 		}
 
 		// move the routes directory back
@@ -85,6 +88,16 @@ const exitIfErrors = (project: InlangProject) => {
 		process.exit(1)
 	}
 	return project
+}
+
+function safeExecSync(
+	...args: Parameters<typeof execSync>
+): { ok: true; stdout: string } | { ok: false; stderr: string } {
+	try {
+		return { ok: true, stdout: execSync(...args).toString() }
+	} catch (err: any) {
+		return { ok: false, stderr: err.stderr.toString() }
+	}
 }
 
 /**
