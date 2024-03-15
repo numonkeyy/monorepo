@@ -4,6 +4,7 @@ import { loadProject, type InlangProject } from "@inlang/sdk"
 import fs from "node:fs/promises"
 import { execSync } from "node:child_process"
 import { resolve } from "node:path"
+import { rewriteFile } from "../../services/build/rewrite.js"
 
 export const buildCommand = new Command()
 	.name("build")
@@ -51,9 +52,7 @@ export const buildCommand = new Command()
 		// Walk through the language directories and rewrite imports
 		for (const [language, languageDir] of Object.entries(languageDirectories)) {
 			await walk(languageDir, ({ path, content }) => {
-				const extensions = ["js", "ts", "jsx", "tsx", "vue", "astro", "svelte", "svx"]
-				if (!extensions.includes(path.split(".").pop() as string)) return content
-				return content.replace("paraglide/messages", `paraglide/messages/${language}`)
+				return rewriteFile({ content, path, targetLanguage: language })
 			})
 		}
 

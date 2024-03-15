@@ -25,7 +25,7 @@ describe("rewriteFile", () => {
 		const indirect = `
             import * as m from "paraglide/messages.js"
             const options = { languageTag: "en" };
-            m.my_message({}, options);
+            m.my_message(params, options);
         `
 
 		const asParam = `
@@ -46,5 +46,18 @@ describe("rewriteFile", () => {
 		expect(rewriteFile({ content: asParam, path: "/", targetLanguage: "en" })).toContain(
 			'import * as m from "paraglide/messages/en.js"'
 		)
+	})
+
+	it("should not replace imports that already are language specific", () => {
+		const content = `
+			import * as en from "paraglide/messages/en.js"
+			import * as m from "paraglide/messages.js"
+		`
+
+		const rewritten = rewriteFile({ content, path: "/", targetLanguage: "de" })
+
+		expect(rewritten).toContain("paraglide/messages/en.js")
+		expect(rewritten).toContain("paraglide/messages/de.js")
+		expect(rewritten).not.toContain("paraglide/messages.js")
 	})
 })
