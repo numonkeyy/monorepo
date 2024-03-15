@@ -51,9 +51,9 @@ export const buildCommand = new Command()
 
 		// Walk through the language directories and rewrite imports
 		for (const [language, languageDir] of Object.entries(languageDirectories)) {
-			await walk(languageDir, ({ path, content }) => {
-				return rewriteFile({ content, path, targetLanguage: language })
-			})
+			await walk(languageDir, ({ path, content }) =>
+				rewriteFile({ content, path, targetLanguage: language })
+			)
 		}
 
 		try {

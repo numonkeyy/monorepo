@@ -14,7 +14,7 @@ const messageWithOptionRegex =
 /**
  * Matches paraglide/messages(.js) imports, but not paraglide/messages.{lang}(.js)
  */
-const matchMessageIndexImport = /paraglide\/messages[^/]/g
+const matchMessageIndexImport = /import[^\n]+from[^\n]+paraglide\/messages[^/]/g
 
 export function rewriteFile({
 	content,

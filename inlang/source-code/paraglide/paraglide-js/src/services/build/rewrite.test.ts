@@ -56,8 +56,15 @@ describe("rewriteFile", () => {
 
 		const rewritten = rewriteFile({ content, path: "/", targetLanguage: "de" })
 
-		expect(rewritten).toContain("paraglide/messages/en.js")
-		expect(rewritten).toContain("paraglide/messages/de.js")
+		expect(rewritten).toContain('import * as en from "paraglide/messages/en.js"')
+		expect(rewritten).toContain('import * as m from "paraglide/messages/de.js"')
 		expect(rewritten).not.toContain("paraglide/messages.js")
+	})
+
+	it("does not replace paraglide/messages if it's not part of an import", () => {
+		const content = `
+			this is some text talking about paraglide/messages.js
+		`
+		expect(rewriteFile({ content, path: "/", targetLanguage: "de" })).toBe(content)
 	})
 })
