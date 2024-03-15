@@ -44,7 +44,6 @@ export const buildCommand = new Command()
 		// resolve the directory for each language
 		const languageDirectories: Record<string, string> = {}
 		for (const language of projectSettings.languageTags) {
-			//TODO keep source-langauge in root
 			languageDirectories[language] = resolve(routesDirectory, language)
 		}
 
@@ -55,10 +54,10 @@ export const buildCommand = new Command()
 
 		// Walk through the language directories and rewrite imports
 		for (const [language, languageDir] of Object.entries(languageDirectories)) {
-			//TODO keep source-langauge in root
-			await walk(languageDir, ({ path, content }) =>
-				rewriteFile({ content, path, targetLanguage: language })
-			)
+			await walk({
+				path: languageDir,
+				rewrite: ({ path, content }) => rewriteFile({ content, path, targetLanguage: language }),
+			})
 		}
 
 		const build = safeExecSync(buildCommand, { stdio: "inherit" })
@@ -103,20 +102,34 @@ function safeExecSync(
 /**
  * Recursively walk through a directory & rewrite all files in-place
  */
-async function walk(
-	dir: string,
-	rewrite: (args: { path: string; content: string; depth: number }) => string,
-	depth = 0
-) {
-	const entries = await fs.readdir(dir)
+async function walk(options: {
+	path: string
+	rewrite: (args: { path: string; content: string; depth: number }) => string
+
+	/**
+	 * Check if we should continue walking down a directory
+	 */
+	predicate?: (options: { path: string }) => boolean
+	depth?: number
+}) {
+	const predicate = options.predicate ?? (() => true)
+	const currentDepth = options.depth ?? 0
+	const entries = await fs.readdir(options.path)
 	for (const entry of entries) {
-		const path = resolve(dir, entry)
+		const path = resolve(options.path, entry)
 		const stat = await fs.stat(path)
 		if (stat.isDirectory()) {
-			await walk(path, rewrite, depth + 1)
+			if (predicate({ path }) === true) {
+				await walk({
+					path,
+					depth: currentDepth + 1,
+					rewrite: options.rewrite,
+					predicate: options.predicate,
+				})
+			}
 		} else {
 			const content = await fs.readFile(path, "utf8")
-			const rewritten = rewrite({ path, content, depth })
+			const rewritten = options.rewrite({ path, content, depth: currentDepth })
 			await fs.writeFile(path, rewritten, { encoding: "utf-8" })
 		}
 	}
