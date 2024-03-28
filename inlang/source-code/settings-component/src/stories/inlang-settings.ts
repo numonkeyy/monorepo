@@ -16,11 +16,6 @@ import SLOption from "@shoelace-style/shoelace/dist/components/option/option.com
 import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
 import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
 import SlCheckbox from "@shoelace-style/shoelace/dist/components/checkbox/checkbox.component.js"
-import SlIconButton from "@shoelace-style/shoelace/dist/components/icon-button/icon-button.component.js"
-import SlIcon from "@shoelace-style/shoelace/dist/components/icon/icon.component.js"
-
-import { setBasePath } from "@shoelace-style/shoelace/dist/utilities/base-path.js"
-setBasePath("./../../../../node_modules/@shoelace-style/shoelace/dist")
 
 // in case an app defines it's own set of shoelace components, prevent double registering
 if (!customElements.get("sl-select")) customElements.define("sl-select", SlSelect)
@@ -28,8 +23,6 @@ if (!customElements.get("sl-option")) customElements.define("sl-option", SLOptio
 if (!customElements.get("sl-input")) customElements.define("sl-input", SlInput)
 if (!customElements.get("sl-button")) customElements.define("sl-button", SlButton)
 if (!customElements.get("sl-checkbox")) customElements.define("sl-checkbox", SlCheckbox)
-if (!customElements.get("sl-icon-button")) customElements.define("sl-icon-button", SlIconButton)
-if (!customElements.get("sl-icon")) customElements.define("sl-icon", SlIcon)
 
 @customElement("inlang-settings")
 export default class InlangSettings extends LitElement {
@@ -38,8 +31,6 @@ export default class InlangSettings extends LitElement {
 		css`
 			h3 {
 				margin: 0;
-				padding-bottom: 24px;
-				border-bottom: 1px solid var(--sl-panel-border-color);
 			}
 			.container {
 				position: relative;
@@ -50,7 +41,7 @@ export default class InlangSettings extends LitElement {
 			.module-container {
 				display: flex;
 				flex-direction: column;
-				gap: 24px;
+				gap: 16px;
 			}
 			.hover-bar-container {
 				width: 100%;
@@ -82,8 +73,26 @@ export default class InlangSettings extends LitElement {
 		`,
 	]
 
-	@property({ attribute: false })
-	project: InlangProject = {} as InlangProject
+	@property({ type: Object })
+	settings: ReturnType<InlangProject["settings"]> = {} as ReturnType<InlangProject["settings"]>
+
+	@property({ type: Array })
+	installedPlugins: ReturnType<InlangProject["installed"]["plugins"]> = [] as ReturnType<
+		InlangProject["installed"]["plugins"]
+	>
+
+	@property({ type: Array })
+	installedMessageLintRules: ReturnType<InlangProject["installed"]["messageLintRules"]> =
+		[] as ReturnType<InlangProject["installed"]["messageLintRules"]>
+
+	dispatchOnSetSettings(settings: ProjectSettings) {
+		const onSetSettings = new CustomEvent("set-settings", {
+			detail: {
+				argument: settings,
+			},
+		})
+		this.dispatchEvent(onSetSettings)
+	}
 
 	@state()
 	private _newSettings: ProjectSettings | undefined = undefined
@@ -94,8 +103,8 @@ export default class InlangSettings extends LitElement {
 	override async firstUpdated() {
 		await this.updateComplete
 
-		if (this.project?.settings()) {
-			this._newSettings = JSON.parse(JSON.stringify(this.project.settings()))
+		if (this.settings) {
+			this._newSettings = JSON.parse(JSON.stringify(this.settings))
 		}
 	}
 
@@ -120,7 +129,7 @@ export default class InlangSettings extends LitElement {
 				[property]: value,
 			}
 		}
-		if (JSON.stringify(this.project?.settings()) !== JSON.stringify(this._newSettings)) {
+		if (JSON.stringify(this.settings) !== JSON.stringify(this._newSettings)) {
 			this._unsavedChanges = true
 		} else {
 			this._unsavedChanges = false
@@ -128,29 +137,32 @@ export default class InlangSettings extends LitElement {
 	}
 
 	_revertChanges = () => {
-		if (this.project?.settings()) {
-			this._newSettings = JSON.parse(JSON.stringify(this.project?.settings()))
+		if (this.settings) {
+			this._newSettings = JSON.parse(JSON.stringify(this.settings))
 		}
 		this._unsavedChanges = false
 	}
 
 	_saveChanges = () => {
 		if (this._newSettings) {
-			this.project?.setSettings(this._newSettings)
+			this.dispatchOnSetSettings(this._newSettings)
 		}
 		this._unsavedChanges = false
 	}
 
-	private get _projectSettingProperties(): Record<
+	private get _settingProperties(): Record<
 		InlangModule["default"]["id"] | "internal",
 		{
 			meta?: InstalledPlugin | InstalledMessageLintRule
 			schema?: Record<string, Record<string, unknown>>
 		}
 	> {
-		const _project = this.project
-		if (!_project) throw new Error("No inlang project")
-		if (!_project.settings()) throw new Error("No inlang project settings")
+		const _settings = this.settings
+		const _installedPlugins = this.installedPlugins
+		const _installedMessageLintRules = this.installedMessageLintRules
+
+		if (!_settings) throw new Error("No inlang settings")
+		if (!_installedPlugins) throw new Error("No installed plugins")
 
 		const generalSchema: Record<
 			InlangModule["default"]["id"] | "internal",
@@ -160,7 +172,7 @@ export default class InlangSettings extends LitElement {
 			}
 		> = { internal: { schema: ProjectSettings.allOf[0] } }
 
-		for (const plugin of _project.installed.plugins()) {
+		for (const plugin of _installedPlugins) {
 			if (plugin.settingsSchema) {
 				generalSchema[plugin.id] = {
 					schema: plugin.settingsSchema,
@@ -168,7 +180,7 @@ export default class InlangSettings extends LitElement {
 				}
 			}
 		}
-		for (const lintRule of _project.installed.messageLintRules()) {
+		for (const lintRule of _installedMessageLintRules) {
 			if (lintRule.settingsSchema) {
 				generalSchema[lintRule.id] = {
 					schema: lintRule.settingsSchema,
@@ -182,10 +194,12 @@ export default class InlangSettings extends LitElement {
 
 	override render() {
 		return html` <div class="container">
-			${Object.entries(this._projectSettingProperties).map(([key, value]) => {
+			${Object.entries(this._settingProperties).map(([key, value]) => {
 				return value.schema?.properties && this._newSettings
 					? html`<div class="module-container">
-							<h3>${(value.meta && (value.meta?.displayName as { en: string }).en) || key}</h3>
+							${value.meta &&
+							(value.meta?.displayName as { en: string }).en &&
+							html`<h3>${value.meta && (value.meta?.displayName as { en: string }).en}</h3>`}
 							${Object.entries(value.schema.properties).map(([property, schema]) => {
 								if (property === "$schema" || property === "modules" || property === "experimental")
 									return undefined
@@ -193,7 +207,7 @@ export default class InlangSettings extends LitElement {
 									? html`
 											<general-input
 												.property=${property}
-												.modules=${this.project.installed.messageLintRules() || []}
+												.modules=${this.installedMessageLintRules || []}
 												.value=${this._newSettings?.[property as keyof typeof this._newSettings]}
 												.schema=${schema}
 												.handleInlangProjectChange=${this.handleInlangProjectChange}
@@ -252,3 +266,4 @@ declare global {
 		"inlang-settings": InlangSettings
 	}
 }
+
