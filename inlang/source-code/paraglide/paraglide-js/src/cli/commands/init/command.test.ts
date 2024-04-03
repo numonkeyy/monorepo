@@ -90,7 +90,7 @@ describe("initializeInlangProject()", () => {
 
 			process.cwd = () => "/folder/subfolder"
 			mockUserInput(["useExistingProject"])
-			const path = await initializeInlangProject({ logger, repo })
+			const { projectPath: path } = await initializeInlangProject({ logger, repo })
 			expect(path).toBe("../project.inlang")
 		},
 		{
@@ -102,8 +102,9 @@ describe("initializeInlangProject()", () => {
 		const fs = mockFiles({})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 		mockUserInput(["newProject", "en"])
-		const path = await initializeInlangProject({ logger, repo })
+		const { project, projectPath: path } = await initializeInlangProject({ logger, repo })
 		expect(path).toBe("./project.inlang")
+		expect(project.settings().languageTags).toEqual(["en"])
 		expect(await pathExists("./project.inlang", fs)).toBe(true)
 	})
 })
@@ -134,6 +135,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON(
 			{
 				projectPath: "./project.inlang",
+				outdir: "./src/paraglide",
 			},
 			{ logger, repo }
 		)
@@ -142,7 +144,9 @@ describe("addCompileStepToPackageJSON()", () => {
 		const packageJson = JSON.parse(
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
-		expect(packageJson.scripts.build).toBe(`paraglide-js compile --project ./project.inlang`)
+		expect(packageJson.scripts.build).toBe(
+			`paraglide-js compile --project ./project.inlang --outdir ./src/paraglide`
+		)
 	})
 
 	test("if an existing build step exists, it should be preceeded by the paraglide-js compile command", async () => {
@@ -157,6 +161,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON(
 			{
 				projectPath: "./project.inlang",
+				outdir: "./src/paraglide",
 			},
 			{ logger, repo }
 		)
@@ -166,7 +171,7 @@ describe("addCompileStepToPackageJSON()", () => {
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
 		expect(packageJson.scripts.build).toBe(
-			`paraglide-js compile --project ./project.inlang && some build step`
+			`paraglide-js compile --project ./project.inlang --outdir ./src/paraglide && some build step`
 		)
 	})
 
@@ -187,6 +192,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON(
 			{
 				projectPath: "./project.inlang",
+				outdir: "./src/paraglide",
 			},
 			{ logger, repo }
 		)
@@ -213,6 +219,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON(
 			{
 				projectPath: "./project.inlang",
+				outdir: "./src/paraglide",
 			},
 			{ logger, repo }
 		)
@@ -239,6 +246,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON(
 			{
 				projectPath: "./project.inlang",
+				outdir: "./src/paraglide",
 			},
 			{ logger, repo }
 		)
@@ -249,7 +257,7 @@ describe("addCompileStepToPackageJSON()", () => {
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
 		expect(packageJson.scripts.postinstall).toBe(
-			`paraglide-js compile --project ./project.inlang && do-something`
+			`paraglide-js compile --project ./project.inlang --outdir ./src/paraglide && do-something`
 		)
 	})
 
@@ -270,6 +278,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON(
 			{
 				projectPath: "./project.inlang",
+				outdir: "./src/paraglide",
 			},
 			{ logger, repo }
 		)
@@ -292,27 +301,33 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON(
 			{
 				projectPath: "./project.inlang",
+				outdir: "./src/paraglide",
 			},
 			{ logger, repo }
 		)
 		const packageJson = JSON.parse(
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
-		expect(packageJson.scripts.postinstall).toBe(`paraglide-js compile --project ./project.inlang`)
+		expect(packageJson.scripts.postinstall).toBe(
+			`paraglide-js compile --project ./project.inlang --outdir ./src/paraglide`
+		)
 	})
 })
 
 describe("existingProjectFlow()", () => {
-	test("if the user selects to proceed with the existing project and the project has no errors, the function should return", async () => {
+	test("if the user selects to proceed with the existing project and the project has no errors, the function should return the project", async () => {
 		const fs = mockFiles({
 			"/project.inlang/settings.json": JSON.stringify(getNewProjectTemplate()),
 		})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
 		mockUserInput(["useExistingProject"])
-		expect(
-			existingProjectFlow({ existingProjectPath: "/project.inlang" }, { logger, repo })
-		).resolves.toBeUndefined()
+		const project = await existingProjectFlow(
+			{ existingProjectPath: "/project.inlang" },
+			{ logger, repo }
+		)
+
+		expect(project.settings().languageTags).toEqual(getNewProjectTemplate().languageTags)
 	})
 
 	test("if the user selects a new project, the newProjectFlow() should be executed", async () => {
