@@ -70,8 +70,8 @@ const Footer = () => {
 
 	return (
 		<footer class="bg-background border-t border-surface-200 py-4 px-4 overflow-visible">
-			<div class="max-w-7xl mx-auto flex justify-between gap-4 h-6">
-				<div class="xl:pl-4 flex items-center justify-between">
+			<div class="max-w-7xl mx-auto flex justify-between gap-4 xl:px-4 h-6">
+				<div class="flex items-center justify-between">
 					<p class="text-sm text-surface-500">
 						© {new Date().getFullYear().toString()} Opral
 					</p>
@@ -84,13 +84,13 @@ const Footer = () => {
 								class={"link link-primary flex space-x-2 items-center text-xs"}
 								href={link.href}
 							>
-								<link.Icon class="w-5 h-5 text-surface-900" />
+								<link.Icon class="w-5 h-5" />
 								<span class="sr-only">{link.name}</span>
 							</Link>
 						)}
 					</For>
 				</div>
-				<div class="relative xl:pr-4">
+				<div class="relative">
 					<sl-dropdown
 						prop:placement="top-end"
 						prop:distance={4}
