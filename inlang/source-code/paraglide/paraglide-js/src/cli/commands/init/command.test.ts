@@ -8,7 +8,6 @@ import {
 	checkIfUncommittedChanges,
 	createNewProjectFlow,
 	existingProjectFlow,
-	findExistingInlangProjectPath,
 	initializeInlangProject,
 	maybeAddVsCodeExtension,
 } from "./command.js"
@@ -18,7 +17,6 @@ import nodeFsPromises from "node:fs/promises"
 import childProcess from "node:child_process"
 import memfs from "memfs"
 import { loadProject, type ProjectSettings } from "@inlang/sdk"
-import { version } from "../../state.js"
 import { createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
 import { Logger } from "../../../services/logger/index.js"
 import { openRepository } from "@lix-js/client"
@@ -89,9 +87,10 @@ describe("initializeInlangProject()", () => {
 			const repo = await openRepository("file://", { nodeishFs: fs })
 
 			process.cwd = () => "/folder/subfolder"
-			mockUserInput(["useExistingProject"])
-			const { projectPath: path } = await initializeInlangProject({ logger, repo })
-			expect(path).toBe("../project.inlang")
+			mockUserInput(["/folder/project.inlang"])
+
+			const { projectPath } = await initializeInlangProject({ logger, repo, repoRoot: "/" })
+			expect(projectPath).toBe("/folder/project.inlang")
 		},
 		{
 			// i am on a plane with bad internet
@@ -102,8 +101,12 @@ describe("initializeInlangProject()", () => {
 		const fs = mockFiles({})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 		mockUserInput(["newProject", "en"])
-		const { project, projectPath: path } = await initializeInlangProject({ logger, repo })
-		expect(path).toBe("./project.inlang")
+		const { project, projectPath: path } = await initializeInlangProject({
+			logger,
+			repo,
+			repoRoot: "/",
+		})
+		expect(path).toBe("/project.inlang")
 		expect(project.settings().languageTags).toEqual(["en"])
 		expect(await pathExists("./project.inlang", fs)).toBe(true)
 	})
@@ -122,7 +125,7 @@ describe("addParaglideJsToDependencies()", () => {
 		const packageJson = JSON.parse(
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
-		expect(packageJson.devDependencies["@inlang/paraglide-js"]).toBe(version)
+		expect(packageJson.devDependencies["@inlang/paraglide-js"]).toBe(PACKAGE_VERSION)
 	})
 })
 
@@ -149,6 +152,7 @@ describe("addCompileStepToPackageJSON()", () => {
 	})
 
 	test("if an existing build step exists, it should be preceeded by the paraglide-js compile command", async () => {
+		process.cwd = () => "/"
 		const fs = mockFiles({
 			"/package.json": JSON.stringify({
 				scripts: {
@@ -226,6 +230,7 @@ describe("addCompileStepToPackageJSON()", () => {
 	})
 
 	test("if there is a postinstall script present, add the paraglide-js compile command to it", async () => {
+		process.cwd = () => "/"
 		const fs = mockFiles({
 			"/package.json": JSON.stringify({
 				scripts: {
@@ -283,6 +288,7 @@ describe("addCompileStepToPackageJSON()", () => {
 	})
 
 	test("if there is no postinstall script present add the paragldie compile command", async () => {
+		process.cwd = () => "/"
 		const fs = mockFiles({
 			"/package.json": JSON.stringify({}),
 		})
@@ -314,13 +320,40 @@ describe("existingProjectFlow()", () => {
 		})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
-		mockUserInput(["useExistingProject"])
-		const project = await existingProjectFlow(
-			{ existingProjectPath: "/project.inlang" },
-			{ logger, repo }
-		)
+		mockUserInput(["/project.inlang"])
+		const { project } = await existingProjectFlow({
+			existingProjectPaths: ["/project.inlang"],
+			logger,
+			repo,
+		})
 
 		expect(project.settings().languageTags).toEqual(getNewProjectTemplate().languageTags)
+	})
+
+	test("allows us to select between multiple projects", async () => {
+		const project1 = getNewProjectTemplate()
+		project1.languageTags = ["en"]
+
+		const project2 = getNewProjectTemplate()
+		project2.languageTags = ["de"]
+
+		const fs = mockFiles({
+			"/project.inlang/settings.json": JSON.stringify(project2),
+			"/folder/project.inlang/settings.json": JSON.stringify(project1),
+		})
+		const repo = await openRepository("file://", { nodeishFs: fs })
+
+		mockUserInput(["/folder/project.inlang"])
+
+		const { project, projectPath } = await existingProjectFlow({
+			existingProjectPaths: ["/folder/project.inlang", "/project.inlang"],
+			logger,
+			repo,
+		})
+
+		// the newly created project file should exist
+		expect(projectPath).toBe("/folder/project.inlang")
+		expect(project.settings().languageTags).toEqual(project1.languageTags)
 	})
 
 	test("if the user selects a new project, the newProjectFlow() should be executed", async () => {
@@ -331,7 +364,7 @@ describe("existingProjectFlow()", () => {
 
 		mockUserInput(["newProject", "en"])
 
-		await existingProjectFlow({ existingProjectPath: "/folder/project.inlang" }, { logger, repo })
+		await existingProjectFlow({ existingProjectPaths: ["/folder/project.inlang"], logger, repo })
 		// info that a new project is created
 		expect(logger.info).toHaveBeenCalledOnce()
 		// the newly created project file should exist
@@ -344,8 +377,8 @@ describe("existingProjectFlow()", () => {
 		})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
-		mockUserInput(["useExistingProject"])
-		await existingProjectFlow({ existingProjectPath: "/project.inlang" }, { logger, repo })
+		mockUserInput(["/project.inlang"])
+		await existingProjectFlow({ existingProjectPaths: ["/project.inlang"], logger, repo })
 		expect(logger.error).toHaveBeenCalled()
 		expect(process.exit).toHaveBeenCalled()
 	})
@@ -645,50 +678,6 @@ describe("checkIfPackageJsonExists()", () => {
 		await checkIfPackageJsonExists({ logger, repo })
 		expect(logger.warn).not.toHaveBeenCalled()
 		expect(process.exit).not.toHaveBeenCalled()
-	})
-})
-
-describe("findExistingInlangProjectPath()", () => {
-	test("it should return undefined if no project.inlang has been found", async () => {
-		const fs = mockFiles({})
-		const repo = await openRepository("file://", { nodeishFs: fs })
-
-		const path = await findExistingInlangProjectPath(repo)
-		expect(path).toBeUndefined()
-	})
-
-	test("it find a project in the current working directory", async () => {
-		process.cwd = () => "/"
-		const fs = mockFiles({ "project.inlang/settings.json": "{}" })
-		const repo = await openRepository("file://", { nodeishFs: fs })
-
-		const path = await findExistingInlangProjectPath(repo)
-		expect(path).toBe("./project.inlang")
-	})
-
-	test("it should find a project in a parent directory", async () => {
-		process.cwd = () => "/nested/"
-
-		const fs = mockFiles({
-			"/project.inlang/settings.json": "{}",
-			"/nested/": {},
-		})
-		const repo = await openRepository("file://", { nodeishFs: fs })
-
-		const path = await findExistingInlangProjectPath(repo)
-		expect(path).toBe("../project.inlang")
-	})
-
-	test("it should find a project in a parent parent directory", async () => {
-		process.cwd = () => "/nested/nested/"
-		const fs = mockFiles({
-			"/project.inlang/settings.json": "{}",
-			"/nested/nested/": {},
-		})
-		const repo = await openRepository("file://", { nodeishFs: fs })
-
-		const path = await findExistingInlangProjectPath(repo)
-		expect(path).toBe("../../project.inlang")
 	})
 })
 
