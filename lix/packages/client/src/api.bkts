@@ -2,14 +2,7 @@ import type { NodeishFilesystem } from "@lix-js/fs"
 import type raw from "../vendored/isomorphic-git/index.js"
 import type { Endpoints } from "@octokit/types"
 import type { statusList, OptStatus } from "./git/status-list.js"
-
-// TODO: restructure types to implementation and split up openRepository into smaller functions
-export type Author = {
-	name?: string
-	email?: string
-	timestamp?: number
-	timezoneOffset?: number
-}
+import type { StatusArgs } from "./git/status-list.js"
 
 export class LixError extends Error {
 	// we currently mix standard errors with github errors and isomorphic git errors, we will start to transition into a clean lix error class as we replace implementations
@@ -17,18 +10,17 @@ export class LixError extends Error {
 	response?: { status?: number }
 }
 
-type StatusArgs = {
-	// ref?: string support custom refs
-	filepaths?: string[]
-	filter?: (filepath: string) => boolean
-	sparseFilter?: (entry: { filename: string; type: "file" | "folder" }) => boolean
-	includeStatus?: OptStatus[]
-}
+// type StatusArgs = {
+// 	// ref?: string support custom refs
+// 	filepaths?: string[]
+// 	filter?: (filepath: string) => boolean
+// 	sparseFilter?: (entry: { filename: string; type: "file" | "folder" }) => boolean
+// 	includeStatus?: OptStatus[]
+// }
 
 // TODO: return type of openRepository instead of seperate type defs
 export type Repository = {
 	// we dont want to add isogit to types but its required for teting comparison and debugging
-	[x: string]: any
 	nodeishFs: NodeishFilesystem
 	// state
 	listRemotes: () => Promise<Awaited<ReturnType<typeof raw.listRemotes>> | undefined>
@@ -47,7 +39,6 @@ export type Repository = {
 	getOrigin: () => Promise<string | undefined> // move to property
 	getCurrentBranch: () => Promise<string | undefined> // move to property
 	getBranches: () => Promise<string[] | undefined>
-	errors: Subscribable<LixError[]> // move to property
 	getFirstCommitHash: () => Promise<string | undefined>
 	getMeta: () => Promise<
 		| {
@@ -82,15 +73,6 @@ export type Repository = {
 	}) => Promise<
 		Endpoints["POST /repos/{owner}/{repo}/merge-upstream"]["response"]["data"] | { error: any }
 	>
-	createFork: () => Promise<Endpoints["POST /repos/{owner}/{repo}/forks"]["response"]>
-
-	// explicit branch api? repo.branches.main.read ? or similar
-	// TODO: implement these before publishing api, but not used in badge or editor, depends on strategy for statelessness
-	// currentBranch: () => unknown
-	// changeBranch: () => unknown
-}
-
-export type Subscribable<Value> = {
-	(): Value
-	subscribe: (callback: (value: Value) => void) => void
+	createFork: () => Promise<Record<string, any>>
+	// Promise<Endpoints["POST /repos/{owner}/{repo}/forks"]["response"]>
 }
