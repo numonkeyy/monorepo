@@ -12,9 +12,9 @@ import type { NextFunction, Request, Response } from "express"
 // @ts-ignore
 import createMiddleware from "./auth/cors-middleware.js"
 import { decryptAccessToken } from "./auth/implementation.js"
-import { privateEnv } from "@inlang/env-variables"
-const allowedOrigins = privateEnv.PUBLIC_ALLOWED_AUTH_URLS?.split(",")
+const allowedOrigins = process.env.PUBLIC_ALLOWED_AUTH_URLS?.split(",")
 const production = process.env.NODE_ENV === "production"
+import { privateEnv } from "@inlang/env-variables"
 
 const middleware = createMiddleware({
 	// This is the cors allowed origin:

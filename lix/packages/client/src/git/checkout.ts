@@ -1,5 +1,23 @@
 import { _FileSystem, _assertParameter, _join } from "../../vendored/isomorphic-git/index.js"
 import { _checkout } from "./_checkout.js"
+import type { RepoContext, RepoState } from "../openRepository.js"
+
+export async function checkout(ctx: RepoContext, state: RepoState, { branch }: { branch: string }) {
+	state.branchName = branch
+
+	if (ctx.useLazyFS) {
+		throw new Error(
+			"not implemented for lazy lix mode yet, use openRepo with different branch instead"
+		)
+	}
+
+	return await doCheckout({
+		fs: ctx.rawFs,
+		cache: ctx.cache,
+		dir: ctx.dir,
+		ref: state.branchName,
+	})
+}
 
 /**
  * Checkout a branch
@@ -54,7 +72,7 @@ import { _checkout } from "./_checkout.js"
  * })
  * console.log('done')
  */
-export async function checkout({
+export async function doCheckout({
 	fs,
 	onProgress,
 	dir,
@@ -68,7 +86,7 @@ export async function checkout({
 	force = false,
 	track = true,
 	cache = {},
-}) {
+}: any) {
 	try {
 		_assertParameter("fs", fs)
 		_assertParameter("dir", dir)
