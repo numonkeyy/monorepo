@@ -1,5 +1,7 @@
 {
-	"extends": [],
+	"extends": [
+        "../.eslintrc.json"
+    ],
 	"rules": {
 		"no-restricted-imports": [
 			"error",
