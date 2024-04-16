@@ -19,11 +19,11 @@ import { useLocalStorage } from "#src/services/local-storage/index.js"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
 import {
-	getAuthClient,
+	// getAuthClient,
 	openRepository,
 	createNodeishMemoryFs,
 	type Repository,
-	type LixError
+	type LixError,
 } from "@lix-js/client"
 
 import { publicEnv } from "@inlang/env-variables"
@@ -39,11 +39,11 @@ import { posthog as telemetryBrowser } from "posthog-js"
 import type { Result } from "@inlang/result"
 import { id } from "../../../../../marketplace-manifest.json"
 
-const browserAuth = getAuthClient({
-	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,
-	githubAppName: publicEnv.PUBLIC_LIX_GITHUB_APP_NAME,
-	githubAppClientId: publicEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID,
-})
+// const browserAuth = getAuthClient({
+// 	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,
+// 	githubAppName: publicEnv.PUBLIC_LIX_GITHUB_APP_NAME,
+// 	githubAppClientId: publicEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID,
+// })
 
 type EditorStateSchema = {
 	/**
@@ -288,7 +288,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${host}/${owner}/${repository}`,
 						{
 							nodeishFs: createNodeishMemoryFs(),
-							auth: browserAuth,
+							// auth: browserAuth, // this does nothing, what is this supposed to do?
 							branch,
 							// debugTime: true,
 							// for testing purposes. if commented out, will use whitelist to enable for certain repos
@@ -365,8 +365,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		args.setFsChange(new Date())
 		// push changes
 		try {
-			const push = await loadedRepo.push()
-			if (push?.ok === false) {
+			const push = await loadedRepo.push().catch((error) => ({ error }))
+			if (push?.error) {
 				return { error: new PushException("Failed to push", { cause: push.error }) }
 			}
 			await loadedRepo.pull({
