@@ -2814,9 +2814,6 @@ importers:
 
   lix/packages/server:
     dependencies:
-      '@inlang/telemetry':
-        specifier: workspace:*
-        version: link:../../../inlang/source-code/telemetry
       '@sentry/node':
         specifier: ^7.47.0
         version: 7.109.0
