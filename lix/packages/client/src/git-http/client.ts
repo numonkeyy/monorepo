@@ -45,8 +45,6 @@
  * @property {HttpFetch} request
  */
 
-// @ts-nocheck
-
 // Convert a value to an Async Iterator
 // This will be easier with async generator functions.
 function fromValue(value) {
