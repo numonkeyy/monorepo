@@ -45,11 +45,9 @@
  * @property {HttpFetch} request
  */
 
-// @ts-nocheck
-
 // Convert a value to an Async Iterator
 // This will be easier with async generator functions.
-function fromValue(value) {
+function fromValue(value: any) {
 	let queue = [value]
 	return {
 		next() {
@@ -65,7 +63,7 @@ function fromValue(value) {
 	}
 }
 
-function getIterator(iterable) {
+function getIterator(iterable: any) {
 	if (iterable[Symbol.asyncIterator]) {
 		return iterable[Symbol.asyncIterator]()
 	}
@@ -79,7 +77,7 @@ function getIterator(iterable) {
 }
 
 // Currently 'for await' upsets my linters.
-async function forAwait(iterable, cb) {
+async function forAwait(iterable: any, cb: Function) {
 	const iter = getIterator(iterable)
 	// eslint-disable-next-line no-constant-condition
 	while (true) {
@@ -90,11 +88,11 @@ async function forAwait(iterable, cb) {
 	if (iter.return) iter.return()
 }
 
-async function collect(iterable) {
+async function collect(iterable: any) {
 	let size = 0
-	const buffers = []
+	const buffers: any[] = []
 	// This will be easier once `for await ... of` loops are available.
-	await forAwait(iterable, (value) => {
+	await forAwait(iterable, (value: any) => {
 		buffers.push(value)
 		size += value.byteLength
 	})
@@ -109,7 +107,7 @@ async function collect(iterable) {
 
 // Convert a web ReadableStream (not Node stream!) to an Async Iterator
 // adapted from https://jakearchibald.com/2017/async-iterators-and-generators/
-function fromStream(stream) {
+function fromStream(stream: any) {
 	// Use native async iteration if it's available.
 	if (stream[Symbol.asyncIterator]) return stream
 	const reader = stream.getReader()
@@ -127,15 +125,7 @@ function fromStream(stream) {
 	}
 }
 
-/* eslint-env browser */
-
-/**
- * MakeHttpClient
- *
- * @param { verbose?: boolean, desciption?: string, onReq: ({body: any, url: string }) => {body: any, url: string} }
- * @returns HttpClient
- */
-export function makeHttpClient({ verbose, description, onReq, onRes }) {
+export function makeHttpClient({ debug, description, onReq, onRes }: { debug?: boolean, description?: string, onRes: ({ body: any, url: string })): {body: any, url: string} {
 	/**
 	 * HttpClient
 	 *
@@ -169,7 +159,7 @@ export function makeHttpClient({ verbose, description, onReq, onRes }) {
 			resHeaders[key] = value
 		}
 
-		if (verbose) {
+		if (debug) {
 			console.warn(`${description} git req:`, origUrl)
 		}
 
