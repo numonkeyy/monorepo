@@ -40,7 +40,7 @@ const send = (res, code, obj) => {
 		return
 	}
 
-	// eslint-disable-next-line no-undef
+	 
 	if (Buffer.isBuffer(obj)) {
 		if (!res.getHeader("Content-Type")) {
 			res.setHeader("Content-Type", "application/octet-stream")
@@ -75,7 +75,7 @@ const send = (res, code, obj) => {
 	}
 
 	if (typeof str === "string") {
-		// eslint-disable-next-line no-undef
+		 
 		res.setHeader("Content-Length", Buffer.byteLength(str))
 	}
 

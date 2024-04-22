@@ -58,7 +58,7 @@ export async function optimizedRefsRes({
 		return
 	}
 
-	// eslint-disable-next-line no-undef
+	 
 	if (statusCode !== 200) {
 		return
 	} else {
@@ -94,7 +94,7 @@ export async function optimizedRefsRes({
 
 		return {
 			resHeaders,
-			// eslint-disable-next-line no-undef
+			 
 			resBody: [new TextEncoder().encode(bodyString)],
 		}
 	}
