@@ -4,16 +4,7 @@ import type { RepoContext, RepoState } from "../openRepository.js"
 import { getMeta } from "../github/getMeta.js"
 
 export async function forkStatus(ctx: RepoContext, state: RepoState) {
-	const {
-		gitUrl,
-		debug,
-		dir,
-		cache,
-		owner,
-		repoName,
-		githubClient,
-		gitProxyUrl,
-	} = ctx
+	const { gitUrl, debug, dir, cache, owner, repoName, githubClient, gitProxyUrl } = ctx
 
 	if (!gitUrl) {
 		throw new Error("Could not find repo url, only github supported for forkStatus at the moment")
@@ -98,6 +89,9 @@ export async function forkStatus(ctx: RepoContext, state: RepoState) {
 		return { error: compare.error || "could not diff repos on github" }
 	}
 
+	const ahead: number = compare.data.ahead_by
+	const behind: number = compare.data.behind_by
+
 	// fetch from forks upstream
 	await isoGit.fetch({
 		depth: compare.data.behind_by + 1,
@@ -139,5 +133,5 @@ export async function forkStatus(ctx: RepoContext, state: RepoState) {
 	} catch (err) {
 		conflicts = true
 	}
-	return { ahead: compare.data.ahead_by, behind: compare.data.behind_by, conflicts }
+	return { ahead, behind, conflicts }
 }
