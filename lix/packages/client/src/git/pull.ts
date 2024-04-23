@@ -18,7 +18,7 @@ export async function pull(
 		depth: 5, // TODO: how to handle depth with upstream? reuse logic from fork sync
 		fs: pullFs,
 		cache: ctx.cache,
-		http: makeHttpClient({ verbose: ctx.debug, description: "pull" }),
+		http: makeHttpClient({ debug: ctx.debug, description: "pull" }),
 		corsProxy: ctx.gitProxyUrl,
 		ref: state.branchName,
 		tags: false,
