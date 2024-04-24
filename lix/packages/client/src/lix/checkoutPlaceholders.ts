@@ -2,13 +2,19 @@ import type { RepoState, RepoContext } from "../openRepository.js"
 import isoGit from "../../vendored/isomorphic-git/index.js"
 import { doCheckout } from "../git/checkout.js"
 import { modeToFileType } from "../git/helpers.js"
+import { withProxy } from "../helpers.js"
 
 export async function checkOutPlaceholders(ctx: RepoContext, state: RepoState) {
-	const { rawFs, cache, dir } = ctx
+	const { rawFs, cache, dir, useLazyFS } = ctx
 	const { branchName, checkedOut, sparseFilter } = state
 
 	await doCheckout({
-		fs: rawFs,
+		fs: withProxy({
+			nodeishFs: rawFs,
+			verbose: true,
+			description: "checkout",
+			intercept: useLazyFS ? delayedAction : undefined,
+		}),
 		cache,
 		dir,
 		ref: branchName,
