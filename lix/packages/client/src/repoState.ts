@@ -1,6 +1,6 @@
 import { withProxy } from "./helpers.js"
 import { makeHttpClient } from "./git-http/client.js"
-import { optimizedRefsRes, optimizedRefsReq } from "./git-http/optimize-refs.js"
+import { optimizeReq, optimizeRes } from "./git-http/optimizeReq.js"
 import { doCheckout as lixCheckout } from "./git/checkout.js"
 import type { RepoContext } from "./repoContext.js"
 import isoGit from "../vendored/isomorphic-git/index.js"
@@ -110,12 +110,11 @@ export async function repoState(
 				http: makeHttpClient({
 					debug,
 					description: "clone",
-
-					onReq: ({ url, body }: { url: string; body: any }) => {
-						return optimizedRefsReq({ url, body, addRef: state.branchName })
-					},
-
-					onRes: optimizedRefsRes,
+					onReq: optimizeReq.bind(null, {
+						noneBlobFilter: experimentalFeatures.lazyClone,
+						filterRefList: { ref: state.branchName },
+					}),
+					onRes: optimizeRes,
 				}),
 				dir,
 				cache,
