@@ -92,7 +92,7 @@ export function openRepo (url, { branch, author }) {
     debug: false,
     experimentalFeatures: {
       lixFs: true,
-      lazyClone: true,
+      lazyClone: false,
       lixCommit: true
     },
     // nodeishFs: createNodeishMemoryFs(),
