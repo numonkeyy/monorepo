@@ -96,7 +96,7 @@ export function openRepo (url, { branch, author }) {
       lixCommit: true
     },
     // nodeishFs: createNodeishMemoryFs(),
-    // auth: browserAuth,
+    // auth: browserAuth
     branch,
     author, // TODO: check with git config
     // sparseFilter: ({ filename, type }) => type === 'folder' || filename.endsWith('.md')
