@@ -4,7 +4,7 @@ services:
   git:
     restart: always
     container_name: git
-    image: git:10
+    image: git:12
     hostname: git
     ports: [ "8000" ]
     labels: [ dev.orbstack.domains=git.local ]
@@ -17,19 +17,35 @@ services:
       dockerfile: Dockerfile
     networks:
       - lix
-    # depends_on:
-    #   - exp
-    # image downgrades user but that seems not to work, see: https://caddy.community/t/basic-docker-compose-setup-failing/6892/7?u=alexander_gabriel
     user: root
     # env_file:
     #   - ./.env
+
+  gitea:
+    labels: [ dev.orbstack.domains=gitea.local ]
+    image: gitea/gitea:1.21.11
+    container_name: gitea
+    hostname: gitea
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+    restart: always
+    networks:
+      - lix
+    volumes:
+      - ./gitea:/data
+      # - /etc/timezone:/etc/timezone:ro - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "3000:3000"
+      # - "222:22"
 
   exp:
     restart: always
     container_name: exp
     hostname: exp
+    # FIXME: local domains stop working randomly, probably bad dns cache expiration etc.
     labels: [ dev.orbstack.domains=exp.local ]
-    image: exp:4
+    image: exp:5
     build:
       dockerfile_inline: |
         FROM node:20-slim
@@ -38,17 +54,16 @@ services:
         RUN npm -g install pnpm
         COPY --chown=app:app . /workspace
         WORKDIR /workspace
-        RUN pnpm --filter=@lix-js/client --filter=@lix-js/fs --filter=lix-app install 
-        RUN pnpm --filter=@lix-js/client --filter=@lix-js/fs --filter=lix-app build
-        
         # todo: shell aliase
     ports: [ "3334" ]
-    working_dir: /workspace/exp
-    entrypoint: pnpm dev
-    # working_dir: /workspace/exp
-    # entrypoint: /bin/bash
-    # stdin_open: true
-    # tty: true
+
+    working_dir: /workspace
+
+    # entrypoint: pnpm --filter=@lix-js/client --filter=@lix-js/fs --filter=exp install && pnpm --parallel --filter=@lix-js/client --filter=@lix-js/fs --filter=exp dev
+    entrypoint: /bin/bash
+    stdin_open: true
+    tty: true
+
     networks:
       - lix
     develop:
@@ -87,5 +102,5 @@ networks:
     driver: bridge
 
 volumes:
-  josh-vol: {}
+  # josh-vol: {}
   pnpm-store: {}
