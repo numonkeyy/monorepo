@@ -287,7 +287,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 							// experimentalFeatures: {
 							// 	lazyClone: true,
 							// 	lixCommit: true,
-							// }
+							// },
 						}
 					)
 
@@ -548,8 +548,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				return false
 			}
 		},
-		async (args) => {
-			const value = await args.repo!.forkStatus()
+		async () => {
+			// args
+			const value = { error: true } // await args.repo!.forkStatus()
 			if ("error" in value) {
 				// Silently ignore errors:
 				// The branch might only exist in the fork and not in the upstream repository.
@@ -598,8 +599,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		() => {
 			return { repo: repo() }
 		},
-		async (args) => {
-			return await args.repo?.getBranches()
+		async () => {
+			// args
+			return ["main"] // await args.repo?.getBranches()
 		}
 	)
 
