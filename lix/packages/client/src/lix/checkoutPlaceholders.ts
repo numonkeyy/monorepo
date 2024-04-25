@@ -8,7 +8,7 @@ export async function checkOutPlaceholders(ctx: RepoContext, state: RepoState) {
 	const { branchName, checkedOut, sparseFilter } = state
 
 	await doCheckout({
-		fs: rawFs,
+		fs: state.nodeishFs,
 		cache,
 		dir,
 		ref: branchName,
