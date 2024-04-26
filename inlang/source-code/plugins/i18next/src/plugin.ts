@@ -67,7 +67,7 @@ async function loadMessages(args: {
 	)
 
 	// split languageTags into batches, based on experiements < 20 is slow for too many iterations and > 50 is slow for too many parallel file handlings so it seems like a good default.
-	const batchSize = 30
+	const batchSize = 50
 	const languageTagBatches: LanguageTag[][] = []
 	for (let i = 0; i < languageTags.length; i += batchSize) {
 		languageTagBatches.push(languageTags.slice(i, i + batchSize))
