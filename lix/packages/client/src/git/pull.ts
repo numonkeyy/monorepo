@@ -3,6 +3,7 @@ import type { RepoContext, RepoState, Author } from "../openRepository.js"
 import { makeHttpClient } from "../git-http/client.js"
 import { doCheckout } from "./checkout.js"
 import { emptyWorkdir } from "../lix/emptyWorkdir.js"
+import { optimizeReq, optimizeRes } from "../git-http/optimizeReq.js"
 
 export async function pull(
 	ctx: RepoContext,
@@ -18,7 +19,17 @@ export async function pull(
 		depth: 5, // TODO: how to handle depth with upstream? reuse logic from fork sync
 		fs: pullFs,
 		cache: ctx.cache,
-		http: makeHttpClient({ verbose: ctx.debug, description: "pull" }),
+		http: makeHttpClient({
+			debug: ctx.debug,
+			description: "pull",
+			onReq: ctx.experimentalFeatures.lazyClone
+			? optimizeReq.bind(null, {
+					noneBlobFilter: true,
+					filterRefList: { ref: state.branchName },
+			  })
+			: undefined,
+			onRes: ctx.experimentalFeatures.lazyClone ? optimizeRes : undefined,,
+		}),
 		corsProxy: ctx.gitProxyUrl,
 		ref: state.branchName,
 		tags: false,
