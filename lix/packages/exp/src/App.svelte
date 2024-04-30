@@ -1,6 +1,8 @@
 <script lang="ts">
   // import { untrack } from 'svelte'
   import { openRepo } from './lix.svelte'
+  // import { createGitgraph, TemplateName, templateExtend } from "@gitgraph/js"
+
   // import SvelteMarkdown from 'svelte-markdown'
   // TODO: move to sveltekit, try load functions and ssr, vscode web and obsidian plugins!
 
@@ -8,7 +10,7 @@
   const repos = {
     gitserver: 'https://ignored.domain/direct/git.local/opral/example.git',
     test: host + '/git/localhost:8089/janfjohannes/ci-test-repo.git',
-    'cal.com': 'https://ignored.domain/direct/git.local/janfjohannes/cal.com.git'
+    'cal.com': 'https://ignored.domain/direct/git.local/jan/cal.com'
   }
   const selectdRepo = 'cal.com'
 
@@ -31,6 +33,41 @@
   $effect(() => {
     message = `Changes on ${repo.currentBranch} started ${new Date().toUTCString()}`
   })
+
+  // const graphContainer = document.getElementById("graph-container")
+  // const gitgraph = createGitgraph(graphContainer, {
+  //   author: 'jan',
+  //   template: templateExtend(TemplateName.Metro, {
+  //     branch: { lineWidth: 4 },
+  //     commit: {
+  //       spacingY: 5,
+  //       spacingX: 5,
+  //       dot: {
+  //         size: 8
+  //       },
+  //       message: {
+  //         font: 'normal 11pt Arial',
+  //         displayHash: false,
+  //       },
+  //     },
+  //   }) 
+  // })
+  // window.gitgraph = gitgraph
+  // const master = gitgraph.branch("master")
+  // master.commit("Initial commit", { author: 'jan'})
+  // const stack2 = master.branch("stack 2")
+  // stack2.commit("ASomething")
+  // const stack1 = master.branch("stack 1")
+  // stack1.commit("Add Refactor")
+  // stack1.commit("Test")
+  // const aFeature = develop.branch("a-feature")
+  // aFeature
+  //   .commit("Make it work")
+  //   .commit("Make it right")
+  //   .commit("Make it fast")
+  // develop.merge(aFeature)
+  // develop.commit("Prepare v1")
+  // master.merge(develop).tag("v1.0.0")
 
   // let timer
   // function debouncedSave() {
@@ -96,7 +133,7 @@
         <p
           class="text-body"
           contenteditable="true"
-          style="white-space: pre; max-width: 60vw; overflow: hidden; padding: 10px;"
+          style="white-space: pre; max-width: calc(100vw - 718px); overflow: hidden; padding: 10px;"
           on:blur
           on:keydown
           bind:innerText={file.content}
@@ -131,14 +168,15 @@
         <button on:click={repo.pull} style="display: inline-block;">Pull</button>
       </div>
 
-      {#each repo.commits as { commit, origin }}
-        <div>
-          {#if origin}
-            <span>(Origin)</span>
-          {/if}
-          <span>{new Date(commit.author.timestamp * 1000).toUTCString()}</span>
-          <span>{commit.author.name}:</span>
-          <span>{commit.message}</span>
+      {#each repo.commits as { commit, origin, oid }}
+        <div style="font-size: 11px;">
+          <p>{#if origin}<span>(Origin)</span>{/if} {new Date(commit.author.timestamp * 1000).toUTCString()}</p>
+          <p>Author: {commit.author.name}</p>
+          <p>Message: {commit.message}</p>
+          <p>Id: {oid}</p>
+          <p>Content Hash: {commit.tree}</p>
+          <p>Parents: {JSON.stringify(commit.parent)}</p>
+          <hr>
         </div>
       {/each}
 
