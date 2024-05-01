@@ -1,6 +1,8 @@
 <script lang="ts">
   // import { untrack } from 'svelte'
   import { openRepo } from './lix.svelte'
+  // import { createGitgraph, TemplateName, templateExtend } from "@gitgraph/js"
+
   // import SvelteMarkdown from 'svelte-markdown'
   // TODO: move to sveltekit, try load functions and ssr, vscode web and obsidian plugins!
 
@@ -8,7 +10,7 @@
   const repos = {
     gitserver: 'https://ignored.domain/direct/git.local/opral/example.git',
     test: host + '/git/localhost:8089/janfjohannes/ci-test-repo.git',
-    'cal.com': 'https://ignored.domain/direct/git.local/janfjohannes/cal.com.git'
+    'cal.com': 'https://ignored.domain/direct/git.local/jan/cal.com'
   }
   const selectdRepo = 'cal.com'
 
@@ -30,7 +32,61 @@
   let message = $state('')
   $effect(() => {
     message = `Changes on ${repo.currentBranch} started ${new Date().toUTCString()}`
+
+    if (repo.commits.length > 1) {
+      for (let a = 0; a < repo.commits.length - 1; a++) {
+        // switch to oids/ hashes
+        var sidebar = document.getElementById('lix-sidebar').getBoundingClientRect()
+        var b1 = document.getElementById(`commit-dot-${a}`).getBoundingClientRect()
+        var b2 = document.getElementById(`commit-dot-${a + 1}`).getBoundingClientRect()
+
+        var newLine = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+        newLine.setAttribute('id', 'line1')
+        newLine.setAttribute('style', 'stroke: #DCDCDC; stroke-width: 2;')
+        newLine.setAttribute('x1', b1.left - sidebar.left + b1.width / 2)
+        newLine.setAttribute('y1', b1.top + b1.height / 2)
+        newLine.setAttribute('x2', b2.left - sidebar.left + b2.width / 2)
+        newLine.setAttribute('y2', b2.top + b2.height / 2)
+   
+        document.getElementById("lines").append(newLine)
+      }
+    }
   })
+
+  // const graphContainer = document.getElementById("graph-container")
+  // const gitgraph = createGitgraph(graphContainer, {
+  //   author: 'jan',
+  //   template: templateExtend(TemplateName.Metro, {
+  //     branch: { lineWidth: 4 },
+  //     commit: {
+  //       spacingY: 5,
+  //       spacingX: 5,
+  //       dot: {
+  //         size: 8
+  //       },
+  //       message: {
+  //         font: 'normal 11pt Arial',
+  //         displayHash: false,
+  //       },
+  //     },
+  //   }) 
+  // })
+  // window.gitgraph = gitgraph
+  // const master = gitgraph.branch("master")
+  // master.commit("Initial commit", { author: 'jan'})
+  // const stack2 = master.branch("stack 2")
+  // stack2.commit("ASomething")
+  // const stack1 = master.branch("stack 1")
+  // stack1.commit("Add Refactor")
+  // stack1.commit("Test")
+  // const aFeature = develop.branch("a-feature")
+  // aFeature
+  //   .commit("Make it work")
+  //   .commit("Make it right")
+  //   .commit("Make it fast")
+  // develop.merge(aFeature)
+  // develop.commit("Prepare v1")
+  // master.merge(develop).tag("v1.0.0")
 
   // let timer
   // function debouncedSave() {
@@ -96,7 +152,7 @@
         <p
           class="text-body"
           contenteditable="true"
-          style="white-space: pre; max-width: 60vw; overflow: hidden; padding: 10px;"
+          style="white-space: pre; max-width: calc(100vw - 718px); overflow: hidden; padding: 10px;"
           on:blur
           on:keydown
           bind:innerText={file.content}
@@ -113,34 +169,35 @@
       {/if}
     </main>
 
-    <aside style="right: 30px; top: 42px; position: absolute; max-width: 337px;">
-      Branch:
-      <select style="max-width: 200px; padding: 2px;" bind:value={repo.currentBranch}>
-        {#each repo.branches as branch}
-          <option value={branch}>{branch}</option>
-        {/each}
-      </select>
+    <aside id="lix-sidebar">
+      <svg id="lines"></svg>
 
-      <div style="">
-        <h3 style="display: inline-block; margin-right: 6px;">Commits</h3>
+      <div style="margin-bottom: 26px;">
+        <select style="max-width: 200px; padding: 2px;" bind:value={repo.currentBranch}>
+          {#each repo.branches as branch}
+            <option value={branch}>{branch}</option>
+          {/each}
+        </select>
+
+        <!-- <h3 style="display: inline-block; margin-right: 6px;">Commits</h3> -->
         {#if repo.unpushed}
-          <button on:click={repo.push} style="display: inline-block;"
+          <button on:click={repo.push} style="float: right; margin-left: 16px; margin-top: -10px;"
             >Push {repo.unpushed} unsaved commits</button
           >
         {/if}
-        <button on:click={repo.pull} style="display: inline-block;">Pull</button>
+        <button on:click={repo.pull} style="float: right; margin-left: 16px; margin-top: -10px;">Pull</button>
       </div>
 
-      {#each repo.commits as { commit, origin }}
-        <div>
-          {#if origin}
-            <span>(Origin)</span>
-          {/if}
-          <span>{new Date(commit.author.timestamp * 1000).toUTCString()}</span>
-          <span>{commit.author.name}:</span>
-          <span>{commit.message}</span>
+      {#each repo.commits as { commit, origin, oid }, i}
+        <div style="font-size: 11px; margin-bottom: 33px;" class="commit" title="Id:{oid}   Hash:{commit.tree}   Parents:{JSON.stringify(commit.parent)}">
+          <div class="commit-dot" id="commit-dot-{i}"></div>
+          <p>{#if origin}<span class="bookmark">origin</span>{/if} {new Date(commit.author.timestamp * 1000).toUTCString()}</p>
+          <p>{commit.author.name}</p>
+          <p>{commit.message}</p>
         </div>
       {/each}
+
+      <button style="display: inline-block;">Load More</button>
 
       {#if repo?.status?.filter(([name, txt]) => txt !== 'unmodified' && !repo?.exclude?.includes(name))?.length}
         <div>
@@ -175,15 +232,71 @@
 </main>
 
 <style>
+  #lines {
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    margin: 0;
+    pointer-events: none;
+  }
+  button {
+    margin-top: 12px;
+    margin-bottom: 12px;
+  }
+  .bookmark {
+    width: 26px;
+    height: 16px;
+    flex-shrink: 0;
+    border-radius: 2px;
+    background: #1F6FEB;
+    padding: 6px;
+    margin-right: 4px;
+    font-weight: bold;
+  }
+
+  #lix-sidebar {
+    overflow: auto;
+    right: 0;
+    top: 0;
+    border-top-left-radius: 30px;
+    height: 100vh;
+    border-bottom-left-radius: 30px;
+    position: fixed;
+    max-width: 337px;
+    box-sizing: border-box;
+    padding: 38px;
+    background: hsl(218 19% 4% / 1);
+  }
+
+  #lix-sidebar p {
+    margin: 0;
+  }
+
+  .commit-dot {
+    content: ' ';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 100%;
+    background-color: #DCDCDC;
+    margin-left: -27px;
+    margin-top: 2px;
+  }
+
   .text-body:focus-visible {
     outline: none;
   }
+
   .files span {
     font-weight: lighter;
   }
+
   .files span.materialized {
     font-weight: bold;
   }
+
 
   .files span.modified:after {
     content: 'M';
