@@ -21,7 +21,7 @@ export const sourceLanguageTag = "en"
  *     throw new Error("Language tag not available")
  *   }
  */
-export const availableLanguageTags = /** @type {const} */ (["de", "en"])
+export const availableLanguageTags = /** @type {const} */ (["de", "en", "fr-CA"])
 
 /**
  * Get the current language tag.

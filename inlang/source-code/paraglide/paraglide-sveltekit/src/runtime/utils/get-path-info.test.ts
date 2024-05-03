@@ -121,4 +121,14 @@ describe("parsePath", () => {
 
 		expect(trailingSlash).toBe(true)
 	})
+
+	it("correctly finds languageTags with regions", () => {
+		const { lang } = getPathInfo("/fr-CA/foo/bar/", {
+			base: "/",
+			availableLanguageTags: ["en", "fr", "fr-CA"],
+			defaultLanguageTag: "en",
+		})
+
+		expect(lang).toBe("fr-CA")
+	})
 })
