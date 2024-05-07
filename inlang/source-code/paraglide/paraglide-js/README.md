@@ -12,19 +12,6 @@
 
 With Paraglide's treeshakeable messages, each page only loads the messages it actually uses. Incremental loading like this would usually take forever to get right, with Paraglide you get it for free.
 
-# Use it with your Favorite Framework
-
-Paraglide is framework agnostic, but there are framework-specific libraries available. If there is one for your framework you will want to follow its documentation instead. If there isn't, read on.
-
-<doc-links>
-	<doc-link title="Paraglide-Next" icon="tabler:brand-nextjs" href="/m/osslbuzt/paraglide-next-i18n" description="Go to Library"></doc-link>
-    <doc-link title="Paraglide-SvelteKit" icon="simple-icons:svelte" href="/m/dxnzrydw/paraglide-sveltekit-i18n" description="Go to Library"></doc-link>
-    <doc-link title="Paraglide-Astro" icon="devicon-plain:astro" href="/m/iljlwzfs/paraglide-astro-i18n" description="Go to Library"></doc-link>
-    <doc-link title="Paraglide-SolidStart" icon="tabler:brand-solidjs" href="/m/n860p17j/paraglide-solidstart-i18n" description="Go to Library"></doc-link>
-	<doc-link title="Paraglide-Remix" icon="simple-icons:remix" href="/m/fnhuwzrx/paraglide-remix-i18n" description="Go to Library"></doc-link>
-	<doc-link title="Or write your own" icon="ph:sparkle-fill" href="#writing-a-framework-library" description="Learn How"></doc-link>
-</doc-links>
-
 # People Love It
 
 A few recent comments.
@@ -35,6 +22,18 @@ A few recent comments.
 <doc-comment text="Awesome library 🙂 Thanks so much! 1) The docs were simple and straight forward 2) Everything just worked.. no headaches" author="Dimitry" icon="mdi:discord" data-source="https://discord.com/channels/897438559458430986/1083724234142011392/1225658097016766574"></doc-comment>
 <doc-comment text="Thank you for that huge work you have done and still doing!" author="ZerdoX-x" icon="mdi:github"></doc-comment>
 </doc-comments>
+
+# Use it with your Favorite Framework
+
+Paraglide is framework agnostic, but there are framework-specific libraries available. They manage your language state, run the paraglide compiler and provide i18n routing. If there is one for your framework you will want to follow its documentation instead.
+
+- [Paraglide-Next](https://inlang.com/m/osslbuzt/paraglide-next-i18n)
+- [Paraglide-SvelteKit](https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n)
+- [Paraglide-Astro](https://inlang.com/m/iljlwzfs/paraglide-astro-i18n)
+- [Paraglide-SolidStart](https://inlang.com/m/n860p17j/paraglide-solidstart-i18n)
+- [Paraglide-Remix](https://inlang.com/m/fnhuwzrx/paraglide-remix-i18n)
+
+Learn more about [Framework Libraries](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/framework-libraries).
 
 # Getting started
 
@@ -50,6 +49,10 @@ This will:
 - Generate a `messages/` folder where your translation files live
 - Add the Paraglide compiler to your `build` script in `package.json`
 - Create necessary configuration files
+
+
+> If you are using a framework you will likely want to use a [Framework Library](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/framework-libraries). 
+
 
 Running the Paraglide compiler will generate a `src/paraglide` folder. This folder contains all the code that you will use in your app.
 
@@ -283,106 +286,6 @@ Find examples of how to use Paraglide on CodeSandbox or in [our GitHub repositor
     <doc-link title="Astro + Paraglide JS" icon="lucide:codesandbox" href="https://stackblitz.com/~/github.com/LorisSigrist/paraglide-astro-example" description="Play around with Astro and Paraglide JS"></doc-link>
 </doc-links>
 
-# Architecture
-
-Paraglide uses a compiler to generate JS functions from your messages. We call these "message functions". 
-
-Message Functions are fully typed using JSDoc. They are exported individually from the `messages.js` file making them tree-shakable. When called, they return a translated string. Message functions aren't reactive in any way, if you want a translation in another language you will need to re-call them.
-
-This design avoids many edge cases with reactivity, lazy-loading, and namespacing that other i18n libraries have to work around.
-
-In addition to the message functions, ParaglideJS also emits a runtime. The runtime is used to set the language tag. It contains less than 50 LOC (lines of code) and is less than 300 bytes minified & gzipped.
-
-![Diagram of the Paraglide Compiler Architecture](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/architecture.svg)
-
-Paraglide consists of four main parts:
-
-| Part         | Description                                                                                                                  |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| **Compiler** | Compiles messages into tree-shakable message functions                                                                       |
-| **Messages** | The compiled tree-shakable message functions                                                                                 |
-| **Runtime**  | A runtime that resolves the [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) of the current user |
-| **Framework Library**  | (optional) A framework library that adjusts the runtime for different frameworks                                                      |
-
-## Compiler
-
-The compiler loads an Inlang project and compiles the messages into tree-shakable and typesafe message functions.
-
-**Input**
-
-```js
-// messages/en.json
-{
-  "hello": "Hello {name}!"
-}
-```
-
-**Output**
-
-```js
-// src/paraglide/messages/en.js
-
-/**
- * @param {object} params
- * @param {string} params.name
- */
-export const hello = (params) => `Hello ${params.name}!`
-```
-
-# Writing a Framework Library
-
-Paraglide-Framework-Library integrates with a framework's lifecycle. It does two things:
-
-1. Calls `setLanguageTag()` at appropriate times to set the language
-2. Reacts to `onSetLanguageTag()`, usually by navigating or relading the page.
-
-Additionally, it may provide convenience features such as localised routing.
-
-Many popular frameworks already have libraries available, check out the [list of available framework libraries](#use-it-with-your-favorite-framework).
-
-If there isn't one for your framework, you can write your own. This example adapts Paraglide to a fictitious full-stack framework.
-
-```tsx
-import {
-	setLanguageTag,
-	onSetLanguageTag,
-	type AvailableLanguageTag,
-} from "../paraglide/runtime.js"
-import { isServer, isClient, request, render } from "@example/framework"
-import { detectLanguage } from "./utils.js"
-
-if (isServer) {
-	// On the server the language tag needs to be resolved on a per-request basis.
-	// Pass a getter function that resolves the language from the correct request
-
-	const detectLanguage = (request: Request): AvailableLanguageTag => {
-		//your logic ...
-	}
-	setLanguageTag(() => detectLanguage(request))
-}
-
-if (isClient) {
-	// On the client, the language tag can be resolved from
-	// the document's html lang tag.
-	setLanguageTag(() => document.documentElement.lang)
-
-	// When the language changes we want to re-render the page in the new language
-	// Here we just navigate to the new route
-
-	// Make sure to call `onSetLanguageTag` after `setLanguageTag` to avoid an infinite loop.
-	onSetLanguageTag((newLanguageTag) => {
-		window.location.pathname = `/${newLanguageTag}${window.location.pathname}`
-	})
-}
-
-// Render the app once the setup is done
-render((page) => (
-	<html lang={request.languageTag}>
-		<body>{page}</body>
-	</html>
-))
-```
-
 # Roadmap
 
 Of course, we're not done yet! We plan on adding the following features to Paraglide JS soon:
@@ -392,7 +295,6 @@ Of course, we're not done yet! We plan on adding the following features to Parag
 - [ ] Markup Placeholders ([Join the Discussion](https://github.com/opral/monorepo/discussions/913))
 - [ ] Component Interpolation
 - [ ] Per-Language Splitting without Lazy-Loading 
-- [ ] Even Smaller Output
 
 # Talks
 
