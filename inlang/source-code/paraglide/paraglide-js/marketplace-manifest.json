@@ -18,9 +18,11 @@
 	"pages": {
 		"/": "./inlang/source-code/paraglide/paraglide-js/README.md",
 		"/getting-started": "./inlang/source-code/paraglide/paraglide-js/README.md",
+		"/message-format": "./inlang/source-code/paraglide/paraglide-js/docs/message-format.md",
 		"/advanced-usage": "./inlang/source-code/paraglide/paraglide-js/docs/advanced-usage.md",
 		"/framework-libraries": "./inlang/source-code/paraglide/paraglide-js/docs/framework-libraries.md",
 		"/architecture": "./inlang/source-code/paraglide/paraglide-js/docs/architecture.md",
+		"/philosophy": "./inlang/source-code/paraglide/paraglide-js/docs/philosophy.md",
 		"/changelog": "./inlang/source-code/paraglide/paraglide-js/CHANGELOG.md"
 	},
 	"keywords": [
