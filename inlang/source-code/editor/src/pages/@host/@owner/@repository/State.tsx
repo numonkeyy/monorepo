@@ -287,7 +287,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 							// experimentalFeatures: {
 							// 	lazyClone: true,
 							// 	lixCommit: true,
-							// }
+							// },
 						}
 					)
 
@@ -551,6 +551,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			if (
 				repo() &&
 				!isForkSyncDisabled() &&
+				false &&
 				repoMeta &&
 				!("error" in repoMeta) &&
 				repoMeta.isFork

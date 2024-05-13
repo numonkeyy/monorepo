@@ -6,18 +6,20 @@ const files = new Map()
 export function openRepo (url, { branch, author }) {
   let repoAvailable
   const repoProm = new Promise((resolve) => {repoAvailable = resolve})
-  let branches = $state([])
+  let branches = $state([branch])
 
   // move this to component ! as $state(openRepo...)?
   const state = $state({
     folders: [], // >> files()
     
-    repo: null,
-    get branches () { // > no need for getter here repo.branches()
-      !branches?.length && repoProm.then((repo: any)=> repo.getBranches().then(br => { 
-        // console.log(br)
+    fetchRefs: async function () {
+      return branches?.length < 2 && repoProm.then((repo: any)=> repo.getBranches().then(br => { 
         branches = br
       })) // TODO: reactivity: needs to be exposed but only executed when used in ui > revisit samuels proxy requirement!
+    },
+
+    repo: null,
+    get branches () { // > no need for getter here repo.branches()
       return branches
     },
     currentBranch: '',
@@ -96,7 +98,7 @@ export function openRepo (url, { branch, author }) {
       lixCommit: true
     },
     // nodeishFs: createNodeishMemoryFs(),
-    // auth: browserAuth,
+    // auth: browserAuth
     branch,
     author, // TODO: check with git config
     // sparseFilter: ({ filename, type }) => type === 'folder' || filename.endsWith('.md')
