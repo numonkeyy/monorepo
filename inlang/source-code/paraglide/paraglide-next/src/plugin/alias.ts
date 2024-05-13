@@ -1,5 +1,5 @@
 import { NextConfig } from "next"
-import { resolve } from "node:path"
+import { posix } from "node:path"
 
 enum Bundler {
 	Webpack,
@@ -9,7 +9,7 @@ enum Bundler {
 /**
  * Adds an alias to the bundler config.
  * @param config The Next.js config object
- * @param aliases A map of aliases to their relative paths
+ * @param aliases A map of aliases to their POSIX relative paths. Eg { "$runtime": "./../runtime.js" }
  */
 export function addAlias(nextConfig: NextConfig, aliases: Record<string, string>) {
 	const bundler = process.env.TURBOPACK ? Bundler.Turborepo : Bundler.Webpack
@@ -19,7 +19,7 @@ export function addAlias(nextConfig: NextConfig, aliases: Record<string, string>
 		const wrappedWebpack: NextConfig["webpack"] = (config, options) => {
 			const absoluteAliases: Record<string, string> = {}
 			for (const [alias, relativePath] of Object.entries(aliases)) {
-				absoluteAliases[alias] = resolve(config.context, relativePath)
+				absoluteAliases[alias] = posix.resolve(config.context, relativePath)
 			}
 
 			config.resolve = config.resolve ?? {}

@@ -18,6 +18,10 @@ export function paraglide(userConfig: Config): NextConfig {
 	if (!isParaglideNextConfig(config))
 		throw new Error("The paraglide config is not valid - Make sure you don't have a typo")
 
+	/**
+	 * The POSIX relative path to the runtime.js file
+	 * @example ./outdir/runtime.js, outdir/runtime.js
+	 */
 	const aliasPath = config.paraglide.outdir.endsWith("/")
 		? config.paraglide.outdir + "runtime.js"
 		: config.paraglide.outdir + "/runtime.js"
@@ -32,13 +36,13 @@ export function paraglide(userConfig: Config): NextConfig {
 		useCompiler({
 			project: config.paraglide.project,
 			outdir: config.paraglide.outdir,
-			watch: process.env.NODE_ENV === "development",
 			silent: config.paraglide.silent ?? false,
+			watch: process.env.NODE_ENV === "development",
 		})
 	})
 
+	// remove the "paraglide" property to avoid causing issues with other plugins
 	const nextConfig: NextConfig = config
 	delete nextConfig.paraglide
-
 	return nextConfig
 }
