@@ -17,10 +17,12 @@ export function addAlias(nextConfig: NextConfig, aliases: Record<string, string>
 	if (bundler === Bundler.Webpack) {
 		const originalWebpack = nextConfig.webpack
 		const wrappedWebpack: NextConfig["webpack"] = (config, options) => {
-			const absoluteAliases: Record<string, string> = {}
-			for (const [alias, relativePath] of Object.entries(aliases)) {
-				absoluteAliases[alias] = posix.resolve(config.context, relativePath)
-			}
+			const absoluteAliases = Object.fromEntries(
+				Object.entries(aliases).map(([alias, relativePath]) => [
+					alias,
+					posix.resolve(config.context, relativePath),
+				])
+			)
 
 			config.resolve = config.resolve ?? {}
 			config.resolve.alias = config.resolve.alias ?? {}
