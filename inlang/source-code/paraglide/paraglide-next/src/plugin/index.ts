@@ -15,7 +15,8 @@ type Config = NextConfig & {
  */
 export function paraglide(userConfig: Config): NextConfig {
 	const config: unknown = userConfig
-	if (!isParaglideNextConfig(config)) throw new Error("Invalid config provided to plugin.")
+	if (!isParaglideNextConfig(config))
+		throw new Error("The paraglide config is not valid - Make sure you don't have a typo")
 
 	const aliasPath = config.paraglide.outdir.endsWith("/")
 		? config.paraglide.outdir + "runtime.js"
