@@ -2,38 +2,10 @@ import type { NextConfig } from "next"
 import { addAlias } from "./alias"
 import { once } from "./utils"
 import { useCompiler } from "./useCompiler"
-
-type ParaglideConfig = {
-	/**
-	 * Where the Inlang Project that defines the languages
-	 * and messages is located.
-	 *
-	 * This should be a relative path starting from the project root.
-	 *
-	 * @example "./project.inlang"
-	 */
-	project: string
-
-	/**
-	 * Where the paraglide output files should be placed. This is usually
-	 * inside a `src/paraglide` folder.
-	 *
-	 * This should be a relative path starting from the project root.
-	 *
-	 * @example "./src/paraglide"
-	 */
-	outdir: string
-
-	/**
-	 * If true, the paraglide compiler will only log errors to the console
-	 *
-	 * @default false
-	 */
-	silent?: boolean
-}
+import { ParaglideNextConfig, isParaglideNextConfig } from "./config"
 
 type Config = NextConfig & {
-	paraglide: ParaglideConfig
+	paraglide: ParaglideNextConfig
 }
 
 /**
@@ -41,7 +13,10 @@ type Config = NextConfig & {
  * It will register any aliases required by Paraglide-Next,
  * and register the build plugin.
  */
-export function paraglide(config: Config): NextConfig {
+export function paraglide(userConfig: Config): NextConfig {
+	const config: unknown = userConfig
+	if (!isParaglideNextConfig(config)) throw new Error("Invalid config provided to plugin.")
+
 	const aliasPath = config.paraglide.outdir.endsWith("/")
 		? config.paraglide.outdir + "runtime.js"
 		: config.paraglide.outdir + "/runtime.js"
