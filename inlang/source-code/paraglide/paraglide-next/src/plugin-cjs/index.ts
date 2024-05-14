@@ -1,8 +1,8 @@
 import type { NextConfig } from "next"
-import { addAlias } from "./alias"
-import { once } from "./utils"
+import { addAlias } from "../plugin-shared/alias"
+import { once } from "../plugin-shared/utils"
 import { useCompiler } from "./useCompiler"
-import { ParaglideNextConfig, isParaglideNextConfig } from "./config"
+import { ParaglideNextConfig, isParaglideNextConfig } from "../plugin-shared/config"
 
 type Config = NextConfig & {
 	paraglide: ParaglideNextConfig

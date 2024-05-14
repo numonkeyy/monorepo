@@ -43,10 +43,18 @@ const pages_build = await rollup({
 	external,
 })
 
-const pluginBuild = await rollup({
+const pluginCJSBuild = await rollup({
 	plugins,
 	input: {
-		"plugin/index": "src/plugin/index.ts",
+		"plugin-cjs/index": "src/plugin-cjs/index.ts",
+	},
+	external,
+})
+
+const pluginESMBuild = await rollup({
+	plugins,
+	input: {
+		"plugin-esm/index": "src/plugin-esm/index.ts",
 	},
 	external,
 })
@@ -72,9 +80,15 @@ await pages_build.write({
 	dir: "dist",
 })
 
-await pluginBuild.write({
+await pluginCJSBuild.write({
 	format: "cjs",
 	entryFileNames: "[name].cjs",
+	dir: "dist",
+})
+
+await pluginESMBuild.write({
+	format: "esm",
+	entryFileNames: "[name].mjs",
 	dir: "dist",
 })
 
