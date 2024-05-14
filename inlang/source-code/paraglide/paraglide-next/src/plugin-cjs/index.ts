@@ -33,6 +33,10 @@ export function paraglide(userConfig: Config): NextConfig {
 	// Next calls `next.config.js` TWICE. Once in a worker and once in the main process.
 	// We only want to compile the Paraglide project once, so we only do it in the main process.
 	once(() => {
+		console.warn(
+			"[paraglide-next] Please update your `next.config.js` to ESM. Support for CJS configs will be discontinued in 1.0"
+		)
+
 		useCompiler({
 			project: config.paraglide.project,
 			outdir: config.paraglide.outdir,
