@@ -119,7 +119,7 @@ describe("main workflow", () => {
 	})
 
 	it("can open repo with lazy clone/checkout", async () => {
-		const lazyRepo = await openRepository("https://github.com/inlang/ci-test-repo", {
+		const lazyRepo = await openRepository("https://github.com/opral/ci-test-repo", {
 			branch: "test-symlink",
 			nodeishFs: createNodeishMemoryFs(),
 			experimentalFeatures: { lazyClone: true, lixCommit: true },
@@ -358,6 +358,7 @@ describe("main workflow", () => {
 		await repo.nodeishFs.rm("/static/test1")
 
 		await repo._emptyWorkdir()
+
 		await repo._checkOutPlaceholders()
 
 		await repo.nodeishFs.mkdir("/static/test/nested/deep/deeper", { recursive: true })
