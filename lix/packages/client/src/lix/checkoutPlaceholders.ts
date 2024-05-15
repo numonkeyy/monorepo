@@ -3,12 +3,16 @@ import isoGit from "../../vendored/isomorphic-git/index.js"
 import { doCheckout } from "../git/checkout.js"
 import { modeToFileType } from "../git/helpers.js"
 
-export async function checkOutPlaceholders(ctx: RepoContext, state: RepoState) {
+export async function checkOutPlaceholders(
+	ctx: RepoContext,
+	state: RepoState,
+	{ materializeGitignores } = { materializeGitignores: true }
+) {
 	const { rawFs, cache, dir } = ctx
 	const { branchName, checkedOut, sparseFilter } = state
 
 	await doCheckout({
-		fs: rawFs,
+		fs: state.nodeishFs,
 		cache,
 		dir,
 		ref: branchName,
@@ -18,6 +22,7 @@ export async function checkOutPlaceholders(ctx: RepoContext, state: RepoState) {
 	const fs = rawFs
 	const gitignoreFiles: string[] = []
 
+	let rootHash: string | undefined
 	await isoGit.walk({
 		fs,
 		dir,
@@ -29,14 +34,22 @@ export async function checkOutPlaceholders(ctx: RepoContext, state: RepoState) {
 			if (!commit) {
 				return undefined
 			}
-			const fileMode = await commit.mode()
-
-			const fileType = modeToFileType(fileMode)
 
 			if (fullpath.endsWith(".gitignore")) {
 				gitignoreFiles.push(fullpath)
-				return undefined
+				if (materializeGitignores) {
+					return fullpath
+				}
 			}
+
+			const fileMode = await commit.mode()
+			const oid = await commit.oid()
+
+			if (fullpath === ".") {
+				rootHash = oid
+			}
+
+			const fileType = modeToFileType(fileMode)
 
 			if (
 				sparseFilter &&
@@ -53,12 +66,12 @@ export async function checkOutPlaceholders(ctx: RepoContext, state: RepoState) {
 			}
 
 			if (fileType === "file" && !checkedOut.has(fullpath)) {
-				await fs._createPlaceholder(fullpath, { mode: fileMode })
+				await fs._createPlaceholder(fullpath, { mode: fileMode, oid, rootHash })
 				return fullpath
 			}
 
 			if (fileType === "symlink" && !checkedOut.has(fullpath)) {
-				await fs._createPlaceholder(fullpath, { mode: fileMode })
+				await fs._createPlaceholder(fullpath, { mode: fileMode, oid, rootHash })
 				return fullpath
 			}
 
@@ -67,9 +80,10 @@ export async function checkOutPlaceholders(ctx: RepoContext, state: RepoState) {
 		},
 	})
 
-	if (gitignoreFiles.length) {
+	if (gitignoreFiles.length && materializeGitignores) {
+		// This is only used for testing when opeinging a snapshot and using emptyWorkdir, using lazyFs will hang forewer but we allready have the ignore files in object store
 		await doCheckout({
-			fs: rawFs,
+			fs: ctx.rawFs,
 			dir,
 			cache,
 			ref: branchName,
@@ -79,4 +93,6 @@ export async function checkOutPlaceholders(ctx: RepoContext, state: RepoState) {
 	}
 
 	state.pending && (await state.pending)
+
+	return { gitignoreFiles }
 }
