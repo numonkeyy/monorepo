@@ -100,8 +100,8 @@ export async function openRepository(
 		// only exposed for testing
 		_emptyWorkdir: emptyWorkdir.bind(undefined, ctx, state),
 		_checkOutPlaceholders: checkOutPlaceholders.bind(undefined, ctx, state),
-		_add: add.bind(undefined, ctx),
-		_remove: remove.bind(undefined, ctx),
+		_add: add.bind(undefined, ctx, state),
+		_remove: remove.bind(undefined, ctx, state),
 		_isoCommit: isoCommit.bind(undefined, ctx),
 	}
 }
