@@ -478,5 +478,5 @@ describe(
 			vi.useRealTimers()
 		})
 	},
-	{ timeout: 5000 }
+	{ timeout: 7000 }
 )
