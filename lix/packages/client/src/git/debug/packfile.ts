@@ -5,6 +5,11 @@ import isoGit, {
 	_collect,
 } from "../../../vendored/isomorphic-git/index.js"
 
+if (window) {
+	// @ts-expect-error
+	window.isoGit = isoGit
+}
+
 /**
  * Use this to intercept your resoponse function to log the pack files interals
  * @param Uint8Array the body of a pack Response
