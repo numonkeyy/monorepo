@@ -130,7 +130,12 @@ export async function repoState(
 			const stats = await rawFs.stat(placeholder)
 
 			if (stats._rootHash) {
-				// FIXME: check _rootHash!!! or do this in the checkout ?!
+				// FIXME: check _rootHash!!! or do this in the checkout ?!?
+				// for the first version this is not an issue thouhg:
+				// if user commits localy all files that are changed are not placeholders, all other files are the same oids as when doing original checkout
+				// if user fetches without checking out etc. the oids are not invalidated
+				// if user does a different checkout the oids are allready up to date by emptyWorkdir and fresh checkoutPlaceholders
+				// if user does checkout with active placehodlers wihtout removing them first, checkout will fail with dirty workdir message
 			}
 			oids.push(stats._oid)
 
@@ -198,7 +203,7 @@ export async function repoState(
 			throw new Error("fs provider does not support placeholders")
 		}
 		console.info("Using lix for cloning repo")
-		// FIXME: symlink = false in git/config!?
+		// FIXME: symlink = false in git/config!???
 		await isoGit
 			.clone({
 				fs: rawFs,
@@ -321,7 +326,7 @@ export async function repoState(
 			pathParts.length === 4 &&
 			prop === "readFile"
 		) {
-			// FIXME: is handling dir option reqlly neceasary anywhere?
+			// FIXME: is handling dir option really neceasary anywhere?
 			// if (dir !== undefined) {
 			// 	const dirWithLeadingSlash = dir.endsWith("/") ? dir : dir + "/"
 			// 	if (!filePath.startsWith(dirWithLeadingSlash)) {
