@@ -65,6 +65,7 @@ function join(...parts: string[]) {
 }
 
 export type StatusArgs = {
+	ensureFirstBatch: () => Promise<void>
 	fs: NodeishFilesystem
 	/** The [working tree](dir-vs-gitdir.md) directory path */
 	dir: string
@@ -107,6 +108,7 @@ export async function statusList(
 ): ReturnType<typeof _statusList> {
 	return await _statusList({
 		fs: ctx.rawFs,
+		ensureFirstBatch: state.ensureFirstBatch,
 		dir: ctx.dir,
 		cache: ctx.cache,
 		sparseFilter: state.sparseFilter,
@@ -121,6 +123,7 @@ export async function statusList(
  */
 export async function _statusList({
 	fs,
+	ensureFirstBatch,
 	dir = "/",
 	gitdir = join(dir, ".git"),
 	ref = "HEAD",
@@ -132,6 +135,9 @@ export async function _statusList({
 	addHashes = false,
 }: StatusArgs): Promise<StatusList> {
 	try {
+		// this call will materialzie all gitignore files that are queued on lazy cloning
+		await ensureFirstBatch()
+
 		return await walk({
 			fs,
 			cache,
