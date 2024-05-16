@@ -199,7 +199,6 @@ export function makeHttpClient({
 		if (debug && uint8Array) {
 			const { inflatePackResponse } = await import("../git/debug/packfile.js")
 			console.info(await inflatePackResponse(uint8Array).catch((err: any) => err))
-
 		}
 
 		if (onRes) {
