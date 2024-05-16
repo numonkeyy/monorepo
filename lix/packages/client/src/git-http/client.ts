@@ -1,5 +1,3 @@
-import { inflatePackResponse } from "../git/debug/packfile.js"
-
 /**
  * Forked from https://github.com/isomorphic-git/isomorphic-git/blob/main/src/http/web/index.js
  * for credentials: "include" support, configurable payload overrides, configurable logging etc.
@@ -201,7 +199,6 @@ export function makeHttpClient({
 		if (debug && uint8Array) {
 			const { inflatePackResponse } = await import("../git/debug/packfile.js")
 			console.info(await inflatePackResponse(uint8Array).catch((err: any) => err))
-
 		}
 
 		if (onRes) {
