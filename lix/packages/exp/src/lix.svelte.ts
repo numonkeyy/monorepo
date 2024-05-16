@@ -38,7 +38,7 @@ export function openRepo (url, { branch, author }) {
         get content () {
           // console.log('reading file ' + path)
           
-          !fileContent?.length && repoProm.then((repo: any) => repo.read(path).then((content) => {
+          !fileContent?.length && repoProm.then((repo) => repo.read(path).then((content) => {
             console.log('exp get content', path )
             fileContent = content
             setTimeout(updateStatus, 0)
