@@ -13,7 +13,7 @@ export function openRepo (url, { branch, author }) {
     folders: [], // >> files()
     
     fetchRefs: async function () {
-      return branches?.length < 2 && repoProm.then((repo)=> repo.getBranches().then(br => { 
+      return branches?.length < 2 && repoProm.then((repo)=> repo.getBranches().then(br => {
         branches = br
       })) // TODO: reactivity: needs to be exposed but only executed when used in ui > revisit samuels proxy requirement!
     },
@@ -48,13 +48,13 @@ export function openRepo (url, { branch, author }) {
         
         set content (val) {
           fileContent = val
-          repoProm.then((repo: any) => repo.write(path, val).then(() => setTimeout(updateStatus, 0)))
+          repoProm.then((repo) => repo.write(path, val).then(() => setTimeout(updateStatus, 0)))
         }
       }
     },
 
     pull: async function () {
-      const repo: any = await repoProm
+      const repo = await repoProm
       await repo.pull({
         fastForward: true,
         singleBranch: true,
@@ -63,7 +63,7 @@ export function openRepo (url, { branch, author }) {
     },
 
     push: async function () {
-      const repo: any = await repoProm
+      const repo = await repoProm
       await repo.push()
       await updateStatus()
     },
