@@ -17,11 +17,6 @@
 </doc-accordion>
 
 <doc-accordion
-	heading="'Can't find module $paraglide/runtime.js' - What do I do?"
-	text="This likely means that you haven't registered the $paraglide alias for src/paraglide in svelte.config.js. Try adding that. Check the example if you're stuck">
-</doc-accordion>
-
-<doc-accordion
 	heading="How can I make my alternate links full urls when prerendering?"
 	text="According to the spec, alternate links should be full urls that include the protocol and origin. By default Paraglide-SvelteKit can't know which URL your page will be deployed to while prerendering, so it only includes the path in the alternate url, not the origin or protocol. This works, but is suboptimal. You can tell Paraglide-SvelteKit which url you will be deploying to by setting kit.prerender.origin in your svelte.config.js">
 </doc-accordion>

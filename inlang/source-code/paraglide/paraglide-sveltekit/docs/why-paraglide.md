@@ -6,7 +6,7 @@
 <doc-feature text-color="#0F172A" color="#E1EFF7" title="No route Param needed" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-sveltekit/assets/no-param.png"></doc-feature>
 </doc-features>
 
-## [Learn how to get Started](/m/dxnzrydw/paraglide-sveltekit-i18n/getting-started)
+## [Get Started](/m/dxnzrydw/paraglide-sveltekit-i18n/getting-started)
 
 ## Playground
 
