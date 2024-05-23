@@ -1,17 +1,15 @@
 # Writing a Framework Library
 
-You can of course write your own framework library if there isn't one for your framework.
+If there isn't a framework library for your framework you can of course write your own.
 
-Paraglide-Framework-Library integrates with a framework's lifecycle. It does two things:
+A Paraglide-Framework-Library integrates with a framework's lifecycle. It does two things:
 
 1. Calls `setLanguageTag()` at appropriate times to set the language
-2. Reacts to `onSetLanguageTag()`, usually by navigating or relading the page.
+2. Reacts to `onSetLanguageTag()`, usually by navigating or reloading the page.
 
-Additionally, it may provide convenience features such as localised routing.
+Additionally, it may provide convenience features like localised routing.
 
-Many popular frameworks already have libraries available, check out the [list of available framework libraries](#use-it-with-your-favorite-framework).
-
-If there isn't one for your framework, you can write your own. This example adapts Paraglide to a fictitious full-stack framework.
+This example library adapts Paraglide to a fictitious full-stack framework like NextJS or SvelteKit.
 
 ```tsx
 import {
