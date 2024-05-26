@@ -8,6 +8,10 @@ export function openRepo (url, { branch, author }) {
   const repoProm = new Promise((resolve) => {repoAvailable = resolve})
   let branches = $state([branch])
 
+  // get git notes
+  let depth = 1
+  console.log('repo o', {depth})
+
   // move this to component ! as $state(openRepo...)?
   const state = $state({
     folders: [], // >> files()
@@ -61,12 +65,50 @@ export function openRepo (url, { branch, author }) {
       }
     },
 
+    updateStatus: async function () {
+      await updateStatus()
+    },
+
     pull: async function () {
       const repo = await repoProm
       await repo.pull({
         fastForward: true,
         singleBranch: true,
       })
+      await updateStatus()
+    },
+
+    readNote: async function (params) {
+      const repo = await repoProm
+      return await repo.readNote(params)
+    },
+
+    async nextPage () { 
+      depth = depth + 10
+      const repo = await repoProm
+      await repo.fetch({ depth: 10, relative: true })
+      updateStatus()
+    },
+
+    clear () {
+      depth = 1
+      updateStatus()
+    },
+
+    fetch: async function (args) {
+      const repo = await repoProm
+
+      if (!args) {
+        // for generic refetch add notes update to the request
+        // FIXME: enable notes suppport as well as fork status on per repo level. use since for notes!
+        await Promise.all([
+          repo.fetch({ depth: 1, ref: 'refs/notes/commits' }).catch((err) => {err}), // remoteRef: 'refs/notes/commits', // singleBranch: false 
+          repo.fetch()
+        ])
+      } else {
+        await repo.fetch(args)
+      }
+      
       await updateStatus()
     },
 
@@ -78,6 +120,8 @@ export function openRepo (url, { branch, author }) {
       console.time('push')
       await repo.push()
       console.timeEnd('push')
+
+      depth = depth + 1
 
       await updateStatus()
     },
@@ -100,6 +144,7 @@ export function openRepo (url, { branch, author }) {
       await state.repo.commit({ message, include: includedFiles })
       console.timeEnd('commit')
 
+      depth = depth + 1
       await updateStatus().then(() => (state.exclude = []))
 
       await state.repo.push().catch(console.error)
@@ -124,9 +169,8 @@ export function openRepo (url, { branch, author }) {
     author, // TODO: check with git config
     // sparseFilter: ({ filename, type }) => type === 'folder' || filename.endsWith('.md')
   }).then(async (newRepo) => {
-    // @ts-ignore
-    window.repo = state.repo
     state.repo = newRepo
+    window.repo = state.repo
     repoAvailable(newRepo)
 
     state.currentBranch = await state.repo.getCurrentBranch()
@@ -148,9 +192,11 @@ export function openRepo (url, { branch, author }) {
       console.timeEnd('statusList')
       // Console.log(await repo.log({ filepath: '.npmrc' }))
 
+      // since: new Date(currentCommits[0].committer.timestamp * 1000) // TODO: log all origin commits from mergebase, or dont use same branch for local commits until publishing
+
       // console.time('double log')
-      const originCommits = (await state.repo.log({ ref: 'origin/' + state.currentBranch, depth: 15 })).reduce((agg, com) => {
-        agg[com.oid] = true
+      const originCommits = (await state.repo.log({ ref: 'origin/' + state.currentBranch, depth })).reduce((agg, com) => {
+        agg[com.oid] = com
         return agg
       }, {})
 
@@ -158,7 +204,7 @@ export function openRepo (url, { branch, author }) {
       // ...await state.repo.log({  ref: 'refs/remotes/origin/' + state.currentBranch, depth: 5})
       let foundOrigng= false
       let currentCommitOid
-      state.commits = ([...await state.repo.log({ depth: 15 })]).map((com) => {
+      const commits = [...await state.repo.log({ depth })].map((com) => {
         if (!currentCommitOid) {
           currentCommitOid = com.oid
           com.current = true
@@ -168,11 +214,21 @@ export function openRepo (url, { branch, author }) {
             foundOrigng = true
             com.origin = true
           }
+          delete originCommits[com.oid]
         } else {
           newUnpushed++
         }
         return com
       })
+
+      const originOnlyCommits = Object.values(originCommits)
+      if (originOnlyCommits[0]) {
+        originOnlyCommits[0].origin = true
+        commits[0].origin = false
+      } 
+
+      state.commits = [...originOnlyCommits, ...commits]
+
       // console.timeEnd('double log')
       state.unpushed = newUnpushed
 
