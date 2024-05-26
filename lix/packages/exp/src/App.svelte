@@ -5,20 +5,47 @@
 
   // import SvelteMarkdown from 'svelte-markdown'
   // TODO: move to sveltekit, try load functions and ssr, vscode web and obsidian plugins!
+  // for inlang git proxy: host + '/git/localhost:8089/janfjohannes/ci-test-repo.git',
 
+  let repos = $state([])
+  let selectdRepo = $state(0)
+  let selectedBranch = $state('main')
 
-  const host = 'https://git.local'
-  const repos = {
-    gitserver: 'https://ignored.domain/direct/git.local/opral/example.git',
-    test: host + '/git/localhost:8089/janfjohannes/ci-test-repo.git',
-    'cal.com': 'https://ignored.domain/direct/git.local/jan/cal.com'
-  }
+  fetch('http://gitea.localhost/api/v1/repos/search').then(async (res) => {
+    const data = await res.json()
+    console.log(data)
+ 
+    repos.push(...data.data)
+  })
 
-  const selectdRepo = 'gitserver'
+  let repo = $state(null)
 
-  const repo = openRepo(repos[selectdRepo], {
-    branch: "main",
-    author: { name: 'me', email: 'user@oral.com' }
+  $effect(() => {
+    if (selectdRepo) {
+      selectedBranch = 'main'
+    }
+  })
+  
+  let refetcher
+  let opened = ''
+  $effect(() => {
+    if (
+      (repos[selectdRepo] && (opened !== repos[selectdRepo]?.full_name)) ||
+      (selectedBranch && repo?.currentBranch && (selectedBranch !== repo?.currentBranch))
+    ) {
+      clearInterval(refetcher)
+      opened = repos[selectdRepo]?.full_name
+      repo = openRepo(`http://ignored.domain/direct/gitea.localhost/${repos[selectdRepo]?.full_name}`, {
+        branch: selectedBranch,
+        author: { name: 'me', email: 'user@oral.com' }
+      })
+
+      refetcher = setInterval(() => {
+        repo.fetch()
+      }, 12000)
+      
+      open('README.md')
+    }
   })
 
   let editing = $state(true)
@@ -29,7 +56,6 @@
     openFile = name
     file = repo.files(openFile)
   }
-  open('README.md')
 
   let message = $state('')
 
@@ -38,7 +64,7 @@
   $effect(() => {
     // switch to oids/ hashes
     const lines = document.getElementById("lines")
-    if (repo.commits.length > 1 || uncomitted) {
+    if (repo?.commits?.length > 1 || uncomitted) {
       const sidebar = document.getElementById('lix-sidebar').getBoundingClientRect()
 
       setTimeout(() => {
@@ -138,7 +164,7 @@
       (delta / 60) % 60, // minutes
       delta % 60 // seconds
     ]
-    const units = ['year', 'month', 'week',' day', 'hour', 'minute', 'second']
+    const units = ['year', 'month', 'week', 'day', 'hour', 'minute', 'second']
 
     for (let i = 0; i < values.length; i++) {
       if (values[i] >= 1) {
@@ -154,16 +180,21 @@
 
 <main style="width: 100vw;">
   <!-- <header style="position: absolute; top: 10px; left: 30px;">
-
   </header> -->
 
   <div class="card">
     <aside style="position: absolute; top: 6px; left: 30px;">
+      <select style="max-width: 200px; padding: 2px; margin-top: 25px;" bind:value={selectdRepo} on:mousedown={() =>{}}>
+        {#each repos as repo, i}
+          <option value={i}>{repo.name}</option>
+        {/each}
+      </select>
+
       <h3>Folders</h3>
       
       <ul class="files" style="list-style: none;">
-        {#each repo.folders as { name, type }}
-          <li style="cursor: pointer;" on:click={() => open(name)}>
+        {#each repo?.folders as { name, type }}
+          <li style="cursor: pointer;" on:mousedown={() => open(name)}>
             {type} &nbsp;
             <span class={statusClasses(name, repo.status)}>{name}</span>
           </li>
@@ -188,7 +219,7 @@
       {:else}
         <div
           class="markdown-body"
-          on:click={() => {
+          on:mousedown={() => {
             editing = true
           }}
         >
@@ -203,19 +234,29 @@
       <svg id="lines"></svg>
 
       <div style="margin-bottom: 26px;">
-        <select style="max-width: 200px; padding: 2px;" bind:value={repo.currentBranch} on:click={repo.fetchRefs}>
-          {#each repo.branches as branch}
-            <option value={branch}>{branch}</option>
-          {/each}
-        </select>
+        {#if repo?.currentBranch}
+          <select style="max-width: 200px; padding: 2px;" bind:value={selectedBranch} on:mousedown={repo?.fetchRefs}>
+            {#each repo?.branches as branch}
+              <option value={branch}>{branch}</option>
+            {/each}
+          </select>
+        {/if}
 
-        <button on:click={repo.pull} style="float: right; margin-left: 16px; margin-top: -10px;">
-          Sync
+       
+        <button on:mousedown={repo.pull} style="float: right; margin-left: 16px; margin-top: -10px;">
+          Update
         </button>
 
+        <button on:mousedown={() =>{  repo.clear() }} style="float: right; margin-left: 16px; margin-top: -10px;">
+          Clear
+        </button>
+
+
         <!-- <h3 style="display: inline-block; margin-right: 6px;">Commits</h3> -->
-        {#if repo.unpushed}
-          <button on:click={repo.push} style="float: right; margin-left: 16px; margin-top: -10px;">
+        {#if repo?.unpushed}
+          <button on:mousedown={() => {
+            repo.push()
+          }} style="float: right; margin-left: 16px; margin-top: -10px;">
             Push {repo.unpushed} local commits
           </button>
         {/if}
@@ -225,8 +266,8 @@
       {#if uncomitted}
         <div>
           <!-- <h3 style="display: inline-block; margin-right: 6px;">Next Commit</h3> -->
-          <button style="display: inline-block;" on:click={() => repo.commit(message)} title="publish changes to {repo.currentBranch}">
-            <div class="commit-dot current" id="commit-dot-new" style="margin-left: -39px; margin-top: 1px; background-color: #25B145;"></div>
+          <button style="display: inline-block;" on:mousedown={() => repo.commit(message)} title="publish changes to {repo.currentBranch}">
+            <div class="commit-dot current" id="commit-dot-new" style="margin-left: -39px; margin-top: 1px; background-color: #25B145;" title="You are here"></div>
             Publish
           </button>
 
@@ -235,30 +276,30 @@
           </button>
         </div>
         
-        <input class="commit-message" type="text" bind:value={message} placeholder="add commit message">
+        <input class="commit-message" type="text" bind:value={message} placeholder="add description">
 
         <ul style="list-style: none;">
           {#each repo.status?.filter(([name, txt]) => txt !== 'unmodified' && !repo.exclude.includes(name)) || [] as entry}
-            <li style="cursor: pointer;" on:click={() => repo.addExclude(entry[0])} title="{entry[1]}">
+            <li style="cursor: pointer;" on:mousedown={() => repo.addExclude(entry[0])} title="{entry[1]}">
               {entry[0]}
             </li>
           {/each}
         </ul>
       {/if}
 
-      {#if repo.exclude?.length > 0}
+      {#if repo?.exclude?.length > 0}
         <h3>Exclude from next commit</h3>
         <ul style="list-style: none;">
           {#each repo.exclude || [] as entry}
-            <li style="cursor: pointer;" on:click={() => repo.include(entry)}>{entry}</li>
+            <li style="cursor: pointer;" on:mousedown={() => repo.include(entry)}>{entry}</li>
           {/each}
         </ul>
       {/if}
 
       <div style="width: 100%">
-        {#each repo.commits as { commit, origin, oid, current }, i}
+        {#each repo?.commits as { commit, origin, oid, current }, i}
           <div style="font-size: 11px;" class="commit" title="Id:{oid}   Hash:{commit.tree}   Parents:{JSON.stringify(commit.parent)}">
-            <div class="commit-dot {current && !uncomitted ? 'current': ''}" id="commit-dot-{i}">
+            <div class="commit-dot {current && !uncomitted ? 'current': ''}" id="commit-dot-{i}" title="{current && !uncomitted ? 'You are here' : ''}">
               {#if commit.parent.length> 1}+{/if}
             </div>
 
@@ -272,7 +313,7 @@
                 <div class="bookmark{(repo.currentBranch) === 'main' ? ' mainline' : ''}">{repo.currentBranch}</div>
               {/if}
 
-              <button class="goto" style="display: inline-block;">Goto</button>
+              <button class="goto" style="display: inline-block;" on:mousedown={async () => { console.log(await repo?.readNote({ oid }))}}>Goto</button>
             </div>
               
             {#if commit.message.length > 0}
@@ -282,7 +323,9 @@
         {/each}
       </div>
 
-      <button style="display: block; margin-left: auto; margin-right: auto; position: relative;">Load More</button>
+      <button style="display: block; margin-left: auto; margin-right: auto; position: relative;" on:mousedown={() => {
+        repo.nextPage()
+      }}>Load More</button>
     </aside>
   </div>
 </main>
@@ -364,7 +407,7 @@
     box-sizing: border-box;
     padding: 38px;
     padding-left: 55px;
-    width: 355px;
+    width: 381px;
     background: hsl(218 19% 4% / 1);
     border: 1px solid #323232;
   }
@@ -389,8 +432,10 @@
     margin-top: 10px;
   }
   .commit-dot.current {
-    background-color:  #25B145;
-    box-shadow: 0 0 6px 6px #25b14633;
+    /* background-color:  #25B145;
+    box-shadow: 0 0 6px 6px #25b14633; */
+    background-color: #ffffff;
+    box-shadow: 0 0 0px 4px #25b146, 0 0 12px 6px #25b146bd;
   }
   /* .commit-dot.current:before {
     background-color: white;
