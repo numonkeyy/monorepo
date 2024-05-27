@@ -1,8 +1,8 @@
-import type { Handle } from "@sveltejs/kit"
-import { getPathInfo } from "../utils/get-path-info.js"
-import { base } from "$app/paths"
+import type { Handle, RequestEvent } from "@sveltejs/kit"
 import type { I18nConfig } from "../adapter.js"
 import { dev } from "$app/environment"
+import { base } from "$app/paths"
+import { getPathInfo } from "../utils/get-path-info.js"
 
 /**
  * The default lang attribute string that's in SvelteKit's `src/app.html` file.
@@ -55,7 +55,7 @@ export const createHandle = <T extends string>(
 	const dirPlaceholder = options.textDirectionPlaceholder ?? "%paraglide.textDirection%"
 
 	return ({ resolve, event }) => {
-		const { lang } = getPathInfo(event.url.pathname, {
+		const { lang, path } = getPathInfo(event.url.pathname, {
 			availableLanguageTags: i18n.runtime.availableLanguageTags,
 			defaultLanguageTag: i18n.defaultLanguageTag,
 			base,
@@ -68,11 +68,32 @@ export const createHandle = <T extends string>(
 			textDirection,
 		}
 
+		// if the language is the default language make sure the langauge tag is not part of the path
+		// if it is 404
+		const accept = event.request.headers.get("accept")
+		const isPage = accept?.includes("text/html")
+		if (isPage && lang === i18n.defaultLanguageTag) {
+			console.info("isPage", event.url.pathname, path)
+
+			if (event.url.pathname.startsWith(base + "/" + i18n.defaultLanguageTag)) {
+				const notFoundEvent: RequestEvent = {
+					...event,
+					route: {
+						// SvelteKit expects null, not undefined
+						// eslint-disable-next-line unicorn/no-null
+						id: null,
+					},
+				}
+
+				return resolve(notFoundEvent)
+			}
+		}
+
 		return resolve(event, {
 			transformPageChunk({ html, done }) {
 				if (!done) return html
 
-				// in dev mode, check if the lang attribute hasn't been replaced
+				// in dev mode, check if the lang attribute has been replaced
 				if (
 					dev &&
 					!html.includes(langPlaceholder) &&
