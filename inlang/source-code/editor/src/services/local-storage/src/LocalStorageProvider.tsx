@@ -114,6 +114,7 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 		if (typeof window !== "undefined") {
 			// listen for changes in other windows
 			window.addEventListener("message", onPostMessage, false)
+			window.addEventListener("storage", onStorageSetByOtherWindow)
 		}
 	})
 
