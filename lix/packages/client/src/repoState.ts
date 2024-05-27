@@ -282,6 +282,14 @@ export async function repoState(
 					{ materializeGitignores: false }
 				)
 
+				await isoGit.setConfig({
+					fs: rawFs,
+					dir: ctx.dir,
+					path: "remote.origin.fetch",
+					value: "+refs/notes/*:refs/notes/*", // "refs/notes/commits:refs/notes/commits",
+					append: true,
+				})
+
 				// we load these on top of whatever first files are fetched in a batch, we dont need the before but need to make sure thay are available asap before workign with files
 				preloads = gitignoreFiles
 			})
