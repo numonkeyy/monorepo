@@ -1,5 +1,17 @@
 # @inlang/cli
 
+## 2.18.1
+
+### Patch Changes
+
+- 9d2aa1a: v2 message bundle persistence - initial store implementation
+
+## 2.18.0
+
+### Minor Changes
+
+- 2806698: force release cli, as it was missing from the changeset targets for some reason
+
 ## 2.17.0
 
 ### Minor Changes
