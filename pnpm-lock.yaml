@@ -460,6 +460,9 @@ importers:
 
   inlang/source-code/editor:
     dependencies:
+      '@inlang/message-bundle-component':
+        specifier: workspace:*
+        version: link:../message-bundle-component
       '@inlang/settings-component':
         specifier: workspace:*
         version: link:../settings-component

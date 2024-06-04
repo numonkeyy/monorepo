@@ -23,7 +23,7 @@ export default class InlangMessageBundle extends LitElement {
 	@property({ type: Object })
 	messageBundle: MessageBundle | undefined
 
-	@property({ type: Object })
+	@property({ type: Array })
 	lintReports: MessageLintReport[] | undefined
 
 	dispatchOnSetSettings(messageBundle: MessageBundle) {

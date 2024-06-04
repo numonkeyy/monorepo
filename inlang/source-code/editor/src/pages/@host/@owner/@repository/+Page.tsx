@@ -7,7 +7,6 @@ import { ListHeader } from "./components/Listheader.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"
-import { Message } from "./Message.jsx"
 import { Errors } from "./components/Errors.jsx"
 import { Layout } from "./Layout.jsx"
 import Link from "#src/renderer/Link.jsx"
@@ -15,6 +14,7 @@ import { getAuthClient } from "@lix-js/client"
 import { currentPageContext } from "#src/renderer/state.js"
 import { replaceMetaInfo } from "./helper/ReplaceMetaInfo.js"
 import { publicEnv } from "@inlang/env-variables"
+import { pluralBundle } from "@inlang/sdk/v2-mocks"
 
 const browserAuth = getAuthClient({
 	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,
@@ -85,6 +85,16 @@ function TheActualPage() {
 			setMessageCount(0)
 		})
 	)
+
+	createEffect(() => {
+		const _project = project()
+
+		if (_project && _project.store) {
+			_project.store.messageBundles.getAll().then((bundles) => {
+				console.log(bundles)
+			})
+		}
+	})
 
 	return (
 		<>
@@ -181,7 +191,16 @@ function TheActualPage() {
 							</TourHintWrapper>
 							<For each={project()!.query.messages.includedMessageIds()}>
 								{(id) => {
-									return <Message id={id} />
+									return (
+										<inlang-message-bundle
+											prop:messageBundle={pluralBundle}
+											prop:lintReports={[]}
+											on:change-message-bundle={(event: CustomEvent) =>
+												console.log(event.detail.argument)
+											}
+										/>
+									)
+									// return <Message id={id} />
 								}}
 							</For>
 						</Show>

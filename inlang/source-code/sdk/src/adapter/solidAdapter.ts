@@ -42,6 +42,7 @@ export const solidAdapter = (
 				getAll: convert(project.query.messageLintReports.getAll),
 			},
 		},
+		store: project.store,
 	} satisfies InlangProjectWithSolidAdapter
 }
 
@@ -71,6 +72,7 @@ export type InlangProjectWithSolidAdapter = {
 			getAll: () => ReturnType<MessageLintReportsQueryApi["getAll"]>
 		}
 	}
+	store: InlangProject["store"]
 }
 
 // const x = {} as InlangProjectWithSolidAdapter
