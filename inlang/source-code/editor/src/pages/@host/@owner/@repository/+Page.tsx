@@ -14,7 +14,7 @@ import { getAuthClient } from "@lix-js/client"
 import { currentPageContext } from "#src/renderer/state.js"
 import { replaceMetaInfo } from "./helper/ReplaceMetaInfo.js"
 import { publicEnv } from "@inlang/env-variables"
-import { pluralBundle } from "@inlang/sdk/v2-mocks"
+import type { MessageBundle } from "@inlang/sdk/v2"
 
 const browserAuth = getAuthClient({
 	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,
@@ -86,12 +86,14 @@ function TheActualPage() {
 		})
 	)
 
+	const [messageBundles, setMessageBundles] = createSignal<MessageBundle[]>([])
+
 	createEffect(() => {
 		const _project = project()
 
 		if (_project && _project.store) {
 			_project.store.messageBundles.getAll().then((bundles) => {
-				console.log(bundles)
+				setMessageBundles(bundles)
 			})
 		}
 	})
@@ -189,14 +191,14 @@ function TheActualPage() {
 							>
 								<></>
 							</TourHintWrapper>
-							<For each={project()!.query.messages.includedMessageIds()}>
-								{(id) => {
+							<For each={messageBundles()}>
+								{(bundle) => {
 									return (
 										<inlang-message-bundle
-											prop:messageBundle={pluralBundle}
+											prop:messageBundle={bundle}
 											prop:lintReports={[]}
 											on:change-message-bundle={(event: CustomEvent) =>
-												console.log(event.detail.argument)
+												project()!.store?.messageBundles.set({ data: event.detail.argument })
 											}
 										/>
 									)
