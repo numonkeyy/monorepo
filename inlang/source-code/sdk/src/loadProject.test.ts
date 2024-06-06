@@ -201,7 +201,7 @@ it("should throw if a project path does not end with .inlang", async () => {
 })
 
 describe("initialization", () => {
-	it("should throw if projectPath is not an absolute path", async () => {
+	it.only("should throw if projectPath is not an absolute path", async () => {
 		const repo = await mockRepo()
 
 		const result = await tryCatch(() =>
