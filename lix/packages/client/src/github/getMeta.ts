@@ -16,6 +16,8 @@ export async function getMeta(ctx: RepoContext) {
 		return { error: res.error }
 	} else {
 		return {
+			allow_forking: res.data.allow_forking,
+			visibility: res.data.visibility, // 'public' | 'private'
 			name: res.data.name,
 			isPrivate: res.data.private,
 			isFork: res.data.fork,
@@ -25,6 +27,7 @@ export async function getMeta(ctx: RepoContext) {
 				pull: res.data.permissions?.pull || false,
 			},
 			owner: {
+				type: res.data.owner.type, // 'User' | 'Organization'
 				name: res.data.owner.name || undefined,
 				email: res.data.owner.email || undefined,
 				login: res.data.owner.login,
