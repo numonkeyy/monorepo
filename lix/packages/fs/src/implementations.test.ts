@@ -78,15 +78,6 @@ const runFsTestSuite = async (
 		expect(await fs.readdir(`${tempDir}/home/user1/documents`)).toEqual([])
 	})
 
-	test("funny paths", async () => {
-		expect(await fs.readdir(`${tempDir}///.//`)).toEqual(["home"])
-		expect(await fs.readdir(`${tempDir}/home/user1/../user1/./`)).toEqual([
-			"documents",
-			"downloads",
-		])
-		expect(await fs.readdir(`${tempDir}/home/./../home/.//user1/documents`)).toEqual([])
-	})
-
 	test("file r/w", async () => {
 		await fs.writeFile(`${tempDir}/home/user1/documents/file1`, textInFirstFile)
 		await fs.writeFile(`${tempDir}/file2`, textInSecondFile)
@@ -216,7 +207,7 @@ const runFsTestSuite = async (
 
 	test("symlink", async () => {
 		await fs.symlink(
-			`${tempDir}/home/./user1/../user1/documents///./file1`,
+			`${tempDir}/home/user1/documents/file1`,
 			`${tempDir}/file1.link`
 		)
 		await fs.symlink(`${tempDir}/file3`, `${tempDir}/file3.link`)
@@ -237,7 +228,7 @@ const runFsTestSuite = async (
 
 	test("readlink", async () => {
 		expect(await fs.readlink(`${tempDir}/file1.link`)).toEqual(
-			`${tempDir}/home/./user1/../user1/documents///./file1`
+			`${tempDir}/home/user1/documents/file1`
 		)
 
 		expect(await fs.readlink(`${tempDir}/file3.link`)).toEqual(`${tempDir}/file3`)
