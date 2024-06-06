@@ -219,7 +219,7 @@ describe(
 			// })
 
 			// it("*deleted and deleted status", async () => {
-			await repository.nodeishFs.readFile("./svelte.config.js", fileContent)
+			await repository.nodeishFs.readFile("./svelte.config.js")
 			await repository.nodeishFs.rm("./svelte.config.js")
 
 			expect(await repository.statusList()).toStrictEqual([
@@ -449,6 +449,10 @@ describe(
 					delete stat.symlinkTarget
 				}
 				// @ts-ignore
+				stat._oid = "ignored"
+				// @ts-ignore
+				stat._rootHash = "ignored"
+				// @ts-ignore
 				stat.mtimeMs = -1
 				// @ts-ignore
 				stat.ctimeMs = -1
@@ -481,6 +485,10 @@ describe(
 					delete stat.symlinkTarget
 				}
 				// @ts-ignore
+				stat._oid = "ignored"
+				// @ts-ignore
+				stat._rootHash = "ignored"
+				// @ts-ignore
 				stat.mtimeMs = -1
 				// @ts-ignore
 				stat.ctimeMs = -1
@@ -492,7 +500,7 @@ describe(
 			delete snapB.fsMap["/.git/index/"]
 
 			expect(snapA.fsMap).toStrictEqual(snapB.fsMap)
-			expect(snapA.statusMap).toStrictEqual(snapB.statusMap)
+			expect(snapA.fsStats).toStrictEqual(snapB.fsStats)
 			vi.useRealTimers()
 		})
 	},
