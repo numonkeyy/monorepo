@@ -12,19 +12,42 @@ export async function getMeta(ctx: RepoContext) {
 
 	const res = await githubClient.getRepo({ repoName, owner })
 
+	// TODO: log out on permission change
+	const {
+		data: { installations },
+	} = await githubClient.getInstallations()
+
+	const found = installations.find((i: any) => i.account.login === owner)
+
+	let isInstalled = false
+	if (found?.repository_selection === "all") {
+		isInstalled = true
+	} else if (found) {
+		const {
+			data: { repositories },
+		} = await githubClient.getAvailableRepos(found.id)
+
+		if (repositories.find((r: any) => r.full_name === `${owner}/${repoName}`)) {
+			isInstalled = true
+		}
+	}
+
 	if ("error" in res) {
 		return { error: res.error }
 	} else {
 		return {
+			allow_forking: res.data.allow_forking,
 			name: res.data.name,
 			isPrivate: res.data.private,
 			isFork: res.data.fork,
+			isInstalled,
 			permissions: {
 				admin: res.data.permissions?.admin || false,
 				push: res.data.permissions?.push || false,
 				pull: res.data.permissions?.pull || false,
 			},
 			owner: {
+				type: res.data.owner.type, // 'User' | 'Organization'
 				name: res.data.owner.name || undefined,
 				email: res.data.owner.email || undefined,
 				login: res.data.owner.login,
