@@ -10,7 +10,7 @@ import type { Fix, LintConfig, LintReport } from "../types/lint.js"
 import { createDebugImport, importSequence } from "../import-utils.js"
 import { createImport } from "./import.js"
 import lintRule from "../dev-modules/lint-rule.js"
-import makeOpralUppercase from "../dev-modules/opral-uppercase-lint-rule.js"
+import enforceCapitalization from "../dev-modules/opral-uppercase-lint-rule.js"
 import _debug from "debug"
 import { combineToBundles } from "../createMessageBundleSlotAdapter.js"
 import createSlotReader from "../../persistence/slotfiles/createSlotReader.js"
@@ -38,7 +38,7 @@ export async function createLinter(
 	const _import = importSequence(
 		createDebugImport({
 			"sdk-dev:lint-rule.js": lintRule,
-			"sdk-dev:opral-uppercase-lint.js": makeOpralUppercase,
+			"sdk-dev:opral-uppercase-lint.js": enforceCapitalization,
 			"sdk-dev:missing-selector-lint-rule.js": missingSelectorLintRule,
 			"sdk-dev:missing-catchall-variant": missingCatchallLintRule,
 		}),

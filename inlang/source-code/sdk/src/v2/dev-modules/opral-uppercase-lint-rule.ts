@@ -2,48 +2,62 @@
 
 import type { MessageBundleLintRule } from "../types/lint.js"
 
-const orpalRegex = /\bOPRAL\b/gi
-
 type Fixes = {
-	title: "Make OPRAL uppercase"
+	title: `Fix spelling of ${string}`
 }
 
-const makeOpralUppercase: MessageBundleLintRule = {
-	id: "messageBundleLintRule.inlangdev.makeOpralUppercase",
-	displayName: "Ensure OPRAL is uppercase",
-	description: "Warns if the OPRAL brand name is not uppercase",
+const id = "messageBundleLintRule.inlangdev.enforceCapitalization"
+
+const enforceCapitalization: MessageBundleLintRule = {
+	id: id,
+	displayName: "Ensure brand names are properly capitalized",
+	description: "Warns if words are not properly capitalized",
+
 	run: ({ report, messageBundle }) => {
-		// loop over all messages and variants in the bundle
+		const words = ["OPRAL", "Inlang", "SvelteKit"] //(settings[id]?.words || []) as string[]
+		const regexes: [string, RegExp][] = words.map((word) => [
+			word,
+			new RegExp(`\\b${word}\\b`, "gi"),
+		])
+
 		for (const message of messageBundle.messages) {
 			for (const variant of message.variants) {
 				const text = variant.pattern
 					.filter((el): el is Extract<typeof el, { type: "text" }> => el.type === "text")
 					.reduce((acc, el) => acc + el.value, "")
 
-				const matches = text.match(orpalRegex)
-				if (!matches) continue
+				const misspelledWords = []
 
-				const badMatches = matches.filter((match) => match !== match.toUpperCase())
-
-				if (badMatches.length === 0) continue
-
-				const fix: Fixes = {
-					title: "Make OPRAL uppercase",
+				for (const [word, regex] of regexes) {
+					const matches = text.match(regex)
+					if (!matches) continue
+					const badMatches = matches.filter((match) => match !== word)
+					if (badMatches.length === 0) continue
+					misspelledWords.push(word)
 				}
 
+				if (misspelledWords.length === 0) continue
+
+				const fixes: Fixes[] = misspelledWords.map((word) => ({
+					title: `Fix spelling of ${word}`,
+				}))
+
 				report({
-					body: `The OPRAL brand name is not uppercase`,
+					body: `The word(s) ${misspelledWords.join(", ")} are not properly capitalized.`,
 					messageBundleId: messageBundle.id,
 					messageId: message.id,
 					variantId: variant.id,
 					locale: message.locale,
-					fixes: [fix],
+					fixes: fixes,
 				})
 			}
 		}
 	},
 	fix: async ({ report, fix, messageBundle }) => {
-		if (fix.title !== "Make OPRAL uppercase") return messageBundle
+		const word = fix.title.slice("Fix spelling of ".length)
+		if (!word) return messageBundle
+
+		const regex = new RegExp(`\\b${word}\\b`, "gi")
 
 		if (!report.variantId || !report.messageId)
 			throw new Error("report must have variantId and messageId")
@@ -56,7 +70,7 @@ const makeOpralUppercase: MessageBundleLintRule = {
 
 		variant.pattern = variant.pattern.map((el) => {
 			if (el.type !== "text") return el
-			el.value = el.value.replaceAll(orpalRegex, "OPRAL")
+			el.value = el.value.replaceAll(regex, word)
 			return el
 		})
 
@@ -64,4 +78,4 @@ const makeOpralUppercase: MessageBundleLintRule = {
 	},
 }
 
-export default makeOpralUppercase
+export default enforceCapitalization
