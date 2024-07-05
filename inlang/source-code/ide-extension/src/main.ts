@@ -19,6 +19,8 @@ import { recommendationBannerView } from "./utilities/recommendation/recommendat
 import { telemetry } from "./services/telemetry/implementation.js"
 import { version } from "../package.json"
 import { statusBar } from "./utilities/settings/statusBar.js"
+import { messageBundlePanel } from "./utilities/messages/messageBundleView.js"
+import { openMessageBundleViewCommand } from "./commands/openMessageBundleView.js"
 //import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
 
 // Entry Point
@@ -93,6 +95,8 @@ async function main(args: {
 		await errorView(args)
 		// Status Bar
 		await statusBar(args)
+		// Message Bundle Panel
+		await messageBundlePanel(args)
 
 		registerExtensionComponents(args)
 		// TODO: Replace by reactive settings API?
@@ -134,6 +138,12 @@ function registerExtensionComponents(args: {
 }) {
 	args.context.subscriptions.push(
 		...Object.values(CONFIGURATION.COMMANDS).map((c) => c.register(c.command, c.callback as any))
+	)
+
+	args.context.subscriptions.push(
+		vscode.commands.registerCommand("sherlock.openMessageBundleView", () => {
+			openMessageBundleViewCommand.callback(args.context)
+		})
 	)
 
 	const additionalSelectors =

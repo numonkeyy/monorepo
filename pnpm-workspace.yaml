@@ -16,3 +16,4 @@ packages:
   - 'inlang/source-code/sdk/load-test'
   - 'inlang/source-code/sdk/multi-project-test'
   - 'inlang/source-code/sdk/slotfile-webapp'
+  - 'inlang/source-code/ide-extension/webview-ui'

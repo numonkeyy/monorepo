@@ -1,83 +1,159 @@
 import * as vscode from "vscode"
-import { state } from "../state.js"
+import * as Comlink from "comlink"
+import { getUri } from "./utils/getUri.js"
+import { getNonce } from "./utils/getNonce.js"
+import { getExtensionInstance } from "./helpers/Extension.js"
+import { makeFsAvailableTo, MessageChannelAdapter } from "@inlang/sdk/v2"
+import * as fs from "node:fs/promises"
 
-import {
-	createMockBundleLintReport,
-	createMockMessageLintReport,
-	createMockVariantLintReport,
-} from "@inlang/sdk/v2-mocks"
-import { type MessageBundle, type LintReport } from "@inlang/sdk/v2"
+function webviewEndpoint(webview: vscode.Webview): Comlink.Endpoint {
+	const listeners = new Map<any, vscode.Disposable>()
 
-//
-// TODO: REPLACE THIS
-//
-
-const mockMessageLintReports: LintReport[] = [
-	createMockBundleLintReport({
-		ruleId: "messageBundleLintRule.inlang.missingMessage",
-		messageBundleId: "mock_bundle_human_id",
-		locale: "de",
-		body: "The bundle `mock_bundle_human_id` is missing message for the locale `de`",
-	}),
-	createMockMessageLintReport({
-		ruleId: "messageBundleLintRule.inlang.missingReference",
-		messageBundleId: "mock_bundle_human_id",
-		messageId: "mock_message_id_en",
-		locale: "en",
-		body: "The bundle `mock_bundle_human_id` is missing the reference message for the locale `en`",
-	}),
-	createMockMessageLintReport({
-		ruleId: "messageBundleLintRule.inlang.missingReference",
-		messageBundleId: "mock_bundle_human_id",
-		messageId: "mock_message_id_en",
-		locale: "en",
-		body: "The bundle `mock_bundle_human_id` is missing the reference message for the locale `en`",
-	}),
-]
-
-const mockVariantLintReports: LintReport[] = [
-	createMockVariantLintReport({
-		ruleId: "messageBundleLintRule.inlang.missingMessage",
-		messageBundleId: "mock_bundle_human_id",
-		variantId: "mock_variant_id_de_one",
-		locale: "de",
-		body: "The variant `one` is broken for the locale `de`",
-	}),
-]
-
-const bundleWithoutSelectors: MessageBundle = {
-	id: "message-bundle-id",
-	messages: [
-		{
-			id: "message-id",
-			locale: "en",
-			selectors: [],
-			declarations: [],
-			variants: [
-				{
-					id: "variant-id",
-					match: [],
-					pattern: [{ type: "text", value: "{count} new messages" }],
-				},
-			],
+	return {
+		postMessage(message) {
+			console.log("main thread postmessage", message)
+			webview.postMessage(message)
 		},
-	],
-	alias: {
-		default: "alias",
-	},
+
+		addEventListener(_, listener) {
+			const disposable = webview.onDidReceiveMessage((data) => {
+				console.log("main thread onmessage", data)
+				if ("handleEvent" in listener) {
+					const ev = new MessageEvent("message", { data })
+					listener.handleEvent(ev)
+				} else {
+					const ev = new MessageEvent("message", { data })
+					listener(ev)
+				}
+			})
+
+			listeners.set(listener, disposable)
+		},
+
+		removeEventListener(_, listener) {
+			const disposable = listeners.get(listener)
+			if (disposable) disposable.dispose()
+		},
+	}
 }
 
-//
-// REPLACE THIS
-//
+function getHtmlForWebview(webview: vscode.Webview, context: vscode.ExtensionContext): string {
+	const file = "src/index.tsx"
+	const localPort = "5173"
+	const localServerUrl = `localhost:${localPort}`
 
-export async function messageBundlePanel(args: {
-	context: vscode.ExtensionContext
-	id: MessageBundle["id"]
-}) {
+	const stylesUri = getUri(webview, context.extensionUri, [
+		"webview-ui",
+		"build",
+		"assets",
+		"index.css",
+	])
+
+	let scriptUri
+	const ext = getExtensionInstance(context)
+	console.log("Extension instance", ext, ext.isProductionMode())
+
+	const isProd = false
+	if (isProd) {
+		scriptUri = getUri(webview, context.extensionUri, ["webview-ui", "build", "assets", "index.js"])
+	} else {
+		scriptUri = `http://${localServerUrl}/${file}`
+	}
+
+	const nonce = getNonce()
+
+	const reactRefresh = /*html*/ `
+      <script type="module">
+        import RefreshRuntime from "http://localhost:${localPort}/@react-refresh"
+        RefreshRuntime.injectIntoGlobalHook(window)
+        window.$RefreshReg$ = () => {}
+        window.$RefreshSig$ = () => (type) => type
+        window.__vite_plugin_react_preamble_installed__ = true
+      </script>`
+
+	const reactRefreshHash = "sha256-YmMpkm5ow6h+lfI3ZRp0uys+EUCt6FOyLkJERkfVnTY="
+
+	const csp = [
+		`default-src 'none';`,
+		`script-src 'unsafe-eval' https://* ${
+			isProd
+				? `'nonce-${nonce}'`
+				: `http://${localServerUrl} http://0.0.0.0:${localPort} '${reactRefreshHash}' 'nonce-${nonce}'`
+		};`,
+		`style-src ${webview.cspSource} 'self' 'unsafe-inline' https://*;`,
+		`font-src ${webview.cspSource};`,
+		`connect-src https://* ${
+			isProd
+				? ``
+				: `ws://${localServerUrl} ws://0.0.0.0:${localPort} http://${localServerUrl} http://0.0.0.0:${localPort}`
+		};`,
+	].join(" ")
+
+	return /*html*/ `
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="Content-Security-Policy" content="${csp}">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" type="text/css" href="${stylesUri}">
+        <title>VSCode React Starter</title>
+      </head>
+      <body>
+        <div id="root"></div>
+        ${isProd ? "" : reactRefresh}
+        <script type="module" nonce="${nonce}" src="${scriptUri}"></script>
+      </body>
+    </html>`
+}
+
+function setWebviewMessageListener(webview: vscode.Webview) {
+	const ep = MessageChannelAdapter.wrap(webviewEndpoint(webview))
+	makeFsAvailableTo(
+		{
+			readFile: (path, options) => {
+				console.log("readFile", path, options)
+				return fs.readFile(path, options)
+			},
+			readdir: fs.readdir,
+			writeFile: fs.writeFile,
+			watch: fs.watch,
+			mkdir: fs.mkdir,
+		},
+		{
+			postMessage(message, transfer) {
+				console.log("postMessage", message)
+				ep.postMessage(message, transfer)
+			},
+			addEventListener: ep.addEventListener.bind(ep),
+			removeEventListener: ep.removeEventListener.bind(ep),
+		}
+	)
+
+	webview.onDidReceiveMessage((message: any) => {
+		const command = message.command
+		const text = message.text
+		console.log("Received message", message)
+
+		switch (command) {
+			case "hello":
+				vscode.window.showInformationMessage(text)
+				return
+			case "setMessageBundle":
+				console.info("Received message", message)
+				break
+			case "setFixLint":
+				console.info("Received fix lint", message)
+				break
+			// Add more switch cases as needed
+		}
+	})
+}
+
+export async function messageBundlePanel(args: { context: vscode.ExtensionContext }) {
 	const panel = vscode.window.createWebviewPanel(
 		"messageBundlePanel",
-		state().selectedProjectPath.split("/").pop() ?? "Settings",
+		"fs test",
 		vscode.ViewColumn.One,
 		{
 			enableScripts: true,
@@ -85,88 +161,9 @@ export async function messageBundlePanel(args: {
 		}
 	)
 
-	panel.webview.html = getWebviewContent({
-		id: args.id,
-		context: args.context,
-		webview: panel.webview,
-	})
+	// const ep = webviewEndpoint(panel.webview)
 
-	panel.webview.onDidReceiveMessage(async (message) => {
-		switch (message.command) {
-			case "setMessageBundle":
-				console.info("Received message", message)
-				break
-			case "setFixLint":
-				console.info("Received fix lint", message)
-				break
-		}
-	})
-}
+	panel.webview.html = getHtmlForWebview(panel.webview, args.context)
 
-export function getWebviewContent(args: {
-	id: MessageBundle["id"]
-	context: vscode.ExtensionContext
-	webview: vscode.Webview
-}): string {
-	const styleUri = args.webview.asWebviewUri(
-		vscode.Uri.joinPath(args.context.extensionUri, "assets", "messagebundle-view.css")
-	)
-
-	const scriptUri = args.webview.asWebviewUri(
-		vscode.Uri.joinPath(args.context.extensionUri, "assets", "messagebundle-component.mjs")
-	)
-
-	const litHtmlUri = args.webview.asWebviewUri(
-		vscode.Uri.joinPath(args.context.extensionUri, "assets", "lit-html.js")
-	)
-
-	const settings = state().project.settings()
-
-	return `<!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Settings</title>
-            <link href="${styleUri}" rel="stylesheet" />
-            <script type="module" src="${litHtmlUri}"></script>
-            <script type="module" src="${scriptUri}"></script>
-        </head>
-        <body>
-			<main>
-				<h1>Edit message</h1>
-				<div id="message-bundle-container"></div>
-			<main>
-            <script type="module">
-                import {html, render} from '${litHtmlUri}';
-                const vscode = acquireVsCodeApi();
-                
-                // RENDER WEB COMPONENT
-                const messageBundleContainer = document.getElementById('message-bundle-container');
-                const messageBundleElement = document.createElement('inlang-message-bundle');
-                messageBundleElement.messageBundle = ${JSON.stringify(bundleWithoutSelectors)};
-                messageBundleElement.lintReports = ${JSON.stringify([
-									...mockMessageLintReports,
-									...mockVariantLintReports,
-								])};
-                messageBundleElement.settings = ${JSON.stringify(settings)};
-
-                messageBundleContainer.appendChild(messageBundleElement);
-
-                // EVENTS
-                document.querySelector('inlang-message-bundle').addEventListener('change-message-bundle', (event) => {
-                    vscode.postMessage({
-                        command: 'setMessageBundle',
-                        messageBundle: event.detail.argument
-                    });
-                });
-				document.querySelector('inlang-message-bundle').addEventListener('fix-lint', (event) => {
-                    vscode.postMessage({
-                        command: 'setFixLint',
-                        fix: event.detail.argument
-                    });
-                });
-            </script>
-        </body>
-        </html>`
+	setWebviewMessageListener(panel.webview)
 }
