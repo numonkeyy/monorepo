@@ -22,6 +22,7 @@ import variantIsCatchAll from "../helper/crud/variant/isCatchAll.js"
 // internal components
 import "./inlang-lint-report-tip.js"
 import "./inlang-selector-configurator.js"
+import "./inlang-pattern-editor.js"
 
 @customElement("inlang-variant")
 export default class InlangVariant extends LitElement {
@@ -384,16 +385,19 @@ export default class InlangVariant extends LitElement {
 						`
 				  })
 				: undefined}
-			<sl-input
+			<!-- <sl-input
 				class="pattern"
 				size="small"
 				placeholder="Enter pattern ..."
 				value=${this.variant ? patternToString({ pattern: this.variant.pattern }) : ""}
 				@input=${(e: Event) => {
-					this._pattern = (e.target as HTMLInputElement).value
-					this._delayedSave()
-				}}
-			></sl-input>
+				this._pattern = (e.target as HTMLInputElement).value
+				this._delayedSave()
+			}}
+			></sl-input> -->
+			<inlang-pattern-editor class="pattern"
+				><div slot="editable-div" contenteditable></div
+			></inlang-pattern-editor>
 			<div class="actions">
 				<div class="dynamic-actions hide-dynamic-actions">
 					${this._isVariantEmpty() && this._isVariantMachineTranslatable()

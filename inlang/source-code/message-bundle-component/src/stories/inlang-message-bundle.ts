@@ -208,7 +208,6 @@ export default class InlangMessageBundle extends LitElement {
 	}
 
 	override render() {
-		console.log(this.messageBundle)
 		return html`
 			<div class=${`header`} part="header">
 				<div class="header-left">
@@ -334,7 +333,6 @@ export default class InlangMessageBundle extends LitElement {
 	}
 
 	private _renderMessage(locale: LanguageTag, message?: Message, lintReports?: LintReport[]) {
-		console.log(lintReports)
 		return html`
 			<div class="message">
 				<div class="language-container">

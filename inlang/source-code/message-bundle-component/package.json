@@ -22,8 +22,8 @@
 	"author": "",
 	"license": "ISC",
 	"devDependencies": {
-		"@inlang/marketplace-registry": "workspace:^",
 		"@inlang/marketplace-manifest": "workspace:^",
+		"@inlang/marketplace-registry": "workspace:^",
 		"@inlang/message-lint-rule": "workspace:^",
 		"@inlang/sdk": "workspace:^",
 		"@nx/storybook": "^18.0.4",
@@ -33,19 +33,22 @@
 		"@storybook/web-components": "^7.6.16",
 		"@storybook/web-components-vite": "^7.6.16",
 		"@types/chroma-js": "^2.4.4",
+		"@vitest/coverage-v8": "^0.33.0",
 		"esbuild": "^0.20.0",
 		"lit": "^3.1.2",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"storybook": "^7.6.16",
-		"vitest": "0.33.0",
-		"@vitest/coverage-v8": "^0.33.0"
+		"vitest": "0.33.0"
 	},
 	"dependencies": {
 		"@inlang/sdk": "workspace:^",
+		"@lexical/plain-text": "^0.16.1",
+		"@lexical/utils": "^0.16.1",
 		"@lit/task": "^1.0.0",
 		"@shoelace-style/shoelace": "2.14.0",
+		"@sinclair/typebox": "0.31.28",
 		"chroma-js": "^2.4.2",
-		"@sinclair/typebox": "0.31.28"
+		"lexical": "^0.16.1"
 	}
 }
