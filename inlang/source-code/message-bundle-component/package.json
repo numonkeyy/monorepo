@@ -43,12 +43,10 @@
 	},
 	"dependencies": {
 		"@inlang/sdk": "workspace:^",
-		"@lexical/plain-text": "^0.16.1",
-		"@lexical/utils": "^0.16.1",
 		"@lit/task": "^1.0.0",
 		"@shoelace-style/shoelace": "2.14.0",
 		"@sinclair/typebox": "0.31.28",
 		"chroma-js": "^2.4.2",
-		"lexical": "^0.16.1"
+		"quill": "^2.0.2"
 	}
 }
