@@ -8,7 +8,7 @@ import {
 	type InstalledLintRule,
 	type Declaration,
 } from "@inlang/sdk/v2"
-import { LitElement, css, html } from "lit"
+import { LitElement, css, html, render } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 
 //helpers
@@ -23,6 +23,10 @@ import variantIsCatchAll from "../helper/crud/variant/isCatchAll.js"
 import "./inlang-lint-report-tip.js"
 import "./inlang-selector-configurator.js"
 import "./inlang-pattern-editor.js"
+import InlangPatternEditor from "./inlang-pattern-editor.js"
+import { createRef, ref } from "lit/directives/ref.js"
+import { registerPlainText } from "@lexical/plain-text"
+import { $createParagraphNode, $createTextNode, $getRoot, createEditor } from "lexical"
 
 @customElement("inlang-variant")
 export default class InlangVariant extends LitElement {
@@ -161,6 +165,9 @@ export default class InlangVariant extends LitElement {
 	installedLintRules: InstalledLintRule[] | undefined
 
 	@property()
+	setHoveredVariantId: (variantId: string | undefined) => void = () => {}
+
+	@property()
 	addMessage: (newMessage: Message) => void = () => {}
 
 	@property()
@@ -185,8 +192,20 @@ export default class InlangVariant extends LitElement {
 	@state()
 	private _pattern: string | undefined = undefined
 
-	// @state()
-	// private _isDelaying: boolean = false
+	hackRef = createRef()
+
+	@state()
+	private _editor: HTMLElement | undefined
+
+	@state()
+	private _variantIsHovered: boolean = false
+
+	//editor
+	config = {
+		namespace: "MyEditor",
+		onError: console.error,
+	}
+	editor = createEditor(this.config)
 
 	//functions
 	private _getLintReports = (): LintReport[] | undefined => {
@@ -317,7 +336,7 @@ export default class InlangVariant extends LitElement {
 	//hooks
 	override async firstUpdated() {
 		await this.updateComplete
-
+		// console.log(this.)
 		//load _pattern
 		this._pattern = this.variant ? patternToString({ pattern: this.variant.pattern }) : ""
 
@@ -361,10 +380,66 @@ export default class InlangVariant extends LitElement {
 				}
 			})
 		}
+
+		console.log("init editor")
+		const messageBundle = document.querySelector("inlang-message-bundle")
+		const contentEditableElement: HTMLElement | null | undefined = document?.querySelector(
+			'[slot="hover-div"]'
+		) as HTMLElement | null | undefined
+
+		if (contentEditableElement) {
+			this._editor = contentEditableElement
+		}
+		this.editor.update(() => {
+			const root = $getRoot()
+			const paragraphNode = $createParagraphNode()
+			const textNode = $createTextNode(this._pattern)
+			paragraphNode.append(textNode)
+			if (root.getChildren().length === 0) {
+				console.log("add")
+				root.append(paragraphNode)
+			} else {
+				console.log("replace")
+				root.getFirstChild()?.replace(paragraphNode)
+			}
+		})
+	}
+
+	// hooks
+	override updated(changedProperties: any) {
+		// works like useEffect
+		// In order to not mutate object references, we need to clone the object
+		// When the messageBundle prop changes, we update the internal state
+		if (changedProperties.has("variant")) {
+		}
 	}
 
 	override render() {
-		return html`<div class="variant">
+		// console.log("hover", this.querySelector('[slot="hover-div"]'))
+		// console.log("focus", this.querySelector('[slot="focus-div"]'))
+		return html`<div
+			class="variant"
+			@mouseenter=${(e: any) => {
+				console.log("mouseover", e.target)
+				if (this.variant?.id && this._editor) {
+					this.setHoveredVariantId(this.variant?.id)
+					this._variantIsHovered = true
+					const contentEditableElement: HTMLElement | null | undefined = document?.querySelector(
+						'[slot="hover-div"]'
+					) as HTMLElement | null | undefined
+					console.log(this._editor.shadowRoot)
+					if (contentEditableElement) {
+						this.editor.setRootElement(contentEditableElement)
+					}
+				}
+			}}
+			@mouseleave=${() => {
+				console.log("mouseleave", this.variant?.id)
+				this.setHoveredVariantId(undefined)
+				this._variantIsHovered = false
+				this.editor.setRootElement(null)
+			}}
+		>
 			${this.variant && this._matches
 				? this._matches.map((match, index) => {
 						return html`
@@ -395,9 +470,12 @@ export default class InlangVariant extends LitElement {
 				this._delayedSave()
 			}}
 			></sl-input> -->
-			<inlang-pattern-editor class="pattern"
-				><div slot="editable-div" contenteditable></div
-			></inlang-pattern-editor>
+			<!-- <inlang-pattern-editor class="pattern"></inlang-pattern-editor> -->
+			<!-- <div ${ref(this.hackRef)} id="slot-hack"></div> -->
+			${this._variantIsHovered
+				? html`<slot name="hover-div"></slot>`
+				: html`<p>${this._pattern}</p>`}
+			<!-- <slot name="focus-div"></slot> -->
 			<div class="actions">
 				<div class="dynamic-actions hide-dynamic-actions">
 					${this._isVariantEmpty() && this._isVariantMachineTranslatable()

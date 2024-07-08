@@ -127,6 +127,9 @@ export default class InlangMessageBundle extends LitElement {
 	@state()
 	private _bundleSlots: Element[] = []
 
+	@state()
+	private _hoveredVariantId: string | undefined
+
 	//functions
 	private _triggerSave = () => {
 		if (this._messageBundle) {
@@ -184,6 +187,10 @@ export default class InlangMessageBundle extends LitElement {
 		return _refLanguageTag && this._messageBundle
 			? getInputs({ messageBundle: this._messageBundle })
 			: undefined
+	}
+
+	private _setHoveredVariantId = (variantId: string | undefined) => {
+		this._hoveredVariantId = variantId
 	}
 
 	// hooks
@@ -473,6 +480,7 @@ export default class InlangMessageBundle extends LitElement {
 										.variant=${variant}
 										.message=${message}
 										.inputs=${this._inputs()}
+										.setHoveredVariantId=${this._setHoveredVariantId}
 										.triggerSave=${this._triggerSave}
 										.triggerMessageBundleRefresh=${this._triggerRefresh}
 										.addMessage=${this._addMessage}
@@ -482,12 +490,19 @@ export default class InlangMessageBundle extends LitElement {
 										.installedLintRules=${this.installedLintRules}
 										.fixLint=${this._fixLint}
 										.machineTranslate=${this._machineTranslate}
-									></inlang-variant>`
+									>
+										${this._hoveredVariantId === variant.id
+											? html`<slot slot="hover-div" name="hover-div"></slot>`
+											: ``}
+										<!-- <slot slot="hover-div" name="hover-div"></slot> -->
+										<!-- <slot slot="focus-div" name="focus-div"></slot> -->
+									</inlang-variant>`
 							  })
 							: message?.selectors.length === 0 || !message
 							? html`<inlang-variant
 									.message=${message}
 									.inputs=${this._inputs()}
+									.setHoveredVariantId=${this._setHoveredVariantId}
 									.triggerSave=${this._triggerSave}
 									.addMessage=${this._addMessage}
 									.addInput=${this._addInput}
@@ -497,7 +512,8 @@ export default class InlangMessageBundle extends LitElement {
 									.installedLintRules=${this.installedLintRules}
 									.fixLint=${this._fixLint}
 									.machineTranslate=${this._machineTranslate}
-							  ></inlang-variant>`
+							  >
+							  </inlang-variant>`
 							: ``}
 						${message?.selectors && message.selectors.length > 0
 							? html`<p

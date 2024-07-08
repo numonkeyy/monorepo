@@ -10,6 +10,8 @@ import {
 import { mockSettings } from "./../mock/settings.ts"
 import { bundleWithoutSelectors } from "./../mock/messageBundle.ts"
 
+import "./inlang-pattern-editor.ts"
+
 const meta: Meta = {
 	component: "inlang-message-bundle",
 	title: "Public/inlang-message-bundle",
@@ -46,7 +48,11 @@ export const Simple: StoryObj = {
 			@change-message-bundle=${(data: any) =>
 				console.info("changeMessageBundle", data.detail.argument)}
 			@fix-lint=${(data: any) => console.info("fixLint", data.detail.argument)}
-		></inlang-message-bundle> `,
+		>
+			<div contenteditable slot="hover-div">hover</div>
+			<div slot="focus-div">focus</div>
+			<!-- <inlang-pattern-editor slot="editable-div"></inlang-pattern-editor> -->
+		</inlang-message-bundle> `,
 }
 
 export const Complex: StoryObj = {

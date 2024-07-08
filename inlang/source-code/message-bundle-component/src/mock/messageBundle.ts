@@ -4,15 +4,28 @@ export const bundleWithoutSelectors: MessageBundle = {
 	id: "message-bundle-id",
 	messages: [
 		{
-			id: "message-id",
+			id: "message-id-en",
 			locale: "en",
 			selectors: [],
 			declarations: [],
 			variants: [
 				{
-					id: "variant-id",
+					id: "variant-id-en-*",
 					match: [],
 					pattern: [{ type: "text", value: "{count} new messages" }],
+				},
+			],
+		},
+		{
+			id: "message-id-de",
+			locale: "de",
+			selectors: [],
+			declarations: [],
+			variants: [
+				{
+					id: "variant-id-de-*",
+					match: [],
+					pattern: [{ type: "text", value: "{count} neue Nachrichten" }],
 				},
 			],
 		},
