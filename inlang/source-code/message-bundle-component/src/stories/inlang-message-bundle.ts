@@ -212,6 +212,11 @@ export default class InlangMessageBundle extends LitElement {
 		this._bundleSlots = children.filter((child) =>
 			child.slot ? child.slot === "bundle-action" : false
 		)
+
+		// MESSAGES
+		// this.messageBundle?.messages[0] // my message
+		// this.messageBundle?.messages[0]?.mergeConflict // theirs message, only set if conflict
+		// this.messageBundle?.messages[0]?.head // last commited message
 	}
 
 	override render() {
