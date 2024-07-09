@@ -1,0 +1,235 @@
+import type { Declaration, LanguageTag, MessageBundle, ProjectSettings2 } from "@inlang/sdk/v2"
+import { LitElement, css, html } from "lit"
+import { customElement, property } from "lit/decorators.js"
+import getInputs from "../helper/crud/input/get.js"
+import deleteInput from "../helper/crud/input/delete.js"
+
+@customElement("inlang-bundle-header")
+export default class InlangBundleHeader extends LitElement {
+	static override styles = [
+		css`
+			div {
+				box-sizing: border-box;
+				font-size: 13px;
+			}
+			.header {
+				display: flex;
+				justify-content: space-between;
+				background-color: var(--sl-color-neutral-300);
+				padding: 0 12px;
+				min-height: 44px;
+			}
+			.header-left {
+				font-weight: 600;
+				display: flex;
+				align-items: center;
+				gap: 16px;
+				min-height: 44px;
+				color: var(--sl-input-color);
+			}
+			.header-right {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				min-height: 44px;
+			}
+			.separator {
+				height: 20px;
+				width: 1px;
+				background-color: var(--sl-input-border-color-hover);
+				opacity: 0.7;
+				border-radius: 1px;
+			}
+			.slotted-menu-wrapper {
+				display: flex;
+				flex-direction: column;
+			}
+			.inputs-wrapper {
+				display: flex;
+				align-items: center;
+				min-height: 44px;
+				gap: 8px;
+				color: var(--sl-input-color);
+			}
+			.inputs {
+				display: flex;
+				align-items: center;
+				min-height: 44px;
+				gap: 2px;
+			}
+			.input-tag::part(base) {
+				height: 28px;
+				font-weight: 500;
+				cursor: pointer;
+			}
+			.text-button::part(base) {
+				background-color: transparent;
+				border: 1px solid transparent;
+			}
+			.text-button::part(base):hover {
+				background-color: var(--sl-panel-border-color);
+				border: 1px solid transparent;
+				color: var(--sl-input-color-hover);
+			}
+			.alias-wrapper {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			.alias {
+				font-weight: 400;
+				color: var(--sl-input-placeholder-color);
+			}
+			.alias-counter {
+				height: 20px;
+				width: 24px;
+				font-weight: 500;
+				font-size: 11px;
+				color: var(--sl-input-color-hover);
+				padding: 4px;
+				border-radius: 4px;
+				background-color: var(--sl-input-background-color-hover);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			sl-button::part(base) {
+				background-color: var(--sl-input-background-color);
+				color: var(--sl-input-color);
+				border: 1px solid var(--sl-input-border-color);
+			}
+			sl-button::part(base):hover {
+				background-color: var(--sl-input-background-color-hover);
+				color: var(--sl-input-color-hover);
+				border: 1px solid var(--sl-input-border-color-hover);
+			}
+			sl-menu-item::part(label) {
+				font-size: 14px;
+				padding-left: 12px;
+			}
+			sl-menu-item::part(base) {
+				color: var(--sl-input-color);
+			}
+			sl-menu-item::part(base):hover {
+				background-color: var(--sl-input-background-color-hover);
+			}
+			sl-menu-item::part(checked-icon) {
+				display: none;
+			}
+			.selector:hover {
+				background-color: var(--sl-input-background-color-hover);
+			}
+		`,
+	]
+
+	@property({ type: Object })
+	bundle: MessageBundle | undefined
+
+	@property({ type: Object })
+	settings: ProjectSettings2 | undefined
+
+	@property()
+	addInput: (input: Declaration) => void = () => {}
+
+	@property()
+	triggerSave: () => void = () => {}
+
+	@property()
+	triggerRefresh: () => void = () => {}
+
+	private _refLocale = (): LanguageTag | undefined => {
+		return this.settings?.baseLocale
+	}
+
+	private _inputs = (): Declaration[] | undefined => {
+		const _refLanguageTag = this._refLocale()
+		return _refLanguageTag && this.bundle ? getInputs({ messageBundle: this.bundle }) : undefined
+	}
+
+	override render() {
+		return html`
+			<div class=${`header`} part="base">
+				<div class="header-left">
+					<span># ${this.bundle?.id}</span>
+					${this.bundle?.alias && Object.keys(this.bundle.alias).length > 0
+						? html` <div class="alias-wrapper">
+								<span class="alias">Alias: ${this.bundle?.alias?.default}</span>
+								${Object.keys(this.bundle.alias).length > 1
+									? html`<div class="alias-counter">
+											+${Object.keys(this.bundle.alias).length - 1}
+									  </div>`
+									: ``}
+						  </div>`
+						: ``}
+				</div>
+				<div class="header-right">
+					${this._inputs() && this._inputs()!.length > 0
+						? html`<div class="inputs-wrapper">
+								Inputs:
+								<div class="inputs">
+									${this._inputs()?.map(
+										(input) =>
+											html`<sl-dropdown
+												><sl-button slot="trigger" class="input-tag" variant="neutral" size="small"
+													>${input.name}</sl-button
+												><sl-menu>
+													<sl-menu-item
+														value="delete"
+														@click=${() => {
+															deleteInput({ messageBundle: this.bundle!, input })
+															// deleteSelector({ message, index })
+															this.triggerSave()
+															this.triggerRefresh()
+														}}
+														>Delete</sl-menu-item
+													>
+												</sl-menu>
+											</sl-dropdown>`
+									)}
+									<inlang-add-input .addInput=${this.addInput}>
+										<sl-tooltip content="Add input to message bundle">
+											<sl-button class="text-button" variant="neutral" size="small"
+												><svg
+													viewBox="0 0 24 24"
+													width="18"
+													height="18"
+													style="margin: 0 -2px"
+													slot="prefix"
+												>
+													<path
+														fill="currentColor"
+														d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"
+													></path></svg
+											></sl-button>
+										</sl-tooltip>
+									</inlang-add-input>
+								</div>
+						  </div>`
+						: html`<div class="inputs-wrapper">
+								<inlang-add-input .addInput=${this.addInput}>
+									<sl-tooltip content="Add input to message bundle">
+										<sl-button class="text-button" variant="text" size="small"
+											><svg
+												viewBox="0 0 24 24"
+												width="18"
+												height="18"
+												slot="prefix"
+												style="margin-right: -2px"
+											>
+												<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path></svg
+											>Input</sl-button
+										>
+									</sl-tooltip>
+								</inlang-add-input>
+						  </div>`}
+				</div>
+			</div>
+		`
+	}
+}
+
+declare global {
+	interface HTMLElementTagNameMap {
+		"inlang-bundle-header": InlangBundleHeader
+	}
+}
