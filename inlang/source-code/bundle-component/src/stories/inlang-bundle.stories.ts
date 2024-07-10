@@ -9,6 +9,7 @@ import {
 import { mockSettings } from "../mock/settings.ts"
 import { bundleWithoutSelectors } from "../mock/messageBundle.ts"
 import { pluralBundle } from "@inlang/sdk/v2-mocks"
+import { type MessageBundle } from "@inlang/sdk/v2"
 
 const meta: Meta = {
 	component: "inlang-bundle",

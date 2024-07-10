@@ -50,6 +50,7 @@ import createInput from "../helper/crud/input/create.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
 import patternToString from "../helper/crud/pattern/patternToString.js"
 import stringToPattern from "../helper/crud/pattern/stringToPattern.js"
+import sortAllVariants from "../helper/crud/variant/sortAll.js"
 
 @customElement("inlang-bundle")
 export default class InlangBundle extends LitElement {
@@ -143,6 +144,10 @@ export default class InlangBundle extends LitElement {
 		this.requestUpdate()
 	}
 
+	private _resetFreshlyAddedVariants = (newArray: string[]) => {
+		this._freshlyAddedVariants = newArray
+	}
+
 	private _fixLint = (lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) => {
 		this.dispatchOnFixLint(lintReport, fix)
 	}
@@ -173,6 +178,7 @@ export default class InlangBundle extends LitElement {
 		// When the messageBundle prop changes, we update the internal state
 		if (changedProperties.has("messageBundle")) {
 			this._bundle = structuredClone(this.bundle)
+			console.log("update")
 		}
 	}
 
@@ -189,6 +195,7 @@ export default class InlangBundle extends LitElement {
 
 	override render() {
 		return html`
+			${JSON.stringify(this.bundle?.lintReports?.reports)}
 			<inlang-bundle-root>
 				<inlang-bundle-header
 					slot="bundle-header"
@@ -212,11 +219,16 @@ export default class InlangBundle extends LitElement {
 							.installedLintRules=${this.installedLintRules}
 							.settings=${this.settings}
 							.inputs=${this._inputs()}
+							.freshlyAddedVariants=${this._freshlyAddedVariants}
+							.resetFreshlyAddedVariants=${this._resetFreshlyAddedVariants}
 							.triggerSave=${this._triggerSave}
-							.triggerRefresh=${this._triggerRefresh}
+							.triggerMessageBundleRefresh=${this._triggerRefresh}
 						>
 							${message && message.variants && message.variants.length > 0
-								? message?.variants.map((variant) => {
+								? sortAllVariants({
+										variants: message.variants,
+										ignoreVariantIds: this._freshlyAddedVariants,
+								  })?.map((variant) => {
 										return html`<inlang-variant
 											slot="variant"
 											.variant=${variant}
@@ -233,6 +245,7 @@ export default class InlangBundle extends LitElement {
 											.machineTranslate=${() => {}}
 										>
 											<inlang-pattern-editor
+												id=${variant.id}
 												slot="pattern-editor"
 												.pattern=${variant.pattern}
 												@change-pattern=${(event: { detail: { argument: Pattern } }) => {
@@ -258,7 +271,8 @@ export default class InlangBundle extends LitElement {
 												: ``}
 										</inlang-variant>`
 								  })
-								: html`
+								: message?.selectors.length === 0 || !message
+								? html`
 										<inlang-variant
 											slot="variant"
 											.message=${message}
@@ -274,11 +288,13 @@ export default class InlangBundle extends LitElement {
 											.machineTranslate=${() => {}}
 										>
 											<inlang-pattern-editor
+												id=${locale}
 												slot="pattern-editor"
 												.pattern=${stringToPattern({ text: "" })}
 												@change-pattern=${(event: { detail: { argument: Pattern } }) => {
 													const newPattern = event.detail.argument
-													if (message) {
+													console.log(message)
+													if (message || this.bundle?.messages.some((m) => m.locale === locale)) {
 														const newVariant = {
 															...createVariant({ match: ["*"] }),
 															pattern: newPattern,
@@ -288,15 +304,24 @@ export default class InlangBundle extends LitElement {
 															variant: newVariant,
 														})
 													} else {
-														this._addMessage(
-															createMessage({
-																locale,
-																text: patternToString({ pattern: newPattern }),
-															})
-														)
+														const newVariant = {
+															...createVariant({ match: ["*"] }),
+															pattern: newPattern,
+														}
+														const element = document.getElementById(locale)
+														if (element) {
+															element.id = newVariant.id
+														}
+														this._addMessage({
+															...createMessage({ locale: locale, text: "test" }),
+															selectors: [],
+															declarations: [],
+															locale: locale,
+															variants: [newVariant],
+														})
 													}
-
 													this._triggerSave()
+													this.requestUpdate()
 												}}
 											></inlang-pattern-editor>
 											<inlang-variant-action
@@ -308,7 +333,8 @@ export default class InlangBundle extends LitElement {
 												}}
 											></inlang-variant-action>
 										</inlang-variant>
-								  `}
+								  `
+								: ``}
 						</inlang-message>`
 					})}
 				</div>
