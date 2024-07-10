@@ -149,6 +149,9 @@ export const MessageWithConflictMarkers = Type.Composite([
 		// Thoughts: we should solve local conflicts by using the disc state - this is more aligned with autosave behaviour in editors?
 		// localConflict: Type.Optional(Message),
 		mergeConflict: Type.Optional(Message),
+		headState: Type.Optional(Message),
+		// TODO restrict to commited and uncommited
+		changeState: Type.String(),
 	}),
 ])
 

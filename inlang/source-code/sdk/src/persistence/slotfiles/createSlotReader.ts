@@ -251,6 +251,7 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 					fsSlotFileState: undefined,
 					// TODO make sure we reload load the slotfile states for new files comming from git
 					headSlotfileState: undefined,
+					headHash: undefined,
 					stateFlag: "loaded" as const,
 					memorySlotFileState: freshSlotfile,
 					changedRecords: [],
@@ -485,7 +486,7 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 		for (const statusEntry of statusList) {
 			// TODO go through all slot files and check the head oid - if it differs - update slotfile
 			const statusEntryDetails = (statusEntry as any)[2] as { headOid: string | undefined }
-			const statusEntryFileName = statusEntry[0]
+			const statusEntryFileName = statusEntry[0].split("/").pop()!.split(".")[0]!
 			const currentState = fileNamesToSlotfileStates.get(statusEntryFileName)
 			if (!currentState) {
 				continue
@@ -509,24 +510,34 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 		for (const statusEntry of statusList) {
 			// TODO go through all slot files and check the head oid - if it differs - update slotfile
 			const statusEntryDetails = (statusEntry as any)[2] as { headOid: string | undefined }
-			const statusEntryFileName = statusEntry[0]
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			const statusEntryFileName = statusEntry[0].split("/").pop()!.split(".")[0]!
 			const currentState = fileNamesToSlotfileStates.get(statusEntryFileName)
 			if (!currentState) {
 				continue
 			}
 
-			if (
-				currentState.memorySlotFileState.contentHash === statusEntryDetails.headOid &&
-				currentState.headSlotfileState
-			) {
-				currentState.headSlotfileState = undefined
-				// TODO trigger change event
-				for (const record of currentState.memorySlotFileState.recordSlots) {
-					if (record?.headState) {
-						changedIds.push(record.data[idProperty])
-						updateSlotEntryStates(record.data[idProperty], record.index)
+			if (statusEntryDetails.headOid) {
+				// file is present in head
+				if (
+					currentState.memorySlotFileState.contentHash === statusEntryDetails.headOid &&
+					(currentState.headHash === currentState.headHash || currentState.headSlotfileState)
+				) {
+					// it was not marked as commited before
+					currentState.headSlotfileState = undefined
+					currentState.headHash = statusEntryDetails.headOid
+					for (const record of currentState.memorySlotFileState.recordSlots) {
+						if (
+							record?.headState ||
+							(record?.gitState === "uncommited" && currentState.headHash === currentState.headHash)
+						) {
+							changedIds.push(record.data[idProperty])
+							updateSlotEntryStates(record.data[idProperty], record.index)
+						}
 					}
 				}
+			} else {
+				// no op
 			}
 		}
 
@@ -607,6 +618,7 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 			  })
 			: undefined
 		let gitState: "uncommited" | "commited" = "uncommited"
+
 		if (headState) {
 			if (currentState.hash === recordSlotfile.headSlotfileState?.recordSlots[slotIndex]?.hash) {
 				// if the hash is the same we don't pass the head state but flag it as commited
@@ -615,6 +627,11 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 			} else {
 				gitState = "uncommited"
 			}
+		} else if (
+			recordSlotfile.headHash &&
+			(!recordSlotfile.changedRecords || recordSlotfile.changedRecords.length === 0)
+		) {
+			gitState = "commited"
 		}
 
 		const currentRecordState: SlotEntry<DocType> = {

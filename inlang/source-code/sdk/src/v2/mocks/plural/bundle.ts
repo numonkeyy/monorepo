@@ -14,6 +14,7 @@ export const pluralBundle: MessageBundle = {
 		{
 			id: "mock_message_id_de",
 			locale: "de",
+			changeState: "commited",
 			declarations: [
 				{
 					type: "input",
@@ -106,6 +107,7 @@ export const pluralBundle: MessageBundle = {
 		{
 			id: "mock_message_id_en",
 			locale: "en",
+			changeState: "uncommited",
 			declarations: [
 				{
 					type: "input",

@@ -80,52 +80,33 @@ export const openProject = async (
 		// await inlangProject.internal.messageStorage.loadSlotFilesFromWorkingCopy(true)
 	}
 
-	const ongoingCommit = undefined as any
+	let ongoingCommit = undefined as any
 
 	const commitChanges = async () => {
 		// TODO use lix repo instead
-		// if (ongoingCommit) {
-		// 	await ongoingCommit.then(commitChanges)
-		// 	return
-		// }
-		// const awaitable = createAwaitable()
-		// ongoingCommit = awaitable[0]
-		// const done = awaitable[1]
-		// const FILE = 0,
-		// 	WORKDIR = 2,
-		// 	STAGE = 3
-		// const filenames = (
-		// 	await statusMatrix({
-		// 		dir: dir,
-		// 		fs: fs,
-		// 	})
-		// )
-		// 	.filter((row) => row[WORKDIR] !== row[STAGE])
-		// 	.map((row) => row[FILE])
-		// if (filenames.length == 0) {
-		// 	return
-		// }
-		// await add({
-		// 	dir: dir,
-		// 	fs: fs,
-		// 	filepath: filenames,
-		// })
-		// try {
-		// 	await commit({
-		// 		dir: dir,
-		// 		fs: fs,
-		// 		message: "db commit",
-		// 		author: {
-		// 			email: "test@test.te",
-		// 			name: "jojo",
-		// 		},
-		// 	})
-		// } catch (e) {
-		// 	// eslint-disable-next-line no-console
-		// 	console.log(e)
-		// }
-		// ongoingCommit = undefined
-		// done()
+		if (ongoingCommit) {
+			await ongoingCommit.then(commitChanges)
+			return
+		}
+		const awaitable = createAwaitable()
+		ongoingCommit = awaitable[0]
+		const done = awaitable[1]
+
+		const filenames = (await repo.statusList({ includeStatus: ["materialized"] }))
+			.filter(([name, fileState]) => fileState !== "unmodified")
+			.map(([name]) => name)
+		if (filenames.length == 0) {
+			return
+		}
+
+		try {
+			await repo.commit({ message: "test commit", include: filenames })
+		} catch (e) {
+			// eslint-disable-next-line no-console
+			console.log(e)
+		}
+		ongoingCommit = undefined
+		done()
 	}
 
 	return {

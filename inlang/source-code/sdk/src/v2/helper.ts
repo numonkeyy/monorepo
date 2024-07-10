@@ -1,6 +1,13 @@
 import { randomHumanId } from "../storage/human-id/human-readable-id.js"
 import { randomId } from "./randomId.js"
-import { LanguageTag, MessageBundle, Message, Text, Variant } from "./types/index.js"
+import {
+	LanguageTag,
+	MessageBundle,
+	Message,
+	Text,
+	Variant,
+	MessageWithConflictMarkers,
+} from "./types/index.js"
 
 /**
  * create v2 MessageBundle with a random human ID
@@ -13,7 +20,7 @@ import { LanguageTag, MessageBundle, Message, Text, Variant } from "./types/inde
  */
 export function createMessageBundle(args: {
 	id?: string
-	messages: Message[]
+	messages: MessageWithConflictMarkers[]
 	alias?: MessageBundle["alias"]
 }): MessageBundle {
 	return {
@@ -31,11 +38,12 @@ export function createMessage(args: {
 	locale: LanguageTag
 	text: string
 	match?: Array<string>
-}): Message {
+}): MessageWithConflictMarkers {
 	return {
 		id: randomId(),
 		locale: args.locale,
 		declarations: [],
+		changeState: "uncommited",
 		selectors: [],
 		variants: [createVariant({ text: args.text, match: args.match })],
 	}

@@ -104,6 +104,7 @@ export async function parseSlotFile<DocType extends HasId>(slotFileContent: stri
 			// data hash and slotEntry hash are the same in case there is no conflict
 			recordOnSlot.slotEntryHash = recordOnSlot.hash
 			recordOnSlot.index = slotIndex
+			recordOnSlot.gitState = "uncommited"
 			//hashPromises.push(addIdHash(recordOnSlot, idHashFn))
 			slotfileEntries.push(recordOnSlot)
 		}

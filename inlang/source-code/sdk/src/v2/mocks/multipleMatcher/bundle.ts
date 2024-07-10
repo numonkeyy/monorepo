@@ -10,6 +10,7 @@ export const multipleMatcherBundle: MessageBundle = {
 			id: "mock_message_id_en",
 			locale: "en",
 			declarations: [],
+			changeState: 'commited',
 			selectors: [
 				{
 					type: "expression",
@@ -86,6 +87,7 @@ export const multipleMatcherBundle: MessageBundle = {
 			id: "mock_message_id_de",
 			locale: "de",
 			declarations: [],
+			changeState: 'commited',
 			selectors: [
 				{
 					type: "expression",

@@ -70,8 +70,8 @@ function compareMessages(
 	return updates
 }
 
-function recordToMessage(message: SlotEntry<MessageRecord>) {
-	return {
+function recordToMessage(message: SlotEntry<MessageRecord>): MessageWithConflictMarkers {
+	const sdkMessage = {
 		...message.data,
 		mergeConflict: message.mergeConflict
 			? {
@@ -79,8 +79,17 @@ function recordToMessage(message: SlotEntry<MessageRecord>) {
 					versionHash: message.mergeConflict.hash,
 			  }
 			: undefined,
+		changeState: message.gitState,
+		headState: message.headState
+			? {
+					...message.headState.data,
+					versionHash: message.headState.hash,
+			  }
+			: undefined,
 		versionHash: message.slotEntryHash,
 	}
+	debug(sdkMessage)
+	return sdkMessage
 }
 
 function messageBundleToMessageBundleRecord(messageBundle: MessageBundle) {

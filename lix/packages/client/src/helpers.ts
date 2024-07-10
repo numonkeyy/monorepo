@@ -176,7 +176,7 @@ export async function hash(inputStr: string) {
 	if (typeof crypto === "undefined" && typeof process !== "undefined" && process?.versions?.node) {
 		// Use string concatenation to force esbuild to treat module as external and not bundle it
 		const modName = "crypto"
-		usedCrypto = globalThis?.crypto || (await import(`node:${modName}`))
+		usedCrypto = globalThis?.crypto || (await import(/* @vite-ignore */ `node:${modName}`))
 	} else if (typeof crypto !== "undefined") {
 		usedCrypto = crypto
 	}

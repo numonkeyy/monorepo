@@ -86,63 +86,66 @@ function toV1Expression(expression: V2.Expression): V1.Expression {
 export function fromV1Message(v1Message: V1.Message): V2.MessageBundle {
 	const languages = dedup(v1Message.variants.map((variant) => variant.languageTag))
 
-	const messages: V2.Message[] = languages.map((language): V2.Message => {
-		//All variants that will be part of this message
-		const v1Variants = v1Message.variants.filter((variant) => variant.languageTag === language)
+	const messages: V2.MessageWithConflictMarkers[] = languages.map(
+		(language): V2.MessageWithConflictMarkers => {
+			//All variants that will be part of this message
+			const v1Variants = v1Message.variants.filter((variant) => variant.languageTag === language)
 
-		//find all selector names
-		const selectorNames = new Set<string>()
-		for (const v1Selector of v1Message.selectors) {
-			selectorNames.add(v1Selector.name)
-		}
-		const selectors: V2.Expression[] = [...selectorNames].map((name) => ({
-			type: "expression",
-			annotation: undefined,
-			arg: {
-				type: "variable",
-				name: name,
-			},
-		}))
-
-		//The set of variables that need to be defined - Certainly includes the selectors
-		const variableNames = new Set<string>(selectorNames)
-		const variants: V2.Variant[] = []
-		for (const v1Variant of v1Variants) {
-			for (const element of v1Variant.pattern) {
-				if (element.type === "VariableReference") {
-					variableNames.add(element.name)
-				}
+			//find all selector names
+			const selectorNames = new Set<string>()
+			for (const v1Selector of v1Message.selectors) {
+				selectorNames.add(v1Selector.name)
 			}
-
-			variants.push({
-				id: randomId(),
-				match: v1Variant.match,
-				pattern: fromV1Pattern(v1Variant.pattern),
-			})
-		}
-
-		//Create an input declaration for each variable and selector we need
-		const declarations: V2.Declaration[] = [...variableNames].map((name) => ({
-			type: "input",
-			name,
-			value: {
+			const selectors: V2.Expression[] = [...selectorNames].map((name) => ({
 				type: "expression",
 				annotation: undefined,
 				arg: {
 					type: "variable",
-					name,
+					name: name,
 				},
-			},
-		}))
+			}))
 
-		return {
-			id: randomId(),
-			locale: language,
-			declarations,
-			selectors,
-			variants,
+			//The set of variables that need to be defined - Certainly includes the selectors
+			const variableNames = new Set<string>(selectorNames)
+			const variants: V2.Variant[] = []
+			for (const v1Variant of v1Variants) {
+				for (const element of v1Variant.pattern) {
+					if (element.type === "VariableReference") {
+						variableNames.add(element.name)
+					}
+				}
+
+				variants.push({
+					id: randomId(),
+					match: v1Variant.match,
+					pattern: fromV1Pattern(v1Variant.pattern),
+				})
+			}
+
+			//Create an input declaration for each variable and selector we need
+			const declarations: V2.Declaration[] = [...variableNames].map((name) => ({
+				type: "input",
+				name,
+				value: {
+					type: "expression",
+					annotation: undefined,
+					arg: {
+						type: "variable",
+						name,
+					},
+				},
+			}))
+
+			return {
+				id: randomId(),
+				locale: language,
+				declarations,
+				selectors,
+				variants,
+				changeState: "uncommited",
+			}
 		}
-	})
+	)
 
 	return {
 		id: v1Message.id,

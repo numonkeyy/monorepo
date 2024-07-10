@@ -29,6 +29,7 @@ describe("createMessageBundle", () => {
 					locale: "en",
 					declarations: [],
 					selectors: [],
+					changeState: 'commited',
 					variants: [
 						{
 							id: expect.any(String),
@@ -64,6 +65,7 @@ describe("createMessageBundle", () => {
 					locale: "en",
 					declarations: [],
 					selectors: [],
+					changeState: 'commited',
 					variants: [
 						{
 							id: expect.any(String),
@@ -82,6 +84,7 @@ describe("createMessageBundle", () => {
 					locale: "de",
 					declarations: [],
 					selectors: [],
+					changeState: 'commited',
 					variants: [
 						{
 							id: expect.any(String),

@@ -222,8 +222,13 @@ export async function loadProject(args: {
 	const updateMessageHeadState = async (newHeadCommit: string) => {
 		if (currentHeadCommit !== newHeadCommit) {
 			const statusList = await args.repo.statusList({
+				includeStatus: ["unmodified"],
 				filter: (filePath) => {
-					return ("." + messagesPath).startsWith(filePath)
+					const filterResult =
+						filePath === "." ||
+						messagesPath.startsWith("/" + filePath) ||
+						("/" + filePath).startsWith(messagesPath)
+					return filterResult
 				},
 			})
 			messageStorage._internal.updateSlotFileHeadStates(statusList as any, args.repo.readBlob)

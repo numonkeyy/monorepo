@@ -16,6 +16,7 @@ type MessageBundleListProps = {
 
 export function MessageBundleList({ project }: MessageBundleListProps) {
 	const [bundles, setBundles] = useState([] as RxDocument<MessageBundle>[])
+	const [uncommitedMessagesCount, setUncommitedMessagesCount] = useState(0)
 	const [currentListBundles, setCrurrentListBundles] = useState([] as RxDocument<MessageBundle>[])
 	const [lintReports, setLintReports] = useState([] as LintReport[])
 	const [projectSettings, setProjectSettings] = useState<ProjectSettings2 | undefined>(undefined)
@@ -24,6 +25,37 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 	const [activeLocales, setActiveLocales] = useState<LanguageTag[]>([])
 
 	const [textSearch, setTextSearch] = useState("")
+
+	useEffect(() => {
+		let querySubscription = undefined as any
+		const query = project.messageBundleCollection.find({
+			selector: {
+				messages: {
+					$elemMatch: {
+						changeState: "comitted",
+					},
+				},
+			},
+		}).$
+
+		querySubscription = query.subscribe((bundles: any) => {
+			console.log("querySubscription")
+			console.log(bundles)
+			let uncommitedCount = 0
+			for (const bundle of bundles) {
+				for (const message of bundle.messages) {
+					if (message.changeState === "uncommited") {
+						uncommitedCount += 1
+					}
+				}
+			}
+			setUncommitedMessagesCount(uncommitedCount)
+		})
+
+		return () => {
+			querySubscription.unsubscribe()
+		}
+	}, [])
 
 	useEffect(() => {
 		let query = undefined as any
@@ -80,6 +112,11 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 		})
 
 		querySubscription = query.subscribe((bundles: any) => {
+			console.log("bundles ! ")
+
+			for (const bundle of bundles) {
+				console.log(bundle)
+			}
 			queryOnceSubscription?.unsubscribe()
 			querySubscription?.unsubscribe()
 			setBundles(bundles)
@@ -173,6 +210,7 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 						project={project}
 						projectSettings={projectSettings}
 						bundles={bundles}
+						uncommitedMessages={uncommitedMessagesCount}
 						reports={lintReports}
 						activeLanguages={activeLocales}
 						onActiveLanguagesChange={(actives) => setActiveLocales(actives)}

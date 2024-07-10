@@ -12,6 +12,7 @@ export type SlotFileStates<DocType extends HasId> = {
 	// // the state of the head commit state of the current branch
 	// headState: ( SlotEntry<DocType> | null )[] | undefined
 	stateFlag: "loaded" | "loadrequested" | "loading"
+	headHash: string | undefined
 	headSlotfileState: SlotFile<DocType> | undefined
 	fsSlotFileState: SlotFile<DocType> | undefined
 	memorySlotFileState: SlotFile<DocType>

@@ -92,6 +92,7 @@ export function MainViewHost() {
 					// 	lazyClone: true,
 					// 	lixCommit: true,
 					// }
+					author: { name: "me", email: "user@oral.com" },
 				}
 			)
 

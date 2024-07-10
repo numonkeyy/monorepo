@@ -17,6 +17,7 @@ type MessageBundleListProps = {
 	project: InlangProject2
 	projectSettings: ProjectSettings2
 	bundles: RxDocument<MessageBundle>[]
+	uncommitedMessages: number
 	reports: LintReport[]
 	activeLanguages: LanguageTag[]
 	onActiveLanguagesChange: (locales: LanguageTag[]) => void
@@ -26,6 +27,7 @@ export function MessageBundleListSummary({
 	project,
 	projectSettings,
 	bundles,
+	uncommitedMessages,
 	reports,
 	activeLanguages,
 	onActiveLanguagesChange,
@@ -100,6 +102,7 @@ export function MessageBundleListSummary({
 				})}
 			</div>
 			<div className="messageCount">Message Bundles: {bundles.length}</div>
+			<div className="messageCount">Uncommited Messages: {uncommitedMessages}</div>
 			<div className="lintsReportsContainer">
 				{installedLints.map((installedLint) => {
 					const lintReports = mappedLintReports[installedLint.id]

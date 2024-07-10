@@ -339,6 +339,7 @@ export default async function createSlotStorageWriter<DocType extends HasId>({
 			slotFileReader._internal.fileNamesToSlotfileStates.set(fileName, {
 				slotFileName: fileName,
 				stateFlag: "loadrequested",
+				headHash: undefined,
 				headSlotfileState: undefined,
 				fsSlotFileState: undefined,
 				memorySlotFileState: transientSlotFile,
