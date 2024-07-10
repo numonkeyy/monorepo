@@ -10,9 +10,12 @@ import { publicEnv } from "@inlang/env-variables"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 import { IFrame } from "./iFrame.js"
 import { openRepository } from "@lix-js/client"
+import { ProjectView } from "./projectView.js"
 const fs = createNodeishMemoryFs()
 
 export function MainViewHost() {
+	;(window as any).fs = fs
+
 	const [githubToken, setGithubToken] = useState<string>(localStorage.ghToken)
 
 	const onGithubTokenChange = (el: any) => {
@@ -208,17 +211,17 @@ export function MainViewHost() {
 					</button>
 					<div className="container">
 						<div className="left">
+							<ProjectView
+								repoUrl={new URLSearchParams(window.location.search).get("repo")!}
+								projectPath={inlangProjectPath}
+							/>
+						</div>
+						{/* <div className="right">
 							<IFrame
 								src={"/?inlangProjectPath=" + inlangProjectPath + "&repo=" + repoUrl}
 								withFs={fs}
 							/>
-						</div>
-						<div className="right">
-							<IFrame
-								src={"/?inlangProjectPath=" + inlangProjectPath + "&repo=" + repoUrl}
-								withFs={fs}
-							/>
-						</div>
+						</div> */}
 					</div>
 				</>
 			)}

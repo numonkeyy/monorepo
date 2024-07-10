@@ -213,7 +213,7 @@ export async function loadProject(args: {
 
 	// Watching for changes in current head and update the message states
 
-	const branch = "main" // await args.repo.getCurrentBranch()
+	const branch = await args.repo.getCurrentBranch()
 
 	const currentBranchCommitPath = ".git/refs/heads/" + branch?.toLowerCase()
 

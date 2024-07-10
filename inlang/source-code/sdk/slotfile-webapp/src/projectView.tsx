@@ -10,28 +10,34 @@ import { openRepository } from "@lix-js/client"
 import { publicEnv } from "@inlang/env-variables"
 
 export const isInIframe = window.self !== window.top
-const fs = getFs(Comlink.windowEndpoint(window.parent))
+const fs = isInIframe ? getFs(Comlink.windowEndpoint(window.parent)) : window.fs
 
-export function MainViewIframe({ projectPath, repoUrl }: { projectPath: string; repoUrl: string }) {
+export function ProjectView({ projectPath, repoUrl }: { projectPath: string; repoUrl: string }) {
 	const [currentProject, setCurrentProject] = useState<InlangProject2 | undefined>(undefined)
 
 	useEffect(() => {
 		;(async () => {
 			const [host, owner, repository] = repoUrl.split("/")
-			const repo = await openRepository(
-				`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${host}/${owner}/${repository}`,
-				{
-					
-					nodeishFs: fs as any, // TODO SDK2 check,
-					// branch,
-					// debugTime: true,
-					// for testing purposes. if commented out, will use whitelist to enable for certain repos
-					// experimentalFeatures: {
-					// 	lazyClone: true,
-					// 	lixCommit: true,
-					// }
-				}
-			)
+			debugger
+			let repo: Repository
+			if ((window as any).repo) {
+				repo = (window as any).repo
+			} else {
+				repo = await openRepository(
+					`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${host}/${owner}/${repository}`,
+					{
+						nodeishFs: isInIframe ? fs : (window.fs as any), // TODO SDK2 check,
+						// branch,
+						// debugTime: true,
+						// for testing purposes. if commented out, will use whitelist to enable for certain repos
+						// experimentalFeatures: {
+						// 	lazyClone: true,
+						// 	lixCommit: true,
+						// }
+					}
+				)
+			}
+
 			const project = await loadProject({
 				projectPath,
 				repo: repo,

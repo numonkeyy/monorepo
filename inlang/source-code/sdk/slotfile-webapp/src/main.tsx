@@ -14,9 +14,9 @@ const root = createRoot(domNode!)
 const isInIframe = window.self !== window.top
 
 if (isInIframe) {
-	const { MainViewIframe } = await import("./mainViewIframe.js")
+	const { ProjectView: ProjectView } = await import("./projectView.js")
 	root.render(
-		<MainViewIframe
+		<ProjectView
 			repoUrl={new URLSearchParams(window.location.search).get("repo")!}
 			projectPath={new URLSearchParams(window.location.search).get("inlangProjectPath")!}
 		/>
