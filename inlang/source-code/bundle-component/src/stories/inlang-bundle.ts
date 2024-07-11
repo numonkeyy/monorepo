@@ -11,6 +11,7 @@ import {
 	type Declaration,
 	createVariant,
 	createMessage,
+	type Variant,
 } from "@inlang/sdk/v2"
 import type { InstalledMessageLintRule } from "@inlang/sdk"
 
@@ -169,8 +170,50 @@ export default class InlangBundle extends LitElement {
 		return _refLanguageTag && this._bundle ? getInputs({ messageBundle: this._bundle }) : undefined
 	}
 
-	private _getFilledMessage = (message: Message): Message | undefined => {
-		return message
+	// fill message with empty message if message is undefined to fix layout shift (will not be committed)
+	private _fillMessage = (message: Message | undefined, locale: LanguageTag): Message => {
+		if (message) {
+			return message
+		} else {
+			return createMessage({ locale: locale, text: "" })
+		}
+	}
+
+	private _handlePatternChange = (
+		message: Message | undefined,
+		variant: Variant,
+		newPattern: Pattern,
+		locale: LanguageTag
+	) => {
+		if (message) {
+			const newVariant = { ...variant, pattern: newPattern }
+			upsertVariant({
+				message: message!,
+				variant: newVariant,
+			})
+		} else {
+			const newVariant = {
+				...createVariant({ match: [] }),
+				pattern: newPattern,
+			}
+
+			if (message || this.bundle?.messages.some((m) => m.locale === locale)) {
+				upsertVariant({
+					message: message!,
+					variant: newVariant,
+				})
+			} else {
+				this._addMessage({
+					...createMessage({ locale: locale, text: "test" }),
+					selectors: [],
+					declarations: [],
+					locale: locale,
+					variants: [newVariant],
+				})
+			}
+		}
+		this._triggerSave()
+		this.requestUpdate()
 	}
 
 	// hooks
@@ -228,113 +271,44 @@ export default class InlangBundle extends LitElement {
 							.triggerSave=${this._triggerSave}
 							.triggerMessageBundleRefresh=${this._triggerRefresh}
 						>
-							${message && message.variants && message.variants.length > 0
-								? sortAllVariants({
-										variants: message.variants,
-										ignoreVariantIds: this._freshlyAddedVariants,
-								  })?.map((variant) => {
-										return html`<inlang-variant
-											slot="variant"
-											.variant=${variant}
-											.message=${message}
-											.inputs=${this._inputs()}
-											.triggerSave=${this._triggerSave}
-											.triggerMessageBundleRefresh=${this._triggerRefresh}
-											.addMessage=${this._addMessage}
-											.addInput=${this._addInput}
-											.locale=${locale}
-											.lintReports=${lintReports}
-											.installedLintRules=${this.installedLintRules}
-											.fixLint=${() => {}}
-											.machineTranslate=${() => {}}
-										>
-											<inlang-pattern-editor
-												id=${variant.id}
-												slot="pattern-editor"
-												.pattern=${variant.pattern}
-												@change-pattern=${(event: { detail: { argument: Pattern } }) => {
-													const newPattern = event.detail.argument
-													const newVariant = { ...variant, pattern: newPattern }
-													upsertVariant({
-														message: message!,
-														variant: newVariant,
-													})
-													this._triggerSave()
-													this.requestUpdate()
-												}}
-											></inlang-pattern-editor>
-											${patternToString({ pattern: variant.pattern }) === ""
-												? html`<inlang-variant-action
-														slot="variant-action"
-														actionTitle="Machine Translate"
-														tooltip="Machine Translate"
-														@click=${() => {
-															this.dispatchOnMachineTranslate(message?.id, variant.id)
-														}}
-												  ></inlang-variant-action>`
-												: ``}
-										</inlang-variant>`
-								  })
-								: message?.selectors.length === 0 || !message
-								? html`
-										<inlang-variant
-											slot="variant"
-											.message=${message}
-											.inputs=${this._inputs()}
-											.triggerSave=${this._triggerSave}
-											.triggerMessageBundleRefresh=${this._triggerRefresh}
-											.addMessage=${this._addMessage}
-											.addInput=${this._addInput}
-											.locale=${locale}
-											.lintReports=${lintReports}
-											.installedLintRules=${this.installedLintRules}
-											.fixLint=${() => {}}
-											.machineTranslate=${() => {}}
-										>
-											<inlang-pattern-editor
-												slot="pattern-editor"
-												.pattern=${stringToPattern({ text: "" })}
-												@change-pattern=${(event: { detail: { argument: Pattern } }) => {
-													const newPattern = event.detail.argument
-													const newVariant = {
-														...createVariant({ match: [] }),
-														pattern: newPattern,
-													}
-
-													if (message || this.bundle?.messages.some((m) => m.locale === locale)) {
-														upsertVariant({
-															message: message!,
-															variant: newVariant,
-														})
-													} else {
-														this._addMessage({
-															...createMessage({ locale: locale, text: "test" }),
-															selectors: [],
-															declarations: [],
-															locale: locale,
-															variants: [newVariant],
-														})
-													}
-													this._triggerSave()
-													this.requestUpdate()
-													setTimeout(() => {
-														const editor = document.getElementById(newVariant.id)
-														console.log(editor)
-														editor?.focus()
-													}, 100)
-												}}
-											></inlang-pattern-editor>
-											<inlang-variant-action
+							${sortAllVariants({
+								variants: this._fillMessage(message, locale).variants,
+								ignoreVariantIds: this._freshlyAddedVariants,
+							})?.map((variant) => {
+								return html`<inlang-variant
+									slot="variant"
+									.variant=${variant}
+									.message=${message}
+									.inputs=${this._inputs()}
+									.triggerSave=${this._triggerSave}
+									.triggerMessageBundleRefresh=${this._triggerRefresh}
+									.addMessage=${this._addMessage}
+									.addInput=${this._addInput}
+									.locale=${locale}
+									.lintReports=${lintReports}
+									.installedLintRules=${this.installedLintRules}
+									.fixLint=${() => {}}
+									.machineTranslate=${() => {}}
+								>
+									<inlang-pattern-editor
+										id=${variant.id}
+										slot="pattern-editor"
+										.pattern=${variant.pattern}
+										@change-pattern=${(event: { detail: { argument: Pattern } }) =>
+											this._handlePatternChange(message, variant, event.detail.argument, locale)}
+									></inlang-pattern-editor>
+									${patternToString({ pattern: variant.pattern }) === ""
+										? html`<inlang-variant-action
 												slot="variant-action"
 												actionTitle="Machine Translate"
 												tooltip="Machine Translate"
 												@click=${() => {
-													this.dispatchOnMachineTranslate(message?.id)
+													this.dispatchOnMachineTranslate(message?.id, variant.id)
 												}}
-											></inlang-variant-action>
-										</inlang-variant>
-								  `
-								: ``}
+										  ></inlang-variant-action>`
+										: ``}
+								</inlang-variant>`
+							})}
 						</inlang-message>`
 					})}
 				</div>

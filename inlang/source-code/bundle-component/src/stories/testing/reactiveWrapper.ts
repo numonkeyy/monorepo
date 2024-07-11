@@ -46,14 +46,14 @@ export default class InlangReactiveWrapper extends LitElement {
 			}
 		}, 1900)
 
-		setInterval(() => {
-			if (this._lintReports) {
-				this._lintReports = {
-					...this._lintReports,
-					reports: [],
-				}
-			}
-		}, 3100)
+		// setInterval(() => {
+		// 	if (this._lintReports) {
+		// 		this._lintReports = {
+		// 			...this._lintReports,
+		// 			reports: [],
+		// 		}
+		// 	}
+		// }, 3100)
 	}
 
 	override render() {

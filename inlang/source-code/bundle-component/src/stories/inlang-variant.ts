@@ -241,9 +241,11 @@ export default class InlangVariant extends LitElement {
 
 	private get _matches(): string[] | undefined {
 		// @ts-ignore - just for prototyping
-		return this._selectors.map((_, index) => {
-			return this.variant && this.variant.match[index]
-		})
+		return this._selectors
+			? this._selectors.map((_, index) => {
+					return this.variant && this.variant.match[index]
+			  })
+			: undefined
 	}
 
 	//hooks
