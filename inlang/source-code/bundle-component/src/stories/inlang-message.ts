@@ -176,6 +176,12 @@ export default class InlangMessage extends LitElement {
 	freshlyAddedVariants: string[] = []
 
 	@property()
+	addInput: (name: string) => void = () => {}
+
+	@property()
+	addMessage: (message: Message) => void = () => {}
+
+	@property()
 	resetFreshlyAddedVariants: (newArray: string[]) => void = () => {}
 
 	@property()
@@ -251,8 +257,9 @@ export default class InlangMessage extends LitElement {
 										.message=${this.message}
 										.locale=${this.locale}
 										.triggerMessageBundleRefresh=${this.triggerMessageBundleRefresh}
-										.addMessage=${() => {}}
-										.addInput=${() => {}}
+										.triggerSave=${this.triggerSave}
+										.addMessage=${this.addMessage}
+										.addInput=${this.addInput}
 									>
 										<sl-tooltip content="Add Selector to message"
 											><sl-button size="small" class="add-selector">

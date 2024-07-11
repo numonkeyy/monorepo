@@ -148,7 +148,13 @@ export default class InlangSelectorConfigurator extends LitElement {
 	triggerMessageBundleRefresh: () => void = () => {}
 
 	@property()
+	triggerSave: () => void = () => {}
+
+	@property()
 	addMessage: (newMessage: Message) => void = () => {}
+
+	@property()
+	addInput: (inputName: string) => void = () => {}
 
 	@state()
 	private _input: string | undefined
@@ -164,9 +170,6 @@ export default class InlangSelectorConfigurator extends LitElement {
 
 	@state()
 	private _newInputSting: string | undefined
-
-	@property()
-	addInput: (inputName: string) => void = () => {}
 
 	private _getPluralCategories = (): string[] | undefined => {
 		return this.locale
@@ -242,6 +245,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 			}
 
 			this.triggerMessageBundleRefresh()
+			this.triggerSave()
 		}
 	}
 
@@ -292,6 +296,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 	}
 
 	override render() {
+		console.log("props", this.inputs, this.message, this.locale)
 		return html`
 			<sl-dropdown
 				distance="-4"

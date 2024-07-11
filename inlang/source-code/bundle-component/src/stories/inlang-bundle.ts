@@ -130,6 +130,7 @@ export default class InlangBundle extends LitElement {
 	}
 
 	private _addInput = (name: string) => {
+		console.log("Test")
 		if (this._bundle) {
 			createInput({ messageBundle: this._bundle, inputName: name })
 		}
@@ -168,6 +169,10 @@ export default class InlangBundle extends LitElement {
 		return _refLanguageTag && this._bundle ? getInputs({ messageBundle: this._bundle }) : undefined
 	}
 
+	private _getFilledMessage = (message: Message): Message | undefined => {
+		return message
+	}
+
 	// hooks
 	override updated(changedProperties: any) {
 		// works like useEffect
@@ -175,7 +180,6 @@ export default class InlangBundle extends LitElement {
 		// When the messageBundle prop changes, we update the internal state
 		if (changedProperties.has("bundle")) {
 			this._bundle = structuredClone(this.bundle)
-			console.log("update")
 		}
 	}
 
@@ -192,7 +196,6 @@ export default class InlangBundle extends LitElement {
 	}
 
 	override render() {
-		console.log("lintReports", this._bundle?.lintReports?.reports)
 		return html`
 			<inlang-bundle-root>
 				<inlang-bundle-header
@@ -219,6 +222,8 @@ export default class InlangBundle extends LitElement {
 							.settings=${this.settings}
 							.inputs=${this._inputs()}
 							.freshlyAddedVariants=${this._freshlyAddedVariants}
+							.addInput=${this._addInput}
+							.addMessage=${this._addMessage}
 							.resetFreshlyAddedVariants=${this._resetFreshlyAddedVariants}
 							.triggerSave=${this._triggerSave}
 							.triggerMessageBundleRefresh=${this._triggerRefresh}
@@ -228,7 +233,6 @@ export default class InlangBundle extends LitElement {
 										variants: message.variants,
 										ignoreVariantIds: this._freshlyAddedVariants,
 								  })?.map((variant) => {
-										console.log("variant", variant, lintReports)
 										return html`<inlang-variant
 											slot="variant"
 											.variant=${variant}
@@ -288,30 +292,21 @@ export default class InlangBundle extends LitElement {
 											.machineTranslate=${() => {}}
 										>
 											<inlang-pattern-editor
-												id=${locale}
 												slot="pattern-editor"
 												.pattern=${stringToPattern({ text: "" })}
 												@change-pattern=${(event: { detail: { argument: Pattern } }) => {
 													const newPattern = event.detail.argument
-													console.log(message)
+													const newVariant = {
+														...createVariant({ match: [] }),
+														pattern: newPattern,
+													}
+
 													if (message || this.bundle?.messages.some((m) => m.locale === locale)) {
-														const newVariant = {
-															...createVariant({ match: ["*"] }),
-															pattern: newPattern,
-														}
 														upsertVariant({
 															message: message!,
 															variant: newVariant,
 														})
 													} else {
-														const newVariant = {
-															...createVariant({ match: ["*"] }),
-															pattern: newPattern,
-														}
-														const element = document.getElementById(locale)
-														if (element) {
-															element.id = newVariant.id
-														}
 														this._addMessage({
 															...createMessage({ locale: locale, text: "test" }),
 															selectors: [],
@@ -322,6 +317,11 @@ export default class InlangBundle extends LitElement {
 													}
 													this._triggerSave()
 													this.requestUpdate()
+													setTimeout(() => {
+														const editor = document.getElementById(newVariant.id)
+														console.log(editor)
+														editor?.focus()
+													}, 100)
 												}}
 											></inlang-pattern-editor>
 											<inlang-variant-action
