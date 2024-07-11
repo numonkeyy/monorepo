@@ -190,6 +190,9 @@ export default class InlangMessage extends LitElement {
 	@property()
 	triggerMessageBundleRefresh: () => void = () => {}
 
+	@property()
+	fixLint: (lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) => void = () => {}
+
 	private _refLocale = (): LanguageTag | undefined => {
 		return this.settings?.baseLocale
 	}
@@ -326,6 +329,7 @@ export default class InlangMessage extends LitElement {
 									? html`<inlang-lint-report-tip
 											.lintReports=${this.lintReports.filter((report) => !report.variantId) ?? []}
 											.installedLintRules=${this.installedLintRules}
+											.fixLint=${this.fixLint}
 									  ></inlang-lint-report-tip>`
 									: ``}
 							</div>

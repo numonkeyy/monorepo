@@ -171,9 +171,6 @@ export default class InlangVariant extends LitElement {
 	@property()
 	fixLint: (lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) => void = () => {}
 
-	@property()
-	machineTranslate: (messageId?: string, variantId?: string) => void = () => {}
-
 	// @property()
 	// revert: (messageId?: string, variantId?: string) => void = () => {}
 

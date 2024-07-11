@@ -270,6 +270,7 @@ export default class InlangBundle extends LitElement {
 							.resetFreshlyAddedVariants=${this._resetFreshlyAddedVariants}
 							.triggerSave=${this._triggerSave}
 							.triggerMessageBundleRefresh=${this._triggerRefresh}
+							.fixLint=${this._fixLint}
 						>
 							${sortAllVariants({
 								variants: this._fillMessage(message, locale).variants,
@@ -287,8 +288,7 @@ export default class InlangBundle extends LitElement {
 									.locale=${locale}
 									.lintReports=${lintReports}
 									.installedLintRules=${this.installedLintRules}
-									.fixLint=${() => {}}
-									.machineTranslate=${() => {}}
+									.fixLint=${this._fixLint}
 								>
 									<inlang-pattern-editor
 										id=${variant.id}
