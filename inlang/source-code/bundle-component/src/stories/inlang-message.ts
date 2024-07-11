@@ -189,7 +189,6 @@ export default class InlangMessage extends LitElement {
 	}
 
 	override render() {
-		console.log("message", this.freshlyAddedVariants)
 		return html`
 			<div class="language-container">
 				<span>${this.locale}</span>

@@ -30,8 +30,9 @@ export const mockVariantLintReports: LintReport[] = [
 	createMockVariantLintReport({
 		ruleId: "messageBundleLintRule.inlang.missingMessage",
 		messageBundleId: "mock_bundle_human_id",
+		messageId: "mock_message_id_de",
 		variantId: "mock_variant_id_de_one",
-		body: "The variant `one` is broken for the locale `de`",
+		body: "Variant test for `de` to check if can be rendered correctly",
 	}),
 ]
 

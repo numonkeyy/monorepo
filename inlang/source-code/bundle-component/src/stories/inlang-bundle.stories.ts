@@ -1,4 +1,5 @@
 import "./inlang-bundle.ts"
+import "./testing/reactiveWrapper.ts"
 import type { Meta, StoryObj } from "@storybook/web-components"
 import { html } from "lit"
 import {
@@ -9,7 +10,6 @@ import {
 import { mockSettings } from "../mock/settings.ts"
 import { bundleWithoutSelectors } from "../mock/messageBundle.ts"
 import { pluralBundle } from "@inlang/sdk/v2-mocks"
-import { type MessageBundle } from "@inlang/sdk/v2"
 
 const meta: Meta = {
 	component: "inlang-bundle",
@@ -54,8 +54,8 @@ export const Simple: StoryObj = {
 }
 
 export const Complex: StoryObj = {
-	render: () =>
-		html`<inlang-bundle
+	render: () => {
+		return html`<inlang-bundle
 			.bundle=${pluralBundle}
 			.settings=${mockSettings}
 			.installedLintRules=${mockInstalledLintRules}
@@ -63,23 +63,8 @@ export const Complex: StoryObj = {
 				console.info("changeMessageBundle", data.detail.argument)}
 			@fix-lint=${(data: any) => console.info("fixLint", data.detail.argument)}
 		>
-			<!-- <div
-				slot="bundle-action"
-				@click=${() => {
-				console.log("copy link")
-			}}
-			>
-				Share
-			</div>
-			<div
-				slot="bundle-action"
-				@click=${() => {
-				console.log("open edit alias")
-			}}
-			>
-				Edit alias
-			</div> -->
-		</inlang-bundle> `,
+		</inlang-bundle> `
+	},
 }
 
 export const Styled: StoryObj = {
@@ -154,4 +139,15 @@ export const Styled: StoryObj = {
 				</div> -->
 			</inlang-bundle>
 		`,
+}
+
+export const ReactiveLints: StoryObj = {
+	render: () => {
+		return html`<inlang-reactive-wrapper
+			.bundle=${pluralBundle}
+			.settings=${mockSettings}
+			.installedLintRules=${mockInstalledLintRules}
+		>
+		</inlang-reactive-wrapper> `
+	},
 }

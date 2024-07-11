@@ -116,9 +116,6 @@ export default class InlangBundle extends LitElement {
 	@state()
 	private _freshlyAddedVariants: string[] = []
 
-	@state()
-	private _hoveredVariantId: string | undefined
-
 	//functions
 	private _triggerSave = () => {
 		if (this._bundle) {
@@ -176,7 +173,7 @@ export default class InlangBundle extends LitElement {
 		// works like useEffect
 		// In order to not mutate object references, we need to clone the object
 		// When the messageBundle prop changes, we update the internal state
-		if (changedProperties.has("messageBundle")) {
+		if (changedProperties.has("bundle")) {
 			this._bundle = structuredClone(this.bundle)
 			console.log("update")
 		}
@@ -191,11 +188,12 @@ export default class InlangBundle extends LitElement {
 		await this.updateComplete
 		// override primitive colors to match the design system
 		overridePrimitiveColors()
+		this._bundle = structuredClone(this.bundle)
 	}
 
 	override render() {
+		console.log("lintReports", this._bundle?.lintReports?.reports)
 		return html`
-			${JSON.stringify(this.bundle?.lintReports?.reports)}
 			<inlang-bundle-root>
 				<inlang-bundle-header
 					slot="bundle-header"
@@ -212,6 +210,7 @@ export default class InlangBundle extends LitElement {
 						const lintReports = this._bundle?.lintReports?.reports.filter(
 							(report) => report.messageId === message?.id
 						)
+
 						return html`<inlang-message
 							.locale=${locale}
 							.message=${message}
@@ -229,6 +228,7 @@ export default class InlangBundle extends LitElement {
 										variants: message.variants,
 										ignoreVariantIds: this._freshlyAddedVariants,
 								  })?.map((variant) => {
+										console.log("variant", variant, lintReports)
 										return html`<inlang-variant
 											slot="variant"
 											.variant=${variant}
@@ -236,8 +236,8 @@ export default class InlangBundle extends LitElement {
 											.inputs=${this._inputs()}
 											.triggerSave=${this._triggerSave}
 											.triggerMessageBundleRefresh=${this._triggerRefresh}
-											.addMessage=${() => {}}
-											.addInput=${() => {}}
+											.addMessage=${this._addMessage}
+											.addInput=${this._addInput}
 											.locale=${locale}
 											.lintReports=${lintReports}
 											.installedLintRules=${this.installedLintRules}
@@ -279,8 +279,8 @@ export default class InlangBundle extends LitElement {
 											.inputs=${this._inputs()}
 											.triggerSave=${this._triggerSave}
 											.triggerMessageBundleRefresh=${this._triggerRefresh}
-											.addMessage=${() => {}}
-											.addInput=${() => {}}
+											.addMessage=${this._addMessage}
+											.addInput=${this._addInput}
 											.locale=${locale}
 											.lintReports=${lintReports}
 											.installedLintRules=${this.installedLintRules}
