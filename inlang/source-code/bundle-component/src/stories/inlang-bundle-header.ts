@@ -1,6 +1,6 @@
 import type { Declaration, LanguageTag, MessageBundle, ProjectSettings2 } from "@inlang/sdk/v2"
 import { LitElement, css, html } from "lit"
-import { customElement, property } from "lit/decorators.js"
+import { customElement, property, state } from "lit/decorators.js"
 import getInputs from "../helper/crud/input/get.js"
 import deleteInput from "../helper/crud/input/delete.js"
 
@@ -138,6 +138,9 @@ export default class InlangBundleHeader extends LitElement {
 	@property()
 	triggerRefresh: () => void = () => {}
 
+	@state()
+	_hasActions: boolean = false
+
 	private _refLocale = (): LanguageTag | undefined => {
 		return this.settings?.baseLocale
 	}
@@ -145,6 +148,11 @@ export default class InlangBundleHeader extends LitElement {
 	private _inputs = (): Declaration[] | undefined => {
 		const _refLanguageTag = this._refLocale()
 		return _refLanguageTag && this.bundle ? getInputs({ messageBundle: this.bundle }) : undefined
+	}
+
+	override async firstUpdated() {
+		await this.updateComplete
+		this._hasActions = this.querySelector("[slot=bundle-action]") !== null
 	}
 
 	override render() {
@@ -163,6 +171,7 @@ export default class InlangBundleHeader extends LitElement {
 						  </div>`
 						: ``}
 				</div>
+
 				<div class="header-right">
 					${this._inputs() && this._inputs()!.length > 0
 						? html`<div class="inputs-wrapper">
@@ -223,6 +232,28 @@ export default class InlangBundleHeader extends LitElement {
 									</sl-tooltip>
 								</inlang-add-input>
 						  </div>`}
+					${this._hasActions
+						? html`<div class="separator"></div>
+								<sl-dropdown class="bundle-actions">
+									<sl-button class="text-button" variant="text" size="small" slot="trigger"
+										><svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="18"
+											height="18"
+											viewBox="0 0 24 24"
+											slot="prefix"
+											style="margin: 0 -2px"
+										>
+											<path
+												fill="currentColor"
+												d="M7 12a2 2 0 1 1-4 0a2 2 0 0 1 4 0m7 0a2 2 0 1 1-4 0a2 2 0 0 1 4 0m7 0a2 2 0 1 1-4 0a2 2 0 0 1 4 0"
+											/></svg
+									></sl-button>
+									<sl-menu>
+										<slot name="bundle-action"></slot>
+									</sl-menu>
+								</sl-dropdown>`
+						: ``}
 				</div>
 			</div>
 		`

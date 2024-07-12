@@ -11,6 +11,8 @@ import { mockSettings } from "../mock/settings.ts"
 import { bundleWithoutSelectors } from "../mock/messageBundle.ts"
 import { pluralBundle } from "@inlang/sdk/v2-mocks"
 
+import "./actions/inlang-bundle-action.ts"
+
 const meta: Meta = {
 	component: "inlang-bundle",
 	title: "Public/inlang-bundle",
@@ -63,6 +65,14 @@ export const Complex: StoryObj = {
 				console.info("changeMessageBundle", data.detail.argument)}
 			@fix-lint=${(data: any) => console.info("fixLint", data.detail.argument)}
 		>
+			<inlang-bundle-action
+				actionTitle="Share"
+				@click=${() => console.log("Share")}
+			></inlang-bundle-action>
+			<inlang-bundle-action
+				actionTitle="Edit alias"
+				@click=${() => console.log("Edit alias")}
+			></inlang-bundle-action>
 		</inlang-bundle> `
 	},
 }
@@ -124,22 +134,14 @@ export const Styled: StoryObj = {
 					console.info("changeMessageBundle", data.detail.argument)}
 				@fix-lint=${(data: any) => console.info("fixLint", data.detail.argument)}
 			>
-				<!-- <div
-					slot="bundle-action"
-					@click=${(e) => {
-					console.log("event", e)
-				}}
-				>
-					Share
-				</div>
-				<div
-					slot="bundle-action"
-					@click=${(e) => {
-					console.log("open edit alias")
-				}}
-				>
-					Edit alias
-				</div> -->
+				<inlang-bundle-action
+					actionTitle="Share"
+					@click=${() => console.log("Share")}
+				></inlang-bundle-action>
+				<inlang-bundle-action
+					actionTitle="Edit alias"
+					@click=${() => console.log("Edit alias")}
+				></inlang-bundle-action>
 			</inlang-bundle>
 		`,
 }

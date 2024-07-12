@@ -52,6 +52,7 @@ import upsertVariant from "../helper/crud/variant/upsert.js"
 import patternToString from "../helper/crud/pattern/patternToString.js"
 import stringToPattern from "../helper/crud/pattern/stringToPattern.js"
 import sortAllVariants from "../helper/crud/variant/sortAll.js"
+import InlangBundleAction from "./actions/inlang-bundle-action.js"
 
 @customElement("inlang-bundle")
 export default class InlangBundle extends LitElement {
@@ -117,6 +118,9 @@ export default class InlangBundle extends LitElement {
 	@state()
 	private _freshlyAddedVariants: string[] = []
 
+	@state()
+	private _bundleActions: Element[] = []
+
 	//functions
 	private _triggerSave = () => {
 		if (this._bundle) {
@@ -170,6 +174,32 @@ export default class InlangBundle extends LitElement {
 	private _inputs = (): Declaration[] | undefined => {
 		const _refLanguageTag = this._refLocale()
 		return _refLanguageTag && this._bundle ? getInputs({ messageBundle: this._bundle }) : undefined
+	}
+
+	private _getBundleActions = (): Element[] => {
+		return Array.from(this.children)
+			.filter((child) => child instanceof InlangBundleAction)
+			.map((child) => {
+				child.setAttribute("slot", "bundle-action")
+				const style = document.createElement("style")
+				style.textContent = `
+					sl-menu-item::part(label) {
+						font-size: 14px;
+						padding-left: 12px;
+					}
+					sl-menu-item::part(base) {
+						color: var(--sl-input-color);
+					}
+					sl-menu-item::part(base):hover {
+						background-color: var(--sl-input-background-color-hover);
+					}
+					sl-menu-item::part(checked-icon) {
+						display: none;
+					}
+                `
+				child.shadowRoot?.appendChild(style)
+				return child
+			})
 	}
 
 	// fill message with empty message if message is undefined to fix layout shift (will not be committed)
@@ -230,6 +260,7 @@ export default class InlangBundle extends LitElement {
 		// When the messageBundle prop changes, we update the internal state
 		if (changedProperties.has("bundle")) {
 			this._bundle = structuredClone(this.bundle)
+			this._bundleActions = this._getBundleActions()
 		}
 	}
 
@@ -255,7 +286,11 @@ export default class InlangBundle extends LitElement {
 					.addInput=${this._addInput}
 					.triggerSave=${this._triggerSave}
 					.triggerRefresh=${this._triggerRefresh}
-				></inlang-bundle-header>
+				>
+					${this._bundleActions.map((action) => {
+						return html`${action}`
+					})}
+				</inlang-bundle-header>
 				<div class="messages-container" slot="messages">
 					${this._locales() &&
 					this._locales()?.map((locale) => {
