@@ -90,7 +90,7 @@ export const Styled: StoryObj = {
 					color: #ffffff !important;
 				}
 				.inlang-pattern-editor-placeholder {
-					color: #71717a;
+					color: #e0e0e0;
 				}
 				inlang-bundle-header::part(base) {
 					background-color: #000;
