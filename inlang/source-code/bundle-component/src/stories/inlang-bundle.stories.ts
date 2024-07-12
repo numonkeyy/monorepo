@@ -123,6 +123,14 @@ export const Styled: StoryObj = {
 					--sl-input-help-text-color: #b0b0b0;
 					--sl-panel-border-color: #606060;
 				}
+
+				inlang-bundle-action {
+					--sl-input-background-color: #313131;
+					--sl-input-background-color-hover: #000;
+					--sl-input-border-color: #606060;
+					--sl-input-color: #e0e0e0;
+					--sl-input-color-hover: #ffffff;
+				}
 			</style>
 
 			<inlang-bundle

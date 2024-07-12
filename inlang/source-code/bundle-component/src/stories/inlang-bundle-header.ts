@@ -55,7 +55,7 @@ export default class InlangBundleHeader extends LitElement {
 				display: flex;
 				align-items: center;
 				min-height: 44px;
-				gap: 2px;
+				gap: 1px;
 			}
 			.input-tag::part(base) {
 				height: 28px;

@@ -56,7 +56,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 				color: var(--sl-color-neutral-500);
 			}
 			.add-input::part(base):hover {
-				background-color: var(--sl-color-neutral-100);
+				background-color: var(--sl-input-background-color-hover);
 				color: var(--sl-input-color-hover);
 			}
 			sl-select::part(form-control-label) {
@@ -67,6 +67,19 @@ export default class InlangSelectorConfigurator extends LitElement {
 			}
 			sl-option::part(label) {
 				font-size: 14px;
+			}
+			sl-menu-item::part(label) {
+				font-size: 14px;
+				padding-left: 12px;
+			}
+			sl-menu-item::part(base) {
+				color: var(--sl-input-color);
+			}
+			sl-menu-item::part(base):hover {
+				background-color: var(--sl-input-background-color-hover);
+			}
+			sl-menu-item::part(checked-icon) {
+				display: none;
 			}
 			.options-title {
 				font-size: 14px;
@@ -97,7 +110,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 				cursor: pointer;
 			}
 			.delete-icon:hover {
-				color: var(--sl-color-neutral-900);
+				color: var(--sl-input-color-hover);
 			}
 			.help-text {
 				display: flex;
