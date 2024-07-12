@@ -123,10 +123,10 @@ export default class InlangBundleHeader extends LitElement {
 		`,
 	]
 
-	@property({ type: Object })
+	@property()
 	bundle: MessageBundle | undefined
 
-	@property({ type: Object })
+	@property()
 	settings: ProjectSettings2 | undefined
 
 	@property()
@@ -139,15 +139,10 @@ export default class InlangBundleHeader extends LitElement {
 	triggerRefresh: () => void = () => {}
 
 	@state()
-	_hasActions: boolean = false
-
-	private _refLocale = (): LanguageTag | undefined => {
-		return this.settings?.baseLocale
-	}
+	private _hasActions: boolean = false
 
 	private _inputs = (): Declaration[] | undefined => {
-		const _refLanguageTag = this._refLocale()
-		return _refLanguageTag && this.bundle ? getInputs({ messageBundle: this.bundle }) : undefined
+		return this.bundle ? getInputs({ messageBundle: this.bundle }) : undefined
 	}
 
 	override async firstUpdated() {
@@ -156,6 +151,7 @@ export default class InlangBundleHeader extends LitElement {
 	}
 
 	override render() {
+		console.log("header rerender", this.bundle)
 		return html`
 			<div class=${`header`} part="base">
 				<div class="header-left">
@@ -196,7 +192,12 @@ export default class InlangBundleHeader extends LitElement {
 												</sl-menu>
 											</sl-dropdown>`
 									)}
-									<inlang-add-input .addInput=${this.addInput}>
+									<inlang-add-input
+										.addInput=${(x: any) => {
+											this.addInput(x)
+											this.requestUpdate()
+										}}
+									>
 										<sl-tooltip content="Add input to message bundle">
 											<sl-button class="text-button" variant="neutral" size="small"
 												><svg
@@ -216,7 +217,12 @@ export default class InlangBundleHeader extends LitElement {
 								</div>
 						  </div>`
 						: html`<div class="inputs-wrapper">
-								<inlang-add-input .addInput=${this.addInput}>
+								<inlang-add-input
+									.addInput=${(x: any) => {
+										this.addInput(x)
+										this.requestUpdate()
+									}}
+								>
 									<sl-tooltip content="Add input to message bundle">
 										<sl-button class="text-button" variant="text" size="small"
 											><svg

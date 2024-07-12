@@ -137,12 +137,12 @@ export default class InlangBundle extends LitElement {
 	}
 
 	private _addInput = (name: string) => {
-		console.log("Test")
+		console.log("add input")
 		if (this._bundle) {
 			createInput({ messageBundle: this._bundle, inputName: name })
 		}
 		this._triggerSave()
-		this._triggerRefresh()
+		this.requestUpdate()
 	}
 
 	private _triggerRefresh = () => {
@@ -277,17 +277,19 @@ export default class InlangBundle extends LitElement {
 	}
 
 	override render() {
+		console.log("bundle rerender", this._bundle)
 		return html`
 			<inlang-bundle-root>
 				<inlang-bundle-header
-					slot="bundle-header"
 					.bundle=${this._bundle}
 					.settings=${this.settings}
 					.addInput=${this._addInput}
 					.triggerSave=${this._triggerSave}
 					.triggerRefresh=${this._triggerRefresh}
+					slot="bundle-header"
 				>
 					${this._bundleActions.map((action) => {
+						console.log("render action")
 						return html`${action}`
 					})}
 				</inlang-bundle-header>

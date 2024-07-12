@@ -301,7 +301,6 @@ export default class InlangVariant extends LitElement {
 	}
 
 	override render() {
-		console.log(this.locale, this.message, this.variant)
 		return !(!this.variant && this.message && this.message?.selectors.length > 0)
 			? html`<div class="variant">
 					${this.variant && this._matches

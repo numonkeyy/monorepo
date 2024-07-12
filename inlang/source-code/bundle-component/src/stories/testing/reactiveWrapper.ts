@@ -2,6 +2,7 @@ import { LitElement, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 
 import "./../inlang-bundle.js"
+import "./../actions/inlang-bundle-action.js"
 import type { LintReport, MessageBundle, ProjectSettings2 } from "@inlang/sdk/v2"
 import type { InstalledMessageLintRule } from "@inlang/sdk"
 import { pluralBundle } from "@inlang/sdk/v2-mocks"
@@ -66,6 +67,14 @@ export default class InlangReactiveWrapper extends LitElement {
 			}}
 			@fix-lint=${(data: any) => console.info("fixLint", data.detail.argument)}
 		>
+			<inlang-bundle-action
+				actionTitle="Share"
+				@click=${() => console.log("Share")}
+			></inlang-bundle-action>
+			<inlang-bundle-action
+				actionTitle="Edit alias"
+				@click=${() => console.log("Edit alias")}
+			></inlang-bundle-action>
 		</inlang-bundle> `
 	}
 }
