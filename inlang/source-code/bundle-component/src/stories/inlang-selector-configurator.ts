@@ -61,18 +61,12 @@ export default class InlangSelectorConfigurator extends LitElement {
 			}
 			sl-select::part(form-control-label) {
 				font-size: 13px;
-				color: var(--sl-input-color);
 			}
 			sl-select::part(display-input) {
 				font-size: 13px;
-				color: var(--sl-input-color);
 			}
 			sl-option::part(label) {
 				font-size: 14px;
-				color: var(--sl-input-color);
-			}
-			sl-option::part(base):hover {
-				background-color: var(--sl-input-background-color-hover);
 			}
 			.options-title {
 				font-size: 14px;

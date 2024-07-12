@@ -71,13 +71,16 @@ export const Styled: StoryObj = {
 	render: () =>
 		html`
 			<style>
-				.inlang-pattern-editor-wrapper {
+				.inlang-pattern-editor-contenteditable {
 					background-color: #313131 !important;
 					color: #e0e0e0 !important;
 				}
-				.inlang-pattern-editor-wrapper:hover {
+				.inlang-pattern-editor-contenteditable:hover {
 					background-color: #000 !important;
 					color: #ffffff !important;
+				}
+				.inlang-pattern-editor-placeholder {
+					color: #71717a;
 				}
 				inlang-bundle-header::part(base) {
 					background-color: #000;

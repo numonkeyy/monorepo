@@ -146,7 +146,10 @@ export default class InlangPatternEditor extends LitElement {
 					position: absolute;
 					top: 14px;
 					left: 12px;
+					font-size: 13px;
+					font-weight: 500;
 					pointer-events: none;
+					font-family: var(--sl-font-sans);
 				}
 			</style>
 			<div class="inlang-pattern-editor-wrapper">
@@ -156,7 +159,7 @@ export default class InlangPatternEditor extends LitElement {
 					${ref(this.contentEditableElementRef)}
 				></div>
 				${this._editorTextContent === ""
-					? html`<p class="inlang-pattern-editor-placeholder">Enter pattern...</p>`
+					? html`<p class="inlang-pattern-editor-placeholder">Enter pattern ...</p>`
 					: ""}
 			</div>
 		`
