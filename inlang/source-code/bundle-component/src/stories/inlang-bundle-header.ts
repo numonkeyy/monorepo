@@ -151,7 +151,6 @@ export default class InlangBundleHeader extends LitElement {
 	}
 
 	override render() {
-		console.log("header rerender", this.bundle)
 		return html`
 			<div class=${`header`} part="base">
 				<div class="header-left">

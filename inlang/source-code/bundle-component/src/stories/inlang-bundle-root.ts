@@ -19,7 +19,6 @@ export default class InlangBundleRoot extends LitElement {
 	]
 
 	override render() {
-		console.log("render root")
 		return html`<div>
 			<slot name="bundle-header"></slot>
 			<slot name="messages"></slot>

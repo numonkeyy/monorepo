@@ -137,7 +137,6 @@ export default class InlangBundle extends LitElement {
 	}
 
 	private _addInput = (name: string) => {
-		console.log("add input")
 		if (this._bundle) {
 			createInput({ messageBundle: this._bundle, inputName: name })
 		}
@@ -277,7 +276,6 @@ export default class InlangBundle extends LitElement {
 	}
 
 	override render() {
-		console.log("bundle rerender", this._bundle)
 		return html`
 			<inlang-bundle-root>
 				<inlang-bundle-header
@@ -289,7 +287,6 @@ export default class InlangBundle extends LitElement {
 					slot="bundle-header"
 				>
 					${this._bundleActions.map((action) => {
-						console.log("render action")
 						return html`${action}`
 					})}
 				</inlang-bundle-header>
