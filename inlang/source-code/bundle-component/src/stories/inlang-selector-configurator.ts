@@ -203,7 +203,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 						},
 						annotation: {
 							type: "function",
-							name: "plural",
+							name: this._function || "plural",
 							options: [],
 						},
 					},
@@ -244,8 +244,8 @@ export default class InlangSelectorConfigurator extends LitElement {
 				})
 			}
 
-			this.triggerMessageBundleRefresh()
 			this.triggerSave()
+			this.triggerMessageBundleRefresh()
 		}
 	}
 
@@ -296,7 +296,6 @@ export default class InlangSelectorConfigurator extends LitElement {
 	}
 
 	override render() {
-		console.log("props", this.inputs, this.message, this.locale)
 		return html`
 			<sl-dropdown
 				distance="-4"

@@ -97,6 +97,7 @@ export default class InlangBundleHeader extends LitElement {
 				background-color: var(--sl-input-background-color);
 				color: var(--sl-input-color);
 				border: 1px solid var(--sl-input-border-color);
+				font-size: 13px;
 			}
 			sl-button::part(base):hover {
 				background-color: var(--sl-input-background-color-hover);

@@ -97,6 +97,8 @@ export default class InlangPatternEditor extends LitElement {
 			// listen to text content changes and dispatch `change-pattern` event
 			this.editor.registerTextContentListener((textContent) => {
 				// The latest text content of the editor!
+
+				//check if something changed
 				this.dispatchOnChangePattern(stringToPattern({ text: textContent }))
 				this._editorTextContent = textContent
 			})
@@ -121,12 +123,19 @@ export default class InlangPatternEditor extends LitElement {
 					width: 100%;
 					position: relative;
 				}
+				.inlang-pattern-editor-wrapper:focus-within {
+					z-index: 1;
+				}
 				.inlang-pattern-editor-contenteditable {
 					background-color: #ffffff;
 					padding: 14px 12px;
 					min-height: 44px;
 					width: 100%;
 					color: #242424;
+					outline: none;
+				}
+				.inlang-pattern-editor-contenteditable:focus {
+					box-shadow: 0 0 0 var(--sl-focus-ring-width) var(--sl-input-focus-ring-color);
 				}
 				.inlang-pattern-editor-contenteditable:hover {
 					background-color: #f9f9f9;

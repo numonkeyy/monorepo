@@ -128,6 +128,8 @@ export default class InlangBundle extends LitElement {
 		if (this._bundle) {
 			this._bundle.messages.push(message)
 		}
+		this._triggerSave()
+		this._triggerRefresh()
 	}
 
 	private _addInput = (name: string) => {
@@ -173,6 +175,9 @@ export default class InlangBundle extends LitElement {
 	// fill message with empty message if message is undefined to fix layout shift (will not be committed)
 	private _fillMessage = (message: Message | undefined, locale: LanguageTag): Message => {
 		if (message) {
+			if (message.variants.length === 0) {
+				message.variants.push(createVariant({ match: [] }))
+			}
 			return message
 		} else {
 			return createMessage({ locale: locale, text: "" })
@@ -181,16 +186,18 @@ export default class InlangBundle extends LitElement {
 
 	private _handlePatternChange = (
 		message: Message | undefined,
-		variant: Variant,
+		variant: Variant | undefined,
 		newPattern: Pattern,
 		locale: LanguageTag
 	) => {
 		if (message) {
-			const newVariant = { ...variant, pattern: newPattern }
-			upsertVariant({
-				message: message!,
-				variant: newVariant,
-			})
+			if (variant) {
+				const newVariant = { ...variant, pattern: newPattern }
+				upsertVariant({
+					message: message!,
+					variant: newVariant,
+				})
+			}
 		} else {
 			const newVariant = {
 				...createVariant({ match: [] }),
@@ -256,7 +263,6 @@ export default class InlangBundle extends LitElement {
 						const lintReports = this._bundle?.lintReports?.reports.filter(
 							(report) => report.messageId === message?.id
 						)
-
 						return html`<inlang-message
 							.locale=${locale}
 							.message=${message}
@@ -273,9 +279,10 @@ export default class InlangBundle extends LitElement {
 							.fixLint=${this._fixLint}
 						>
 							${sortAllVariants({
-								variants: this._fillMessage(message, locale).variants,
+								variants: this._fillMessage(structuredClone(message), locale).variants,
 								ignoreVariantIds: this._freshlyAddedVariants,
-							})?.map((variant) => {
+							})?.map((fakevariant) => {
+								const variant = message?.variants.find((v) => v.id === fakevariant.id)
 								return html`<inlang-variant
 									slot="variant"
 									.variant=${variant}
@@ -291,19 +298,20 @@ export default class InlangBundle extends LitElement {
 									.fixLint=${this._fixLint}
 								>
 									<inlang-pattern-editor
-										id=${variant.id}
+										id=${variant?.id}
 										slot="pattern-editor"
-										.pattern=${variant.pattern}
-										@change-pattern=${(event: { detail: { argument: Pattern } }) =>
-											this._handlePatternChange(message, variant, event.detail.argument, locale)}
+										.pattern=${variant?.pattern}
+										@change-pattern=${(event: { detail: { argument: Pattern } }) => {
+											this._handlePatternChange(message, variant, event.detail.argument, locale)
+										}}
 									></inlang-pattern-editor>
-									${patternToString({ pattern: variant.pattern }) === ""
+									${patternToString({ pattern: variant?.pattern || [] }) === ""
 										? html`<inlang-variant-action
 												slot="variant-action"
 												actionTitle="Machine Translate"
 												tooltip="Machine Translate"
 												@click=${() => {
-													this.dispatchOnMachineTranslate(message?.id, variant.id)
+													this.dispatchOnMachineTranslate(message?.id, variant?.id)
 												}}
 										  ></inlang-variant-action>`
 										: ``}

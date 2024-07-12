@@ -22,6 +22,8 @@ export default class InlangVariantAction extends LitElement {
 				color: var(--sl-input-color);
 				background-color: var(--sl-input-background-color);
 				border: 1px solid var(--sl-input-border-color);
+				border-radius: 4px;
+				font-size: 13px;
 			}
 			sl-button::part(base):hover {
 				color: var(--sl-input-color-hover);
