@@ -301,8 +301,8 @@ export default class InlangVariant extends LitElement {
 	}
 
 	override render() {
-		//console.log(this.locale, this.message, this.variant)
-		return this.variant || (!this.variant && !this.message)
+		console.log(this.locale, this.message, this.variant)
+		return !(!this.variant && this.message && this.message?.selectors.length > 0)
 			? html`<div class="variant">
 					${this.variant && this._matches
 						? this._matches.map((match, index) => {
@@ -356,7 +356,8 @@ export default class InlangVariant extends LitElement {
 										</sl-tooltip>
 								  </inlang-selector-configurator>`
 								: ``}
-							${this.message && this.variant && this.message.selectors.length > 0
+							${(this.message && this.variant && this.message.selectors.length > 0) ||
+							(this.message && this.variant && this.message.variants.length > 1)
 								? html`<sl-tooltip content="Delete"
 										><sl-button size="small" @click=${() => this._delete()}
 											><svg
