@@ -620,18 +620,25 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 		let gitState: "uncommited" | "commited" = "uncommited"
 
 		if (headState) {
-			if (currentState.hash === recordSlotfile.headSlotfileState?.recordSlots[slotIndex]?.hash) {
+			// ok there seem to be a different in the slot file at least
+			if (currentState.hash === headState.hash) {
 				// if the hash is the same we don't pass the head state but flag it as commited
 				headState = undefined
 				gitState = "commited"
 			} else {
+				console.log("change in file and hash of entry is different")
 				gitState = "uncommited"
 			}
-		} else if (
-			recordSlotfile.headHash &&
-			(!recordSlotfile.changedRecords || recordSlotfile.changedRecords.length === 0)
-		) {
-			gitState = "commited"
+		} else {
+			// ok no difference in the slot file!
+			if (
+				!recordSlotfile.headSlotfileState &&
+				recordSlotfile.headHash &&
+				(!recordSlotfile.changedRecords || recordSlotfile.changedRecords.length === 0)
+			) {
+				// the record has a head hash and no changes!
+				gitState = "commited"
+			}
 		}
 
 		const currentRecordState: SlotEntry<DocType> = {

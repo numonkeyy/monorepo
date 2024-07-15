@@ -88,7 +88,7 @@ function recordToMessage(message: SlotEntry<MessageRecord>): MessageWithConflict
 			: undefined,
 		versionHash: message.slotEntryHash,
 	}
-	debug(sdkMessage)
+	debug("STATE: ", sdkMessage.id, sdkMessage.changeState)
 	return sdkMessage
 }
 
@@ -123,7 +123,7 @@ export const combineToBundles = (
 			continue
 		}
 		const bundleMessage: MessageWithConflictMarkers = recordToMessage(message)
-
+		debug("STATE - pushing bundle")
 		loadBundle.messages.push(bundleMessage)
 	}
 
@@ -151,14 +151,16 @@ export function createMessageBundleSlotAdapter(
 		source: "adapter" | "api" | "fs",
 		changedMessageBundle: MessageBundle
 	) => {
+		console.log("STATE - onBundleChange")
 		// if (source === "fs") {
 		// changes comming from fs need to be propagated to the pull stream again
+
 		pullStream$.next({
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- event api sucks atm - we know that we can expect slot entries in records-change event
 			documents: [changedMessageBundle],
 			// NOTE: we don't need to reconnect a collection at the moment - any checkpoint should work
 			checkpoint: {
-				now: Date.now(),
+				now: Date.now() + "" + Math.random(),
 			},
 		})
 		// }
@@ -208,7 +210,6 @@ export function createMessageBundleSlotAdapter(
 		if (e !== "records-change" || !messageRecordIds) {
 			return
 		}
-		debug(source)
 
 		for (const messageRecord of messageStorage.findByIds(messageRecordIds)) {
 			const loaded = loadedMessageBundles.get((messageRecord.data as any).bundleId)
@@ -243,7 +244,7 @@ export function createMessageBundleSlotAdapter(
 		// for now we assume that messages exist before the reports
 		for (const [bundleId, bundle] of loadedMessageBundles) {
 			const currentReports = reportResults[bundleId]
-			if (reportResults[bundleId]!.hash !== loadedMessageBundleLintReports.get(bundleId)?.hash) {
+			if (reportResults[bundleId]?.hash !== loadedMessageBundleLintReports.get(bundleId)?.hash) {
 				if (currentReports) {
 					loadedMessageBundleLintReports.set(bundleId, currentReports)
 				} else {
@@ -593,10 +594,13 @@ const conflictHandler: RxConflictHandler<any> = function (
 	 * for better performance because deepEqual() is expensive.
 	 */
 	if (deepEqual(i.newDocumentState, i.realMasterState)) {
+		debug("STATE no conflicts", i.newDocumentState)
 		return Promise.resolve({
 			isEqual: true,
 		})
 	}
+
+	debug("STATE using real master state", i.realMasterState)
 
 	/**
 	 * If a conflict exists, we have to resolve it.

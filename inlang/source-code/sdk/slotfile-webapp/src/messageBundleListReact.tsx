@@ -32,7 +32,7 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 			selector: {
 				messages: {
 					$elemMatch: {
-						changeState: "comitted",
+						changeState: "uncommited",
 					},
 				},
 			},

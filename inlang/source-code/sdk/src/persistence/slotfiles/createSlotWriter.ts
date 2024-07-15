@@ -301,6 +301,11 @@ export default async function createSlotStorageWriter<DocType extends HasId>({
 					// NOTE: deletion of the elements will keep empty slots - we wan't to check for length === 0 so we have to apply a new array here if all slots are empty
 					knownSlotFileStates.changedRecords = []
 					knownSlotFileStates.fsSlotFileState = undefined
+					if (
+						knownSlotFileStates.memorySlotFileState.contentHash === knownSlotFileStates.headHash
+					) {
+						knownSlotFileStates.headSlotfileState = knownSlotFileStates.memorySlotFileState
+					}
 					knownSlotFileStates.memorySlotFileState = slotFileStateToWrite
 					knownSlotFileStates.stateFlag = "loadrequested"
 					for (const updatedSlotEntry of updatedSlotEntries) {
