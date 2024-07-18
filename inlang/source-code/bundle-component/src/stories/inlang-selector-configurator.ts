@@ -9,6 +9,7 @@ import {
 	createVariant,
 	type LanguageTag,
 	type Message,
+	type Variant,
 } from "@inlang/sdk/v2"
 import addSelector from "../helper/crud/selector/add.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
@@ -178,6 +179,48 @@ export default class InlangSelectorConfigurator extends LitElement {
 	@state()
 	private _newInputSting: string | undefined
 
+	// events
+	dispatchOnInsertMessage(message: Message, variants: Variant[]) {
+		const onInsertMessage = new CustomEvent("insert-message", {
+			bubbles: true,
+			composed: true,
+			detail: {
+				argument: {
+					message,
+					variants,
+				},
+			},
+		})
+		this.dispatchEvent(onInsertMessage)
+	}
+
+	dispatchOnUpdateMessage(message: Message, variants: Variant[]) {
+		const onUpdateMessage = new CustomEvent("update-message", {
+			bubbles: true,
+			composed: true,
+			detail: {
+				argument: {
+					message,
+					variants,
+				},
+			},
+		})
+		this.dispatchEvent(onUpdateMessage)
+	}
+
+	dispatchOnInsertVariant(variant: Variant) {
+		const onInsertVariant = new CustomEvent("insert-variant", {
+			bubbles: true,
+			composed: true,
+			detail: {
+				argument: {
+					variant,
+				},
+			},
+		})
+		this.dispatchEvent(onInsertVariant)
+	}
+
 	private _getPluralCategories = (): string[] | undefined => {
 		return this.locale
 			? [...new Intl.PluralRules(this.locale).resolvedOptions().pluralCategories, "*"]
@@ -222,6 +265,10 @@ export default class InlangSelectorConfigurator extends LitElement {
 					newMatchers: newMatchers,
 				})
 				this.addMessage(newMessage)
+				this.dispatchOnInsertMessage(newMessage, newMessage.variants)
+				for (const variant of newMessage.variants) {
+					this.dispatchOnInsertVariant(variant)
+				}
 			} else if (this.message) {
 				// get variant matchers arrays
 				const _variants = structuredClone(this.message ? this.message.variants : [])
@@ -244,11 +291,22 @@ export default class InlangSelectorConfigurator extends LitElement {
 					},
 				})
 
+				const updatedVariant = structuredClone(this.message.variants)
+				this.dispatchOnUpdateMessage(this.message, updatedVariant)
+
 				this._addVariants({
 					message: this.message,
 					variantMatcherArrays: _variantMatcherArrays,
 					newMatchers: newMatchers,
 				})
+
+				// only inserted variants should be dispatched -> show filter
+				const insertedVariants = this.message.variants.filter(
+					(variant) => !updatedVariant.find((v) => v.id === variant.id)
+				)
+				for (const variant of insertedVariants) {
+					this.dispatchOnInsertVariant(variant)
+				}
 			}
 
 			this.triggerSave()

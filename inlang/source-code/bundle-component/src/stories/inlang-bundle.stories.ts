@@ -61,8 +61,13 @@ export const Complex: StoryObj = {
 			.bundle=${pluralBundle}
 			.settings=${mockSettings}
 			.installedLintRules=${mockInstalledLintRules}
-			@change-message-bundle=${(data: any) =>
-				console.info("changeMessageBundle", data.detail.argument)}
+			@update-bundle=${(data: any) => console.info("updateBundle", data.detail.argument)}
+			@insert-message=${(data: any) => console.info("insertMessage", data.detail.argument)}
+			@update-message=${(data: any) => console.info("updateMessage", data.detail.argument)}
+			@delete-message=${(data: any) => console.info("deleteMessage", data.detail.argument)}
+			@insert-variant=${(data: any) => console.info("insertVariant", data.detail.argument)}
+			@update-variant=${(data: any) => console.info("updateVariant", data.detail.argument)}
+			@delete-variant=${(data: any) => console.info("deleteVariant", data.detail.argument)}
 			@fix-lint=${(data: any) => console.info("fixLint", data.detail.argument)}
 		>
 			<inlang-bundle-action

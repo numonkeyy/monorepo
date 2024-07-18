@@ -1,5 +1,5 @@
 import type { InstalledMessageLintRule, LanguageTag } from "@inlang/sdk"
-import type { Declaration, LintReport, Message, ProjectSettings2 } from "@inlang/sdk/v2"
+import type { Declaration, LintReport, Message, ProjectSettings2, Variant } from "@inlang/sdk/v2"
 import { createVariant } from "@inlang/sdk/v2"
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
@@ -185,13 +185,23 @@ export default class InlangMessage extends LitElement {
 	resetFreshlyAddedVariants: (newArray: string[]) => void = () => {}
 
 	@property()
-	triggerSave: () => void = () => {}
-
-	@property()
 	triggerMessageBundleRefresh: () => void = () => {}
 
 	@property()
 	fixLint: (lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) => void = () => {}
+
+	dispatchOnInsertVariant(variant: Variant) {
+		const onInsertVariant = new CustomEvent("insert-variant", {
+			bubbles: true,
+			composed: true,
+			detail: {
+				argument: {
+					variant,
+				},
+			},
+		})
+		this.dispatchEvent(onInsertVariant)
+	}
 
 	private _refLocale = (): LanguageTag | undefined => {
 		return this.settings?.baseLocale
@@ -229,7 +239,6 @@ export default class InlangMessage extends LitElement {
 												value="delete"
 												@click=${() => {
 													deleteSelector({ message: this.message!, index })
-													this.triggerSave()
 													this.triggerMessageBundleRefresh()
 												}}
 												><svg
@@ -260,7 +269,6 @@ export default class InlangMessage extends LitElement {
 										.message=${this.message}
 										.locale=${this.locale}
 										.triggerMessageBundleRefresh=${this.triggerMessageBundleRefresh}
-										.triggerSave=${this.triggerSave}
 										.addMessage=${this.addMessage}
 										.addInput=${this.addInput}
 									>
@@ -349,7 +357,7 @@ export default class InlangMessage extends LitElement {
 										message: this.message!,
 										variant: variant,
 									})
-									this.triggerSave()
+									this.dispatchOnInsertVariant(variant)
 									this.triggerMessageBundleRefresh()
 								}}
 								class="new-variant"

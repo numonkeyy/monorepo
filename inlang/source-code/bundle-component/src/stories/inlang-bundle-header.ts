@@ -1,4 +1,11 @@
-import type { Declaration, LanguageTag, MessageBundle, ProjectSettings2 } from "@inlang/sdk/v2"
+import type {
+	Declaration,
+	LanguageTag,
+	Message,
+	MessageBundle,
+	ProjectSettings2,
+	Variant,
+} from "@inlang/sdk/v2"
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import getInputs from "../helper/crud/input/get.js"
@@ -141,6 +148,20 @@ export default class InlangBundleHeader extends LitElement {
 	@state()
 	private _hasActions: boolean = false
 
+	dispatchOnUpdateMessage(message: Message, variants: Variant[]) {
+		const onUpdateMessage = new CustomEvent("update-message", {
+			bubbles: true,
+			composed: true,
+			detail: {
+				argument: {
+					message,
+					variants,
+				},
+			},
+		})
+		this.dispatchEvent(onUpdateMessage)
+	}
+
 	private _inputs = (): Declaration[] | undefined => {
 		return this.bundle ? getInputs({ messageBundle: this.bundle }) : undefined
 	}
@@ -183,8 +204,10 @@ export default class InlangBundleHeader extends LitElement {
 														@click=${() => {
 															deleteInput({ messageBundle: this.bundle!, input })
 															// deleteSelector({ message, index })
-															this.triggerSave()
-															this.triggerRefresh()
+															this.requestUpdate()
+															for (const message of this.bundle!.messages) {
+																this.dispatchOnUpdateMessage(message, [])
+															}
 														}}
 														>Delete</sl-menu-item
 													>

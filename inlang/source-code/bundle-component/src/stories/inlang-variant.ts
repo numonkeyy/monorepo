@@ -175,6 +175,32 @@ export default class InlangVariant extends LitElement {
 	// @property()
 	// revert: (messageId?: string, variantId?: string) => void = () => {}
 
+	dispatchOnDeleteVariant(variant: Variant) {
+		const onDeleteVariant = new CustomEvent("delete-variant", {
+			bubbles: true,
+			composed: true,
+			detail: {
+				argument: {
+					variant,
+				},
+			},
+		})
+		this.dispatchEvent(onDeleteVariant)
+	}
+
+	dispatchOnUpdateVariant(variant: Variant) {
+		const onUpdateVariant = new CustomEvent("update-variant", {
+			bubbles: true,
+			composed: true,
+			detail: {
+				argument: {
+					variant,
+				},
+			},
+		})
+		this.dispatchEvent(onUpdateVariant)
+	}
+
 	//functions
 	private _getLintReports = (): LintReport[] | undefined => {
 		// wether a lint report belongs to a variant or message and when they are shown
@@ -206,7 +232,7 @@ export default class InlangVariant extends LitElement {
 				message: this.message,
 				variant: this.variant,
 			})
-			this.triggerSave()
+			this.dispatchOnDeleteVariant(this.variant)
 			this.triggerMessageBundleRefresh()
 		}
 	}
@@ -226,7 +252,7 @@ export default class InlangVariant extends LitElement {
 				changedVariant.match[matchIndex] = value
 			}
 
-			this.triggerSave()
+			this.dispatchOnUpdateVariant(this.variant)
 			this.triggerMessageBundleRefresh()
 		}
 	}

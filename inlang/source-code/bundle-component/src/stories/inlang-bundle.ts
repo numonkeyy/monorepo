@@ -12,6 +12,7 @@ import {
 	createVariant,
 	createMessage,
 	type Variant,
+	type Expression,
 } from "@inlang/sdk/v2"
 import type { InstalledMessageLintRule } from "@inlang/sdk"
 
@@ -53,6 +54,11 @@ import patternToString from "../helper/crud/pattern/patternToString.js"
 import stringToPattern from "../helper/crud/pattern/stringToPattern.js"
 import sortAllVariants from "../helper/crud/variant/sortAll.js"
 import InlangBundleAction from "./actions/inlang-bundle-action.js"
+import deleteInput from "../helper/crud/input/delete.js"
+import deleteSelector from "../helper/crud/selector/delete.js"
+import addSelector from "../helper/crud/selector/add.js"
+import deleteVariant from "../helper/crud/variant/delete.js"
+import updateMatch from "../helper/crud/variant/updateMatch.js"
 
 @customElement("inlang-bundle")
 export default class InlangBundle extends LitElement {
@@ -75,19 +81,64 @@ export default class InlangBundle extends LitElement {
 	}
 
 	// events
-	dispatchOnChangeMessageBundle(bundle: MessageBundle) {
-		const onChangeMessageBundle = new CustomEvent("change-message-bundle", {
+	dispatchOnUpdateVariant(variant: Variant) {
+		const onUpdateVariant = new CustomEvent("update-variant", {
 			bubbles: true,
+			composed: true,
 			detail: {
-				argument: bundle,
+				argument: {
+					variant,
+				},
 			},
 		})
-		this.dispatchEvent(onChangeMessageBundle)
+		this.dispatchEvent(onUpdateVariant)
+	}
+
+	dispatchOnInsertVariant(variant: Variant) {
+		const onInsertVariant = new CustomEvent("insert-variant", {
+			bubbles: true,
+			composed: true,
+			detail: {
+				argument: {
+					variant,
+				},
+			},
+		})
+		this.dispatchEvent(onInsertVariant)
+	}
+
+	dispatchOnInsertMessage(message: Message, variants: Variant[]) {
+		const onInsertMessage = new CustomEvent("insert-message", {
+			bubbles: true,
+			composed: true,
+			detail: {
+				argument: {
+					message,
+					variants,
+				},
+			},
+		})
+		this.dispatchEvent(onInsertMessage)
+	}
+
+	dispatchOnUpdateMessage(message: Message, variants: Variant[]) {
+		const onUpdateMessage = new CustomEvent("update-message", {
+			bubbles: true,
+			composed: true,
+			detail: {
+				argument: {
+					message,
+					variants,
+				},
+			},
+		})
+		this.dispatchEvent(onUpdateMessage)
 	}
 
 	dispatchOnFixLint(lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) {
 		const onFixLint = new CustomEvent("fix-lint", {
 			bubbles: true,
+			composed: true,
 			detail: {
 				argument: {
 					lintReport,
@@ -101,6 +152,7 @@ export default class InlangBundle extends LitElement {
 	dispatchOnMachineTranslate(messageId?: string, variantId?: string) {
 		const onMachineTranslate = new CustomEvent("machine-translate", {
 			bubbles: true,
+			composed: true,
 			detail: {
 				argument: {
 					messageId,
@@ -124,7 +176,7 @@ export default class InlangBundle extends LitElement {
 	//functions
 	private _triggerSave = () => {
 		if (this._bundle) {
-			this.dispatchOnChangeMessageBundle(this._bundle)
+			//this.dispatchOnChangeMessageBundle(this._bundle)
 		}
 	}
 
@@ -140,7 +192,9 @@ export default class InlangBundle extends LitElement {
 		if (this._bundle) {
 			createInput({ messageBundle: this._bundle, inputName: name })
 		}
-		this._triggerSave()
+		for (const message of this._bundle?.messages || []) {
+			this.dispatchOnUpdateMessage(message, [])
+		}
 		this.requestUpdate()
 	}
 
@@ -213,19 +267,25 @@ export default class InlangBundle extends LitElement {
 		}
 	}
 
-	private _handlePatternChange = (
+	private _handleUpdatePattern = (
 		message: Message | undefined,
 		variant: Variant | undefined,
 		newPattern: Pattern,
 		locale: LanguageTag
 	) => {
-		if (message) {
-			if (variant) {
-				const newVariant = { ...variant, pattern: newPattern }
-				upsertVariant({
-					message: message!,
-					variant: newVariant,
-				})
+		if (variant) {
+			if (!message) {
+				throw new Error("a variant cant exist without a message")
+			}
+
+			// update existing variant
+			const newVariant = { ...variant, pattern: newPattern }
+			const upsertedVariant = upsertVariant({
+				message: message!,
+				variant: newVariant,
+			})
+			if (upsertedVariant) {
+				this.dispatchOnUpdateVariant(upsertedVariant)
 			}
 		} else {
 			const newVariant = {
@@ -233,22 +293,27 @@ export default class InlangBundle extends LitElement {
 				pattern: newPattern,
 			}
 
-			if (message || this.bundle?.messages.some((m) => m.locale === locale)) {
+			if (message) {
+				// A message object exists -> just add the new variant
 				upsertVariant({
 					message: message!,
 					variant: newVariant,
 				})
+				this.dispatchOnInsertVariant(newVariant)
 			} else {
-				this._addMessage({
+				// A message object does not exist yet -> create one that also contains the new variant
+				const newMessage = {
 					...createMessage({ locale: locale, text: "test" }),
 					selectors: [],
 					declarations: [],
 					locale: locale,
 					variants: [newVariant],
-				})
+				}
+				this._addMessage(newMessage)
+				this.dispatchOnInsertMessage(newMessage, [newVariant])
+				this.dispatchOnInsertVariant(newVariant)
 			}
 		}
-		this._triggerSave()
 		this.requestUpdate()
 	}
 
@@ -336,7 +401,7 @@ export default class InlangBundle extends LitElement {
 										slot="pattern-editor"
 										.pattern=${variant?.pattern}
 										@change-pattern=${(event: { detail: { argument: Pattern } }) => {
-											this._handlePatternChange(message, variant, event.detail.argument, locale)
+											this._handleUpdatePattern(message, variant, event.detail.argument, locale)
 										}}
 									></inlang-pattern-editor>
 									${patternToString({ pattern: variant?.pattern || [] }) === ""
