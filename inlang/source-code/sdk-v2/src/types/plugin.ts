@@ -127,32 +127,14 @@ export type ResolvePlugins2Function = (args: {
  */
 export type ResolvedPlugin2Api = {
 	/**
-	 *  * Importer / Exporter functions.
+	 * Importer / Exporter functions.
 	 * see https://linear.app/opral/issue/MESDK-157/sdk-v2-release-on-sqlite
 	 */
-	toBeImportedFiles: Record<string, Plugin2["toBeImportedFiles"] | undefined>
-	importFiles: Record<string, Plugin2["importFiles"] | undefined>
-	exportFiles: Record<string, Plugin2["exportFiles"] | undefined>
-	/**
-	 * App specific APIs.
-	 *
-	 * @example
-	 *  // define
-	 *  customApi: ({ settings }) => ({
-	 *    "app.inlang.ide-extension": {
-	 *      messageReferenceMatcher: () => {
-	 *        // use settings
-	 *        settings.pathPattern
-	 *       return
-	 *      }
-	 *    }
-	 *  })
-	 *  // use
-	 *  customApi['app.inlang.ide-extension'].messageReferenceMatcher()
-	 */
-	customApi: Record<`app.${string}.${string}` | `library.${string}.${string}`, unknown> & {
-		"app.inlang.ideExtension"?: CustomApiInlangIdeExtension
-	}
+
+	toBeImportedFiles?: Plugin2["toBeImportedFiles"]
+	importFiles?: Plugin2["importFiles"]
+	exportFiles?: Plugin2["exportFiles"]
+	customApi?: Record<`app.${string}.${string}` | `library.${string}.${string}`, unknown>
 }
 
 // ---------------------------- RESOLVE PLUGIN API TYPES ---------------------------------------------
@@ -200,13 +182,9 @@ export type ResolvePlugin2Function = (args: {
 		id: Plugin2["key"]
 	}>
 	/**
-	 * The resolved plugins.
-	 */
-	plugins: Array<Plugin2>
-	/**
 	 * The resolved api provided by plugins.
 	 */
-	resolvedPluginApi: ResolvedPlugin2Api
+	plugins: Record<string, ResolvedPlugin2Api>
 	/**
 	 * Errors during the resolution process.
 	 *
@@ -231,56 +209,3 @@ export type NodeishFilesystemSubset = Pick<
 	NodeishFilesystem,
 	"readFile" | "readdir" | "mkdir" | "writeFile" | "watch"
 >
-
-/**
- * Function that resolves (imports and initializes) the plugins.
- */
-export type ResolvePluginsFunction = (args: {
-	plugins: Array<Plugin2>
-	settings: ProjectSettings2
-	nodeishFs: NodeishFilesystemSubset
-}) => Promise<{
-	data: ResolvedPluginApi
-	errors: Array<
-		| PluginReturnedInvalidCustomApiError
-		| PluginToBeImportedFilesFunctionAlreadyDefinedError
-		| PluginImportFilesFunctionAlreadyDefinedError
-		| PluginExportFilesFunctionAlreadyDefinedError
-		| PluginHasInvalidIdError
-		| PluginHasInvalidSchemaError
-		| PluginsDoNotProvideImportOrExportFilesError
-	>
-}>
-
-/**
- * The API after resolving the plugins.
- */
-export type ResolvedPluginApi = {
-	/**
-	 * Importer / Exporter functions.
-	 * see https://linear.app/opral/issue/MESDK-157/sdk-v2-release-on-sqlite
-	 */
-	toBeImportedFiles: Record<string, Plugin2["toBeImportedFiles"] | undefined>
-	importFiles: Record<string, Plugin2["importFiles"] | undefined>
-	exportFiles: Record<string, Plugin2["exportFiles"] | undefined>
-	/**
-	 * App specific APIs.
-	 *
-	 * @example
-	 *  // define
-	 *  customApi: ({ settings }) => ({
-	 * 	 "app.inlang.ide-extension": {
-	 * 	   messageReferenceMatcher: () => {
-	 * 		 // use settings
-	 * 		 settings.pathPattern
-	 * 		return
-	 * 	   }
-	 * 	 }
-	 *  })
-	 *  // use
-	 *  customApi['app.inlang.ide-extension'].messageReferenceMatcher()
-	 */
-	customApi: Record<`app.${string}.${string}` | `library.${string}.${string}`, unknown> & {
-		"app.inlang.ideExtension"?: CustomApiInlangIdeExtension
-	}
-}

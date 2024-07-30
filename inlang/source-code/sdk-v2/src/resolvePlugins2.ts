@@ -2,10 +2,9 @@ import { tryCatch } from "@inlang/result"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { validatedPluginSettings } from "./validatedPluginSettings.js"
 import {
-	Plugin2,
 	InlangPlugin2,
-	type ResolvePluginsFunction,
 	type ResolvePlugin2Function,
+	type ResolvedPlugin2Api,
 } from "./types/plugin.js"
 import {
 	PluginError,
@@ -14,23 +13,16 @@ import {
 	PluginExportIsInvalidError,
 	PluginSettingsAreInvalidError,
 	PluginReturnedInvalidCustomApiError,
-	PluginImportFilesFunctionAlreadyDefinedError,
-	PluginExportFilesFunctionAlreadyDefinedError,
-	PluginToBeImportedFilesFunctionAlreadyDefinedError,
-	PluginHasInvalidIdError,
-	PluginHasInvalidSchemaError,
-	PluginsDoNotProvideImportOrExportFilesError,
 } from "./types/plugin-errors.js"
-import { deepmerge } from "deepmerge-ts"
 
 const PluginCompiler = TypeCompiler.Compile(InlangPlugin2)
 
 export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 	const _import = args._import
 
-	const allPlugins: Array<Plugin2> = []
 	const meta: Awaited<ReturnType<ResolvePlugin2Function>>["meta"] = []
 	const pluginErrors: Array<PluginError> = []
+	const resolvedPlugins: Record<string, ResolvedPlugin2Api> = {}
 
 	async function resolvePlugin(plugin: string) {
 		const importedPlugin = await tryCatch<InlangPlugin2>(() => _import(plugin))
@@ -83,102 +75,60 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 			return
 		}
 
+		const pluginKey = importedPlugin.data.default.key
 		meta.push({
 			plugin,
-			id: importedPlugin.data.default.key,
+			id: pluginKey,
 		})
 
-		allPlugins.push(importedPlugin.data.default as Plugin2)
-	}
+		const pluginData: ResolvedPlugin2Api = {}
 
-	await Promise.all(args.settings.modules.map(resolvePlugin))
-
-	const result: Awaited<ReturnType<ResolvePluginsFunction>> = {
-		data: {
-			toBeImportedFiles: {},
-			importFiles: {},
-			exportFiles: {},
-			customApi: {},
-		},
-		errors: [...pluginErrors],
-	}
-
-	for (const plugin of allPlugins) {
-		const errors = [...PluginCompiler.Errors(plugin)]
-
-		// -- USES INVALID SCHEMA --
-		if (errors.length > 0) {
-			console.error(`Plugin uses invalid schema: ${plugin.key}`, errors)
-			result.errors.push(
-				new PluginHasInvalidSchemaError({
-					key: plugin.key,
-					errors: errors,
-				})
-			)
+		if (typeof importedPlugin.data.default.toBeImportedFiles === "function") {
+			pluginData.toBeImportedFiles = importedPlugin.data.default.toBeImportedFiles
 		}
 
-		// -- CHECK FOR ALREADY DEFINED IMPORTER / EXPORTER --
-		if (typeof plugin.toBeImportedFiles === "function") {
-			if (result.data.toBeImportedFiles[plugin.key]) {
-				result.errors.push(
-					new PluginToBeImportedFilesFunctionAlreadyDefinedError({ key: plugin.key })
-				)
-			} else {
-				result.data.toBeImportedFiles[plugin.key] = plugin.toBeImportedFiles
-			}
+		if (typeof importedPlugin.data.default.importFiles === "function") {
+			// TODO: Fix type
+			// @ts-expect-error
+			pluginData.importFiles = importedPlugin.data.default.importFiles
 		}
 
-		if (typeof plugin.importFiles === "function") {
-			if (result.data.importFiles[plugin.key]) {
-				result.errors.push(new PluginImportFilesFunctionAlreadyDefinedError({ key: plugin.key }))
-			} else {
-				result.data.importFiles[plugin.key] = plugin.importFiles
-			}
+		if (typeof importedPlugin.data.default.exportFiles === "function") {
+			pluginData.exportFiles = importedPlugin.data.default.exportFiles
 		}
 
-		if (typeof plugin.exportFiles === "function") {
-			if (result.data.exportFiles[plugin.key]) {
-				result.errors.push(new PluginExportFilesFunctionAlreadyDefinedError({ key: plugin.key }))
-			} else {
-				result.data.exportFiles[plugin.key] = plugin.exportFiles
-			}
-		}
-
-		// -- ADD APP SPECIFIC API --
-		if (typeof plugin.addCustomApi === "function") {
+		if (typeof importedPlugin.data.default.addCustomApi === "function") {
 			const { data: customApi, error } = tryCatch(() =>
-				plugin.addCustomApi!({
+				importedPlugin.data.default.addCustomApi!({
 					settings: args.settings,
 				})
 			)
 			if (error) {
-				console.error(`Plugin returned invalid custom API: ${plugin.key}`, error)
-				result.errors.push(
-					new PluginReturnedInvalidCustomApiError({ key: plugin.key, cause: error })
-				)
+				// TODO: Fix type
+				// @ts-expect-error
+				pluginErrors.push(new PluginReturnedInvalidCustomApiError({ key: pluginKey, cause: error }))
 			} else if (typeof customApi !== "object") {
-				console.error(`Plugin returned invalid custom API type: ${plugin.key}`, typeof customApi)
-				result.errors.push(
+				pluginErrors.push(
+					// TODO: Fix type
+					// @ts-expect-error
 					new PluginReturnedInvalidCustomApiError({
-						key: plugin.key,
+						key: pluginKey,
 						cause: new Error(`The return value must be an object. Received "${typeof customApi}".`),
 					})
 				)
 			} else {
-				result.data.customApi = deepmerge(result.data.customApi, customApi)
+				pluginData.customApi = customApi
 			}
 		}
 
-		// -- CONTINUE IF ERRORS --
-		if (errors.length > 0) {
-			continue
-		}
+		resolvedPlugins[pluginKey] = pluginData
 	}
+
+	await Promise.all(args.settings.modules.map(resolvePlugin))
 
 	return {
 		meta,
-		plugins: allPlugins,
-		resolvedPluginApi: result.data,
-		errors: result.errors,
+		plugins: resolvedPlugins,
+		errors: pluginErrors,
 	}
 }
