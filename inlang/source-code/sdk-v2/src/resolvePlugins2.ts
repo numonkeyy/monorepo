@@ -106,13 +106,6 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 	for (const plugin of allPlugins) {
 		const errors = [...PluginCompiler.Errors(plugin)]
 
-		// -- INVALID ID in META --
-		const hasInvalidId = errors.some((error) => error.path === "/id")
-		if (hasInvalidId) {
-			console.error(`Plugin has invalid ID: ${plugin.key}`, errors)
-			result.errors.push(new PluginHasInvalidIdError({ key: plugin.key }))
-		}
-
 		// -- USES INVALID SCHEMA --
 		if (errors.length > 0) {
 			console.error(`Plugin uses invalid schema: ${plugin.key}`, errors)
@@ -124,10 +117,9 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 			)
 		}
 
-		// -- CHECK FOR ALREADY DEFINED FUNCTIONS --
+		// -- CHECK FOR ALREADY DEFINED IMPORTER / EXPORTER --
 		if (typeof plugin.toBeImportedFiles === "function") {
 			if (result.data.toBeImportedFiles[plugin.key]) {
-				console.error(`Plugin toBeImportedFiles function already defined: ${plugin.key}`)
 				result.errors.push(
 					new PluginToBeImportedFilesFunctionAlreadyDefinedError({ key: plugin.key })
 				)
@@ -138,7 +130,6 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 
 		if (typeof plugin.importFiles === "function") {
 			if (result.data.importFiles[plugin.key]) {
-				console.error(`Plugin importFiles function already defined: ${plugin.key}`)
 				result.errors.push(new PluginImportFilesFunctionAlreadyDefinedError({ key: plugin.key }))
 			} else {
 				result.data.importFiles[plugin.key] = plugin.importFiles
@@ -147,7 +138,6 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 
 		if (typeof plugin.exportFiles === "function") {
 			if (result.data.exportFiles[plugin.key]) {
-				console.error(`Plugin exportFiles function already defined: ${plugin.key}`)
 				result.errors.push(new PluginExportFilesFunctionAlreadyDefinedError({ key: plugin.key }))
 			} else {
 				result.data.exportFiles[plugin.key] = plugin.exportFiles
@@ -183,16 +173,6 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 		if (errors.length > 0) {
 			continue
 		}
-	}
-
-	// -- IMPORT / EXPORT NOT DEFINED FOR ANY PLUGIN --
-	if (
-		Object.keys(result.data.toBeImportedFiles).length === 0 &&
-		Object.keys(result.data.importFiles).length === 0 &&
-		Object.keys(result.data.exportFiles).length === 0
-	) {
-		console.error(`No import/export functions defined for any plugin.`)
-		result.errors.push(new PluginsDoNotProvideImportOrExportFilesError())
 	}
 
 	return {
