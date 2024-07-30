@@ -26,7 +26,7 @@ import { createDebugImport, importSequence } from "./import-utils.js"
 // import makeOpralUppercase from "./dev-modules/opral-uppercase-lint-rule.js"
 // import missingSelectorLintRule from "./dev-modules/missing-selector-lint-rule.js"
 // import missingCatchallLintRule from "./dev-modules/missingCatchall.js"
-import type { InstalledLintRule, ProjectSettings2 } from "./types/project-settings.js"
+import type { ProjectSettings2 } from "./types/project-settings.js"
 import type { InlangProject } from "./types/project.js"
 import { resolvePlugins } from "./resolvePlugins2.js"
 // import type { LanguageTag } from "@inlang/plugin"
@@ -87,36 +87,33 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 		}),
 		tap(() => lifecycle$.next("loaded"))
 	)
-
-	const installedLintRules$ = new BehaviorSubject([] as InstalledLintRule[])
-
-	combineLatest([modules$, settings$])
-		.pipe(
-			switchMap(([modules]) => {
-				lifecycle$.next("resolvingModules")
-				// TODO SDK-v2 LINT handle module load errors
-				const rules = (modules as any).messageBundleLintRules.map(
-					(rule: any) =>
-						({
-							id: rule.id,
-							displayName: rule.displayName,
-							description: rule.description,
-							module:
-								(modules as any).meta.find((m: { id: string | any[] }) => m.id.includes(rule.id))
-									?.module ??
-								"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
-							// default to warning, see https://github.com/opral/monorepo/issues/1254
-							level: "warning", // TODO SDK2 settings.messageLintRuleLevels?.[rule.id] ?? "warning",
-							settingsSchema: rule.settingsSchema,
-						} satisfies InstalledLintRule)
-				)
-				return from([rules])
-			})
-		)
-		.subscribe({
-			next: (rules) => installedLintRules$.next(rules),
-			error: (err) => console.error(err),
-		})
+	/**
+	 * Lint rules are now Lix validation rules, therefore this needs to be reimplemented
+	 */
+	// combineLatest([modules$, settings$])
+	// 	.pipe(
+	// 		switchMap(([modules]) => {
+	// 			lifecycle$.next("resolvingModules")
+	// 			// TODO SDK-v2 LINT handle module load errors
+	// 			const rules = (modules as any).messageBundleLintRules.map((rule: any) => ({
+	// 				id: rule.id,
+	// 				displayName: rule.displayName,
+	// 				description: rule.description,
+	// 				module:
+	// 					(modules as any).meta.find((m: { id: string | any[] }) => m.id.includes(rule.id))
+	// 						?.module ??
+	// 					"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
+	// 				// default to warning, see https://github.com/opral/monorepo/issues/1254
+	// 				level: "warning", // TODO SDK2 settings.messageLintRuleLevels?.[rule.id] ?? "warning",
+	// 				settingsSchema: rule.settingsSchema,
+	// 			}))
+	// 			return from([rules])
+	// 		})
+	// 	)
+	// 	.subscribe({
+	// 		next: (rules) => installedLintRules$.next(rules),
+	// 		error: (err) => console.error(err),
+	// 	})
 
 	const sqliteDbFilePath = args.inlangFolderPath + "/inlang.sqlite"
 
@@ -136,12 +133,9 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 		// sql,
 		// rawSql,
 		// TODO SDK-v2 API if we expose only the api, what helper Method should the SDK provide insert/update/delete for bundle/message/variant? how shall we deal with nested queries?
-		// db: db, 
+		// db: db,
 
-		installed: {
-			lintRules: installedLintRules$,
-			plugins: [],
-		},
+		plugins: [],
 		settings: {
 			get: () => projectSettings$.getValue(),
 			set: async (settings: ProjectSettings2) => {
@@ -264,7 +258,7 @@ export const populateMessages = (bundleSelect: SelectQueryBuilder<Database, "bun
 				"message.bundleId",
 				"=",
 				"bundle.id" as any
-			) 
+			)
 		).as("messages"),
 	])
 }

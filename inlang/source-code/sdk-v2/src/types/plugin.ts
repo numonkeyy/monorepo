@@ -1,13 +1,6 @@
-import {
-	type Static,
-	Type,
-	type TTemplateLiteral,
-	type TLiteral,
-	type TObject,
-} from "@sinclair/typebox"
+import { type Static, Type, type TObject } from "@sinclair/typebox"
 import type { JSONObject } from "@inlang/json-types"
 import type { CustomApiInlangIdeExtension } from "./customApis/app.inlang.ideExtension.js"
-import { Translatable } from "@inlang/translatable"
 import {
 	type ProjectSettings2,
 	type ExternalProjectSettings as ExternalProjectSettingsType,
@@ -28,12 +21,6 @@ import { NestedBundle } from "./schema.js"
 import { TranslationFile, type TranslationFile as TranslationFileType } from "./translation-file.js"
 import type { ImportFunction } from "../resolve-plugins/import.js"
 import type { NodeishFilesystem } from "@lix-js/fs"
-
-export const PluginId = Type.String({
-	pattern: "^plugin\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)$",
-	examples: ["plugin.namespace.id"],
-}) as unknown as TTemplateLiteral<[TLiteral<`plugin.${string}.${string}`>]>
-export type PluginId = Static<typeof PluginId>
 
 // ---------------------------- RUNTIME VALIDATION TYPES ---------------------------------------------
 
@@ -90,14 +77,7 @@ export type Plugin2<
 }
 
 export const Plugin2 = Type.Object({
-	id: PluginId,
-	displayName: Translatable(Type.String()),
-	description: Translatable(Type.String()),
-	/**
-	 * Typebox must be used to validate the Json Schema.
-	 * Github discussion to upvote a plain Json Schema validator and read the benefits of Typebox
-	 * https://github.com/opral/monorepo/discussions/1503
-	 */
+	key: Type.String(),
 	settingsSchema: Type.Optional(Type.Object({}, { additionalProperties: true })),
 	/**
 	 * see https://linear.app/opral/issue/MESDK-157/sdk-v2-release-on-sqlite
@@ -150,9 +130,9 @@ export type ResolvedPlugin2Api = {
 	 *  * Importer / Exporter functions.
 	 * see https://linear.app/opral/issue/MESDK-157/sdk-v2-release-on-sqlite
 	 */
-	toBeImportedFiles: Record<PluginId, Plugin2["toBeImportedFiles"] | undefined>
-	importFiles: Record<PluginId, Plugin2["importFiles"] | undefined>
-	exportFiles: Record<PluginId, Plugin2["exportFiles"] | undefined>
+	toBeImportedFiles: Record<string, Plugin2["toBeImportedFiles"] | undefined>
+	importFiles: Record<string, Plugin2["importFiles"] | undefined>
+	exportFiles: Record<string, Plugin2["exportFiles"] | undefined>
 	/**
 	 * App specific APIs.
 	 *
@@ -217,7 +197,7 @@ export type ResolvePlugin2Function = (args: {
 		/**
 		 * The resolved item id of the module.
 		 */
-		id: Plugin2["id"]
+		id: Plugin2["key"]
 	}>
 	/**
 	 * The resolved plugins.
@@ -280,9 +260,9 @@ export type ResolvedPluginApi = {
 	 * Importer / Exporter functions.
 	 * see https://linear.app/opral/issue/MESDK-157/sdk-v2-release-on-sqlite
 	 */
-	toBeImportedFiles: Record<PluginId, Plugin2["toBeImportedFiles"] | undefined>
-	importFiles: Record<PluginId, Plugin2["importFiles"] | undefined>
-	exportFiles: Record<PluginId, Plugin2["exportFiles"] | undefined>
+	toBeImportedFiles: Record<string, Plugin2["toBeImportedFiles"] | undefined>
+	importFiles: Record<string, Plugin2["importFiles"] | undefined>
+	exportFiles: Record<string, Plugin2["exportFiles"] | undefined>
 	/**
 	 * App specific APIs.
 	 *

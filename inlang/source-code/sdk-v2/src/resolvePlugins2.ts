@@ -23,7 +23,7 @@ import {
 } from "./types/plugin-errors.js"
 import { deepmerge } from "deepmerge-ts"
 
-// const PluginCompiler = TypeCompiler.Compile(InlangPlugin2)
+const PluginCompiler = TypeCompiler.Compile(InlangPlugin2)
 
 export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 	const _import = args._import
@@ -75,7 +75,7 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 		// -- VALIDATE PLUGIN SETTINGS
 		const result = validatedPluginSettings({
 			settingsSchema: importedPlugin.data.default.settingsSchema,
-			pluginSettings: (args.settings as any)[importedPlugin.data.default.id],
+			pluginSettings: (args.settings as any)[importedPlugin.data.default.key],
 		})
 		if (result !== "isValid") {
 			console.error(`Plugin settings are invalid for: ${plugin}`, result)
@@ -85,7 +85,7 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 
 		meta.push({
 			plugin,
-			id: importedPlugin.data.default.id,
+			id: importedPlugin.data.default.key,
 		})
 
 		allPlugins.push(importedPlugin.data.default as Plugin2)
@@ -109,16 +109,16 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 		// -- INVALID ID in META --
 		const hasInvalidId = errors.some((error) => error.path === "/id")
 		if (hasInvalidId) {
-			console.error(`Plugin has invalid ID: ${plugin.id}`, errors)
-			result.errors.push(new PluginHasInvalidIdError({ id: plugin.id }))
+			console.error(`Plugin has invalid ID: ${plugin.key}`, errors)
+			result.errors.push(new PluginHasInvalidIdError({ key: plugin.key }))
 		}
 
 		// -- USES INVALID SCHEMA --
 		if (errors.length > 0) {
-			console.error(`Plugin uses invalid schema: ${plugin.id}`, errors)
+			console.error(`Plugin uses invalid schema: ${plugin.key}`, errors)
 			result.errors.push(
 				new PluginHasInvalidSchemaError({
-					id: plugin.id,
+					key: plugin.key,
 					errors: errors,
 				})
 			)
@@ -126,31 +126,31 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 
 		// -- CHECK FOR ALREADY DEFINED FUNCTIONS --
 		if (typeof plugin.toBeImportedFiles === "function") {
-			if (result.data.toBeImportedFiles[plugin.id]) {
-				console.error(`Plugin toBeImportedFiles function already defined: ${plugin.id}`)
+			if (result.data.toBeImportedFiles[plugin.key]) {
+				console.error(`Plugin toBeImportedFiles function already defined: ${plugin.key}`)
 				result.errors.push(
-					new PluginToBeImportedFilesFunctionAlreadyDefinedError({ id: plugin.id })
+					new PluginToBeImportedFilesFunctionAlreadyDefinedError({ key: plugin.key })
 				)
 			} else {
-				result.data.toBeImportedFiles[plugin.id] = plugin.toBeImportedFiles
+				result.data.toBeImportedFiles[plugin.key] = plugin.toBeImportedFiles
 			}
 		}
 
 		if (typeof plugin.importFiles === "function") {
-			if (result.data.importFiles[plugin.id]) {
-				console.error(`Plugin importFiles function already defined: ${plugin.id}`)
-				result.errors.push(new PluginImportFilesFunctionAlreadyDefinedError({ id: plugin.id }))
+			if (result.data.importFiles[plugin.key]) {
+				console.error(`Plugin importFiles function already defined: ${plugin.key}`)
+				result.errors.push(new PluginImportFilesFunctionAlreadyDefinedError({ key: plugin.key }))
 			} else {
-				result.data.importFiles[plugin.id] = plugin.importFiles
+				result.data.importFiles[plugin.key] = plugin.importFiles
 			}
 		}
 
 		if (typeof plugin.exportFiles === "function") {
-			if (result.data.exportFiles[plugin.id]) {
-				console.error(`Plugin exportFiles function already defined: ${plugin.id}`)
-				result.errors.push(new PluginExportFilesFunctionAlreadyDefinedError({ id: plugin.id }))
+			if (result.data.exportFiles[plugin.key]) {
+				console.error(`Plugin exportFiles function already defined: ${plugin.key}`)
+				result.errors.push(new PluginExportFilesFunctionAlreadyDefinedError({ key: plugin.key }))
 			} else {
-				result.data.exportFiles[plugin.id] = plugin.exportFiles
+				result.data.exportFiles[plugin.key] = plugin.exportFiles
 			}
 		}
 
@@ -162,13 +162,15 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 				})
 			)
 			if (error) {
-				console.error(`Plugin returned invalid custom API: ${plugin.id}`, error)
-				result.errors.push(new PluginReturnedInvalidCustomApiError({ id: plugin.id, cause: error }))
+				console.error(`Plugin returned invalid custom API: ${plugin.key}`, error)
+				result.errors.push(
+					new PluginReturnedInvalidCustomApiError({ key: plugin.key, cause: error })
+				)
 			} else if (typeof customApi !== "object") {
-				console.error(`Plugin returned invalid custom API type: ${plugin.id}`, typeof customApi)
+				console.error(`Plugin returned invalid custom API type: ${plugin.key}`, typeof customApi)
 				result.errors.push(
 					new PluginReturnedInvalidCustomApiError({
-						id: plugin.id,
+						key: plugin.key,
 						cause: new Error(`The return value must be an object. Received "${typeof customApi}".`),
 					})
 				)

@@ -1,7 +1,5 @@
-import type { BehaviorSubject, Observer, Subscription } from "rxjs"
+import type { Observer, Subscription } from "rxjs"
 import type {
-	InstalledLintRule,
-	InstalledPlugin,
 	ProjectSettings2,
 	// LintResult,
 	// Message,
@@ -27,11 +25,6 @@ export type InlangProject = {
 	 */
 	id: string
 
-	installed: {
-		plugins: InstalledPlugin[] // TODO check how we get those subscribable
-		lintRules: BehaviorSubject<InstalledLintRule[]> // TODO check how we get those subscribable
-	}
-
 	settings: {
 		get: () => ProjectSettings2
 		set: (settings: ProjectSettings2) => Promise<void>
@@ -40,6 +33,10 @@ export type InlangProject = {
 			error?: (error: any) => void,
 			complete?: () => void
 		) => Subscription
+	}
+	plugins: {
+		// TODO provide import exporter plugins
+		// see https://linear.app/opral/issue/MESDK-160/new-plugin-api
 	}
 	bundle: {
 		select: SelectQueryBuilder<Database, "bundle", object>
