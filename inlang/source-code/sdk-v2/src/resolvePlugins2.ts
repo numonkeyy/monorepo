@@ -3,7 +3,7 @@ import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { validatedPluginSettings } from "./validatedPluginSettings.js"
 import {
 	Plugin2,
-	InlangPlugin,
+	InlangPlugin2,
 	type ResolvePluginsFunction,
 	type ResolvePlugin2Function,
 } from "./types/plugin.js"
@@ -23,21 +23,22 @@ import {
 } from "./types/plugin-errors.js"
 import { deepmerge } from "deepmerge-ts"
 
-const PluginCompiler = TypeCompiler.Compile(InlangPlugin)
+// const PluginCompiler = TypeCompiler.Compile(InlangPlugin2)
 
 export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 	const _import = args._import
 
 	const allPlugins: Array<Plugin2> = []
 	const meta: Awaited<ReturnType<ResolvePlugin2Function>>["meta"] = []
-	const moduleErrors: Array<PluginError> = []
+	const pluginErrors: Array<PluginError> = []
 
 	async function resolvePlugin(plugin: string) {
-		const importedPlugin = await tryCatch<InlangPlugin>(() => _import(plugin))
+		const importedPlugin = await tryCatch<InlangPlugin2>(() => _import(plugin))
 
 		// -- FAILED TO IMPORT --
 		if (importedPlugin.error) {
-			moduleErrors.push(
+			console.error(`Failed to import plugin: ${plugin}`, importedPlugin.error)
+			pluginErrors.push(
 				new PluginImportError({
 					plugin,
 					cause: importedPlugin.error as Error,
@@ -48,7 +49,8 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 
 		// -- PLUGIN DOES NOT EXPORT ANYTHING --
 		if (importedPlugin.data?.default === undefined) {
-			moduleErrors.push(
+			console.error(`Plugin has no exports: ${plugin}`)
+			pluginErrors.push(
 				new PluginHasNoExportsError({
 					plugin,
 				})
@@ -56,17 +58,17 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 			return
 		}
 
-		// -- CHECK IF PLUGIN IS SYNTACTICALLY VALID
+		// -- CHECK IF PLUGIN IS SYNTACTICALLY VALID --
 		const isValidPlugin = PluginCompiler.Check(importedPlugin.data)
 		if (!isValidPlugin) {
 			const errors = [...PluginCompiler.Errors(importedPlugin.data)]
-			moduleErrors.push(
+			console.error(`Plugin schema is invalid for: ${plugin}`, errors)
+			pluginErrors.push(
 				new PluginExportIsInvalidError({
 					plugin,
 					errors,
 				})
 			)
-
 			return
 		}
 
@@ -76,7 +78,8 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 			pluginSettings: (args.settings as any)[importedPlugin.data.default.id],
 		})
 		if (result !== "isValid") {
-			moduleErrors.push(new PluginSettingsAreInvalidError({ plugin, errors: result }))
+			console.error(`Plugin settings are invalid for: ${plugin}`, result)
+			pluginErrors.push(new PluginSettingsAreInvalidError({ plugin, errors: result }))
 			return
 		}
 
@@ -97,7 +100,7 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 			exportFiles: {},
 			customApi: {},
 		},
-		errors: [...moduleErrors],
+		errors: [...pluginErrors],
 	}
 
 	for (const plugin of allPlugins) {
@@ -106,11 +109,13 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 		// -- INVALID ID in META --
 		const hasInvalidId = errors.some((error) => error.path === "/id")
 		if (hasInvalidId) {
+			console.error(`Plugin has invalid ID: ${plugin.id}`, errors)
 			result.errors.push(new PluginHasInvalidIdError({ id: plugin.id }))
 		}
 
 		// -- USES INVALID SCHEMA --
 		if (errors.length > 0) {
+			console.error(`Plugin uses invalid schema: ${plugin.id}`, errors)
 			result.errors.push(
 				new PluginHasInvalidSchemaError({
 					id: plugin.id,
@@ -122,6 +127,7 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 		// -- CHECK FOR ALREADY DEFINED FUNCTIONS --
 		if (typeof plugin.toBeImportedFiles === "function") {
 			if (result.data.toBeImportedFiles[plugin.id]) {
+				console.error(`Plugin toBeImportedFiles function already defined: ${plugin.id}`)
 				result.errors.push(
 					new PluginToBeImportedFilesFunctionAlreadyDefinedError({ id: plugin.id })
 				)
@@ -132,6 +138,7 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 
 		if (typeof plugin.importFiles === "function") {
 			if (result.data.importFiles[plugin.id]) {
+				console.error(`Plugin importFiles function already defined: ${plugin.id}`)
 				result.errors.push(new PluginImportFilesFunctionAlreadyDefinedError({ id: plugin.id }))
 			} else {
 				result.data.importFiles[plugin.id] = plugin.importFiles
@@ -140,6 +147,7 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 
 		if (typeof plugin.exportFiles === "function") {
 			if (result.data.exportFiles[plugin.id]) {
+				console.error(`Plugin exportFiles function already defined: ${plugin.id}`)
 				result.errors.push(new PluginExportFilesFunctionAlreadyDefinedError({ id: plugin.id }))
 			} else {
 				result.data.exportFiles[plugin.id] = plugin.exportFiles
@@ -154,8 +162,10 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 				})
 			)
 			if (error) {
+				console.error(`Plugin returned invalid custom API: ${plugin.id}`, error)
 				result.errors.push(new PluginReturnedInvalidCustomApiError({ id: plugin.id, cause: error }))
 			} else if (typeof customApi !== "object") {
+				console.error(`Plugin returned invalid custom API type: ${plugin.id}`, typeof customApi)
 				result.errors.push(
 					new PluginReturnedInvalidCustomApiError({
 						id: plugin.id,
@@ -179,6 +189,7 @@ export const resolvePlugins: ResolvePlugin2Function = async (args) => {
 		Object.keys(result.data.importFiles).length === 0 &&
 		Object.keys(result.data.exportFiles).length === 0
 	) {
+		console.error(`No import/export functions defined for any plugin.`)
 		result.errors.push(new PluginsDoNotProvideImportOrExportFilesError())
 	}
 

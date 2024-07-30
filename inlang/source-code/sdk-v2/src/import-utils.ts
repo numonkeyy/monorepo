@@ -1,12 +1,12 @@
-import type { InlangPlugin } from "./types/plugin.js"
+import type { InlangPlugin2 } from "./types/plugin.js"
 import { PluginImportError } from "./types/plugin-errors.js"
 
 /**
  * @throws {PluginImportError}
  */
-type Importer = (uri: string) => Promise<InlangPlugin>
+type Importer = (uri: string) => Promise<InlangPlugin2>
 
-export function createDebugImport(importMap: Record<string, InlangPlugin["default"]>): Importer {
+export function createDebugImport(importMap: Record<string, InlangPlugin2["default"]>): Importer {
 	return async (uri) => {
 		const resolved = importMap[uri]
 		if (resolved) return { default: resolved }

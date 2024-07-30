@@ -9,11 +9,13 @@ import type { JSONObject } from "@inlang/json-types"
 import type { CustomApiInlangIdeExtension } from "./customApis/app.inlang.ideExtension.js"
 import { Translatable } from "@inlang/translatable"
 import {
-	type ProjectSettings2 as ProjectSettings2Type,
+	type ProjectSettings2,
 	type ExternalProjectSettings as ExternalProjectSettingsType,
 	ExternalProjectSettings,
 } from "./project-settings.js"
 import type {
+	PluginHasNoExportsError,
+	PluginImportError,
 	PluginHasInvalidIdError,
 	PluginHasInvalidSchemaError,
 	PluginReturnedInvalidCustomApiError,
@@ -24,9 +26,7 @@ import type {
 } from "./plugin-errors.js"
 import { NestedBundle } from "./schema.js"
 import { TranslationFile, type TranslationFile as TranslationFileType } from "./translation-file.js"
-import type { ProjectSettings2 } from "./project-settings.js"
 import type { ImportFunction } from "../resolve-plugins/import.js"
-import type { PluginHasNoExportsError, PluginImportError } from "./plugin-errors.js"
 import type { NodeishFilesystem } from "@lix-js/fs"
 
 export const PluginId = Type.String({
@@ -64,13 +64,13 @@ export type Plugin2<
 	 * see https://linear.app/opral/issue/MESDK-157/sdk-v2-release-on-sqlite
 	 */
 	toBeImportedFiles?: (args: {
-		settings: ProjectSettings2Type & ExternalSettings
+		settings: ProjectSettings2 & ExternalSettings
 		nodeFs: unknown
 	}) => Promise<Array<TranslationFileType>> | Array<TranslationFileType>
 	importFiles?: (args: { files: Array<TranslationFileType> }) => { bundles: NestedBundle }
 	exportFiles?: (args: {
 		bundles: NestedBundle
-		settings: ProjectSettings2Type & ExternalSettings
+		settings: ProjectSettings2 & ExternalSettings
 	}) => Array<TranslationFileType>
 	/**
 	 * Define app specific APIs.
@@ -83,7 +83,7 @@ export type Plugin2<
 	 *  })
 	 */
 	addCustomApi?: (args: {
-		settings: ProjectSettings2Type & ExternalSettings
+		settings: ProjectSettings2 & ExternalSettings
 	}) =>
 		| Record<`app.${string}.${string}`, unknown>
 		| { "app.inlang.ideExtension": CustomApiInlangIdeExtension }
@@ -120,11 +120,7 @@ export const Plugin2 = Type.Object({
 			Type.Array(TranslationFile)
 		)
 	),
-	/**
-	 * @deprecated removed
-	 */
-	detectedLanguageTags: Type.Optional(Type.Any()),
-	addCustomApi: Type.Optional(Type.Any()),
+	addCustomApi: Type.Optional(Type.Function([Type.Object({ settings: Type.Any() })], Type.Any())),
 })
 
 /**
@@ -132,7 +128,7 @@ export const Plugin2 = Type.Object({
  */
 export type ResolvePlugins2Function = (args: {
 	plugins: Array<Plugin2>
-	settings: ProjectSettings2Type
+	settings: ProjectSettings2
 }) => Promise<{
 	data: ResolvedPlugin2Api
 	errors: Array<
@@ -188,10 +184,10 @@ export type ResolvedPlugin2Api = {
  */
 // not using Static<infer T> here because the type is not inferred correctly
 // due to type overwrites in modules.
-export type InlangPlugin = { default: Plugin2 }
-export const InlangPlugin = Type.Object({
+export const InlangPlugin2 = Type.Object({
 	default: Plugin2,
 })
+export type InlangPlugin2 = Static<typeof InlangPlugin2>
 
 /**
  * Function that resolves modules from the config.
