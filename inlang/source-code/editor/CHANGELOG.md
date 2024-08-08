@@ -1,5 +1,21 @@
 # @inlang/editor
 
+## 0.1.8
+
+### Patch Changes
+
+- a377572: Update app server settings
+
+## 0.1.7
+
+### Patch Changes
+
+- c07c5a4: fix: Ninja recommendation
+- Updated dependencies [e8d74b9]
+  - @lix-js/fs@2.2.0
+  - @lix-js/client@2.2.1
+  - @inlang/settings-component@1.0.30
+
 ## 0.1.6
 
 ### Patch Changes

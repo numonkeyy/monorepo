@@ -16,7 +16,6 @@
 		for (const lang of availableLanguageTags) {
 			const localisedPath = strategy.getLocalisedPath(canonicalPath, lang)
 			const fullPath = serializeRoute(localisedPath, absoluteBase, undefined)
-
 			const link = new URL(fullPath, new URL($page.url)).href
 			links.push(link)
 		}

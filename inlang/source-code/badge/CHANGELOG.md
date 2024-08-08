@@ -1,5 +1,18 @@
 # @inlang/badge
 
+## 0.7.40
+
+### Patch Changes
+
+- a377572: Update app server settings
+
+## 0.7.39
+
+### Patch Changes
+
+- @inlang/sdk@0.36.3
+- @lix-js/client@2.2.1
+
 ## 0.7.38
 
 ### Patch Changes

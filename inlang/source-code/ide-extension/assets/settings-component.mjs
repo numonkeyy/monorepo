@@ -5613,9 +5613,9 @@ var require_ms = __commonJS({
   }
 });
 
-// ../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/common.js
+// ../../../node_modules/.pnpm/debug@4.3.5/node_modules/debug/src/common.js
 var require_common = __commonJS({
-  "../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/common.js"(exports, module) {
+  "../../../node_modules/.pnpm/debug@4.3.5/node_modules/debug/src/common.js"(exports, module) {
     function setup(env) {
       createDebug.debug = createDebug;
       createDebug.default = createDebug;
@@ -5776,9 +5776,9 @@ var require_common = __commonJS({
   }
 });
 
-// ../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/browser.js
+// ../../../node_modules/.pnpm/debug@4.3.5/node_modules/debug/src/browser.js
 var require_browser = __commonJS({
-  "../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/browser.js"(exports, module) {
+  "../../../node_modules/.pnpm/debug@4.3.5/node_modules/debug/src/browser.js"(exports, module) {
     exports.formatArgs = formatArgs;
     exports.save = save;
     exports.load = load;
@@ -27240,7 +27240,7 @@ var j = (t7, i5, s5) => {
   return h3._$AI(t7), h3;
 };
 
-// ../../../node_modules/.pnpm/lit-element@4.0.5/node_modules/lit-element/lit-element.js
+// ../../../node_modules/.pnpm/lit-element@4.0.6/node_modules/lit-element/lit-element.js
 var s3 = class extends b {
   constructor() {
     super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
@@ -27266,7 +27266,7 @@ var s3 = class extends b {
 s3._$litElement$ = true, s3["finalized", "finalized"] = true, globalThis.litElementHydrateSupport?.({ LitElement: s3 });
 var r4 = globalThis.litElementPolyfillSupport;
 r4?.({ LitElement: s3 });
-(globalThis.litElementVersions ??= []).push("4.0.5");
+(globalThis.litElementVersions ??= []).push("4.0.6");
 
 // ../../../node_modules/.pnpm/@lit+reactive-element@2.0.4/node_modules/@lit/reactive-element/decorators/custom-element.js
 var t3 = (t7) => (e11, o9) => {
@@ -28131,7 +28131,7 @@ var InlangModule = import_typebox9.Type.Object({
 // ../sdk/dist/resolve-modules/message-lint-rules/resolveMessageLintRules.js
 var import_value = __toESM(require_value2(), 1);
 
-// ../../../node_modules/.pnpm/dedent@1.5.1_babel-plugin-macros@2.8.0/node_modules/dedent/dist/dedent.mjs
+// ../../../node_modules/.pnpm/dedent@1.5.1/node_modules/dedent/dist/dedent.mjs
 function ownKeys(object, enumerableOnly) {
   var keys = Object.keys(object);
   if (Object.getOwnPropertySymbols) {
@@ -28709,41 +28709,6 @@ var registry = [
     pricing: "Free"
   },
   {
-    uniqueID: "0023fsjj",
-    $schema: "https://inlang.com/schema/marketplace-manifest",
-    id: "app.lokalise.i18nally",
-    icon: "https://avatars.githubusercontent.com/u/14294501?s=200&v=4",
-    gallery: [
-      "https://github.com/lokalise/i18n-ally/blob/main/screenshots/full-logo-new.png?raw=true"
-    ],
-    displayName: {
-      en: "i18n ally"
-    },
-    description: {
-      en: "\u{1F30D} All in one i18n extension for VS Code"
-    },
-    readme: {
-      en: "./inlang/external-projects/i18n-ally/README.md"
-    },
-    keywords: [
-      "apps",
-      "i18n-ally",
-      "i18n ally",
-      "vs-code",
-      "ide-extension",
-      "javascript",
-      "developer",
-      "i18n",
-      "external"
-    ],
-    recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
-    pricing: "free",
-    publisherName: "lokalise",
-    publisherIcon: "https://avatars.githubusercontent.com/u/14294501?s=200&v=4",
-    website: "https://marketplace.visualstudio.com/items?itemName=lokalise.i18n-ally",
-    license: "MIT License"
-  },
-  {
     uniqueID: "gkrpgoir",
     id: "app.parrot.figmaPlugin",
     icon: "https://cdn.jsdelivr.net/gh/parrot-global/parrot@main/parrot-logo.svg",
@@ -28765,30 +28730,6 @@ var registry = [
     publisherName: "Parrot.global",
     publisherIcon: "https://cdn.jsdelivr.net/gh/parrot-global/parrot@main/parrot-logo.svg",
     license: "PolyForm Strict License 1.0.0"
-  },
-  {
-    uniqueID: "1153khjh",
-    $schema: "https://inlang.com/schema/marketplace-manifest",
-    id: "app.tolgee.tolgee-platform",
-    gallery: [
-      "https://user-images.githubusercontent.com/18496315/188632536-3547fd70-755c-4a32-9b1e-fb1afbf84b33.png"
-    ],
-    icon: "https://user-images.githubusercontent.com/18496315/188628892-33fcc282-26f1-4035-8105-95952bd93de9.svg",
-    displayName: {
-      en: "Tolgee"
-    },
-    description: {
-      en: "An open-source localization platform developers enjoy to work with."
-    },
-    readme: {
-      en: "./inlang/external-projects/tolgee/README.md"
-    },
-    keywords: ["apps", "tolgee", "editor", "messages", "translator", "external"],
-    recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
-    pricing: "start free",
-    publisherName: "tolgee",
-    publisherIcon: "https://user-images.githubusercontent.com/18496315/188628892-33fcc282-26f1-4035-8105-95952bd93de9.svg",
-    license: "Apache-2.0"
   },
   {
     uniqueID: "940fn8mg",
@@ -29414,39 +29355,6 @@ var registry = [
     license: "Apache-2.0"
   },
   {
-    uniqueID: "hheug211",
-    $schema: "https://inlang.com/schema/marketplace-manifest",
-    id: "library.amannn.nextintl",
-    icon: "https://emojis.wiki/thumbs/emojis/globe-with-meridians.webp",
-    gallery: ["https://github.com/amannn/next-intl/blob/main/media/logo.png?raw=true"],
-    displayName: {
-      en: "next-intl"
-    },
-    description: {
-      en: "Internationalization (i18n) for Next.js that gets out of your way."
-    },
-    readme: {
-      en: "./inlang/external-projects/next-intl/README.md"
-    },
-    keywords: [
-      "libraries",
-      "next-intl",
-      "nextjs",
-      "next",
-      "react",
-      "developer",
-      "i18n",
-      "external",
-      "inlang",
-      "unlisted"
-    ],
-    recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
-    publisherName: "amannn",
-    publisherIcon: "https://avatars.githubusercontent.com/u/4038316?v=4",
-    website: "https://next-intl-docs.vercel.app",
-    license: "MIT License"
-  },
-  {
     uniqueID: "fnhuwzrx",
     $schema: "https://inlang.com/schema/marketplace-manifest",
     id: "library.brikev.remix-paraglidejs",
@@ -29478,39 +29386,6 @@ var registry = [
     website: "https://github.com/BRIKEV/remix-paraglidejs",
     license: "MIT License",
     pricing: "Free"
-  },
-  {
-    uniqueID: "kl95463j",
-    $schema: "https://inlang.com/schema/marketplace-manifest",
-    id: "library.i18next.i18next",
-    icon: "https://avatars.githubusercontent.com/u/8546082?s=200&v=4",
-    gallery: [
-      "https://github.com/i18next/i18next/blob/master/assets/i18next-ecosystem.jpg?raw=true"
-    ],
-    displayName: {
-      en: "i18next library"
-    },
-    description: {
-      en: "learn once - translate everywhere"
-    },
-    readme: {
-      en: "./inlang/external-projects/i18next/README.md"
-    },
-    keywords: [
-      "libraries",
-      "i18next",
-      "javascript",
-      "developer",
-      "i18n",
-      "external",
-      "inlang",
-      "unlisted"
-    ],
-    recommends: ["m/3i8bor92", "m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
-    publisherName: "i18next",
-    publisherIcon: "https://avatars.githubusercontent.com/u/8546082?s=200&v=4",
-    website: "https://www.i18next.com",
-    license: "MIT License"
   },
   {
     uniqueID: "8y8sxj09",
@@ -29845,94 +29720,6 @@ var registry = [
     publisherName: "inlang",
     publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
     license: "Apache-2.0"
-  },
-  {
-    uniqueID: "kkfjusgu",
-    $schema: "https://inlang.com/schema/marketplace-manifest",
-    id: "library.kaisermann.svelte-i18n",
-    icon: "https://avatars.githubusercontent.com/u/23617963?s=200&v=4",
-    gallery: ["https://avatars.githubusercontent.com/u/23617963?s=200&v=4"],
-    displayName: {
-      en: "svelte-i18n"
-    },
-    description: {
-      en: "Internationalization library for Svelte"
-    },
-    readme: {
-      en: "./inlang/external-projects/svelte-i18n/README.md"
-    },
-    keywords: ["libraries", "developer", "i18n", "external", "unlisted"],
-    recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
-    publisherName: "kaisermann",
-    publisherIcon: "https://avatars.githubusercontent.com/u/12702016?v=4",
-    website: "https://github.com/kaisermann/svelte-i18n",
-    license: "MIT License"
-  },
-  {
-    uniqueID: "29dg63g3",
-    $schema: "https://inlang.com/schema/marketplace-manifest",
-    id: "library.kazupon.vuei18n",
-    icon: "https://raw.githubusercontent.com/kazupon/vue-i18n/ca513046480ecdb4565072a3b38ec0e2643f43e3/assets/vue-i18n-logo.svg",
-    gallery: [
-      "https://raw.githubusercontent.com/kazupon/vue-i18n/ca513046480ecdb4565072a3b38ec0e2643f43e3/assets/vue-i18n-logo.svg"
-    ],
-    displayName: {
-      en: "Vue I18n"
-    },
-    description: {
-      en: "Vue I18n is internationalization plugin for Vue.js"
-    },
-    readme: {
-      en: "./inlang/external-projects/vue-i18n/README.md"
-    },
-    keywords: [
-      "libraries",
-      "vue-i18n",
-      "vue",
-      "javascript",
-      "developer",
-      "i18n",
-      "external",
-      "unlisted"
-    ],
-    recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
-    publisherName: "kazupon",
-    publisherIcon: "https://avatars.githubusercontent.com/u/72989?v=4",
-    website: "https://kazupon.github.io/vue-i18n",
-    license: "MIT License"
-  },
-  {
-    uniqueID: "j8f8f832",
-    $schema: "https://inlang.com/schema/marketplace-manifest",
-    id: "library.QuiiBz.nextinternational",
-    icon: "https://github.com/QuiiBz/next-international/blob/main/assets/logo-black.png?raw=true",
-    gallery: [
-      "https://github.com/QuiiBz/next-international/blob/main/assets/logo-black.png?raw=true"
-    ],
-    displayName: {
-      en: "next-international"
-    },
-    description: {
-      en: "Type-safe internationalization (i18n) for Next.js"
-    },
-    readme: {
-      en: "./inlang/external-projects/next-international/README.md"
-    },
-    keywords: [
-      "libraries",
-      "nextjs",
-      "next",
-      "javascript",
-      "developer",
-      "i18n",
-      "external",
-      "unlisted"
-    ],
-    recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
-    publisherName: "QuiiBz",
-    publisherIcon: "https://avatars.githubusercontent.com/u/43268759?v=4",
-    website: "https://next-international.vercel.app",
-    license: "MIT License"
   },
   {
     uniqueID: "ewkole66",
@@ -30314,6 +30101,29 @@ var registry = [
     website: "https://manage.inlang.com/install?module=plugin.inlang.nextIntl",
     license: "Apache-2.0",
     module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-next-intl@latest/dist/index.js"
+  },
+  {
+    uniqueID: "wrh36dfb",
+    $schema: "https://inlang.com/schema/marketplace-manifest",
+    id: "plugin.inlang.sapUI5",
+    icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/plugins/sap-ui5/assets/icon.png",
+    displayName: {
+      en: "SAP UI5 plugin"
+    },
+    description: {
+      en: "Enables the inlang Visual Studio Code extension (Sherlock) to work with SAP UI5"
+    },
+    pages: {
+      "/": "./inlang/source-code/plugins/sap-ui5/README.md",
+      "/changelog": "./inlang/source-code/plugins/sap-ui5/CHANGELOG.md"
+    },
+    keywords: ["website", "vscode", "sap", "sapui5", "plugin"],
+    recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
+    publisherName: "inlang",
+    publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+    website: "https://manage.inlang.com/install?module=plugin.inlang.sapUI5",
+    license: "Apache-2.0",
+    module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-sap-ui5@latest/dist/index.js"
   },
   {
     uniqueID: "698iow33",
@@ -31824,7 +31634,7 @@ GeneralInput = __decorateClass([
   t3("general-input")
 ], GeneralInput);
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.V2OL7VMD.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.V2OL7VMD.js
 var tag_styles_default = i`
   :host {
     display: inline-block;
@@ -31940,7 +31750,7 @@ var tag_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.6I2T3DLI.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.6I2T3DLI.js
 var icon_button_styles_default = i`
   :host {
     display: inline-block;
@@ -31990,7 +31800,7 @@ var icon_button_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.3Y6SB6QS.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.3Y6SB6QS.js
 var basePath = "";
 function setBasePath(path) {
   basePath = path;
@@ -32015,14 +31825,14 @@ function getBasePath(subpath = "") {
   return basePath.replace(/\/$/, "") + (subpath ? `/${subpath.replace(/^\//, "")}` : ``);
 }
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.P7ZG6EMR.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.P7ZG6EMR.js
 var library = {
   name: "default",
   resolver: (name) => getBasePath(`assets/icons/${name}.svg`)
 };
 var library_default_default = library;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.3TFKS637.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.3TFKS637.js
 var icons = {
   caret: `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -32146,7 +31956,7 @@ var systemLibrary = {
 };
 var library_system_default = systemLibrary;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.ZL53POKZ.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.ZL53POKZ.js
 var registry2 = [library_default_default, library_system_default];
 var watchedIcons = [];
 function watchIcon(icon) {
@@ -32159,7 +31969,7 @@ function getIconLibrary(name) {
   return registry2.find((lib) => lib.name === name);
 }
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.QLXRCYS4.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.QLXRCYS4.js
 var icon_styles_default = i`
   :host {
     display: inline-block;
@@ -32175,7 +31985,7 @@ var icon_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.IFDWM6P4.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.IFDWM6P4.js
 var __defProp2 = Object.defineProperty;
 var __defProps = Object.defineProperties;
 var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
@@ -32206,7 +32016,7 @@ var __decorateClass2 = (decorators, target, key, kind) => {
   return result;
 };
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.2FB5TK5H.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.2FB5TK5H.js
 function watch(propertyName, options) {
   const resolvedOptions = __spreadValues({
     waitUntilFirstUpdate: false
@@ -32232,7 +32042,7 @@ function watch(propertyName, options) {
   };
 }
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.TUVJKY7S.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.TUVJKY7S.js
 var component_styles_default = i`
   :host {
     box-sizing: border-box;
@@ -32249,7 +32059,7 @@ var component_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.RVOOE4AQ.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.RVOOE4AQ.js
 var ShoelaceElement = class extends s3 {
   constructor() {
     super();
@@ -32307,7 +32117,7 @@ var f3 = (o9) => void 0 === o9.strings;
 var u3 = {};
 var m2 = (o9, t7 = u3) => o9._$AH = t7;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.7YG67M3U.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.7YG67M3U.js
 var CACHEABLE_ERROR = Symbol();
 var RETRYABLE_ERROR = Symbol();
 var parser;
@@ -32539,7 +32349,7 @@ var u4 = l3(b2);
 // ../../../node_modules/.pnpm/lit-html@3.1.4/node_modules/lit-html/directives/if-defined.js
 var o6 = (o9) => o9 ?? T;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.7XLSSP47.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.7XLSSP47.js
 var SlIconButton = class extends ShoelaceElement {
   constructor() {
     super(...arguments);
@@ -32742,7 +32552,7 @@ var LocalizeController = class {
   }
 };
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.MAS2SHYD.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.MAS2SHYD.js
 var translation = {
   $code: "en",
   $name: "English",
@@ -32779,12 +32589,12 @@ var translation = {
 registerTranslation(translation);
 var en_default = translation;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.WLV3FVBR.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.WLV3FVBR.js
 var LocalizeController2 = class extends LocalizeController {
 };
 registerTranslation(en_default);
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.7J6CPMBU.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.7J6CPMBU.js
 var SlTag = class extends ShoelaceElement {
   constructor() {
     super(...arguments);
@@ -32852,7 +32662,7 @@ __decorateClass2([
   n4({ type: Boolean })
 ], SlTag.prototype, "removable", 2);
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.AN6YZWTU.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.AN6YZWTU.js
 var select_styles_default = i`
   :host {
     display: block;
@@ -33179,7 +32989,7 @@ var select_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.RK73WSZS.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.RK73WSZS.js
 function getOffset(element, parent) {
   return {
     top: Math.round(element.getBoundingClientRect().top - parent.getBoundingClientRect().top),
@@ -33210,7 +33020,7 @@ function scrollIntoView(element, container, direction = "vertical", behavior = "
   }
 }
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.SI4ACBFK.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.SI4ACBFK.js
 var form_control_styles_default = i`
   .form-control .form-control__label {
     display: none;
@@ -33269,7 +33079,7 @@ var form_control_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.GI7VDIWX.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.GI7VDIWX.js
 var defaultValue = (propertyName = "value") => (proto, key) => {
   const ctor = proto.constructor;
   const attributeChangedCallback = ctor.prototype.attributeChangedCallback;
@@ -33289,7 +33099,7 @@ var defaultValue = (propertyName = "value") => (proto, key) => {
   };
 };
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.3KSWVBQ5.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.3KSWVBQ5.js
 var popup_styles_default = i`
   :host {
     --arrow-color: var(--sl-color-neutral-1000);
@@ -33481,7 +33291,7 @@ function rectToClientRect(rect) {
   };
 }
 
-// ../../../node_modules/.pnpm/@floating-ui+core@1.6.1/node_modules/@floating-ui/core/dist/floating-ui.core.mjs
+// ../../../node_modules/.pnpm/@floating-ui+core@1.6.2/node_modules/@floating-ui/core/dist/floating-ui.core.mjs
 function computeCoordsFromPlacement(_ref, placement, rtl) {
   let {
     reference,
@@ -34004,16 +33814,16 @@ var size = function(options) {
         widthSide = side;
         heightSide = alignment === "end" ? "top" : "bottom";
       }
-      const overflowAvailableHeight = height - overflow[heightSide];
-      const overflowAvailableWidth = width - overflow[widthSide];
+      const maximumClippingHeight = height - overflow.top - overflow.bottom;
+      const maximumClippingWidth = width - overflow.left - overflow.right;
+      const overflowAvailableHeight = min(height - overflow[heightSide], maximumClippingHeight);
+      const overflowAvailableWidth = min(width - overflow[widthSide], maximumClippingWidth);
       const noShift = !state.middlewareData.shift;
       let availableHeight = overflowAvailableHeight;
       let availableWidth = overflowAvailableWidth;
       if (isYAxis) {
-        const maximumClippingWidth = width - overflow.left - overflow.right;
         availableWidth = alignment || noShift ? min(overflowAvailableWidth, maximumClippingWidth) : maximumClippingWidth;
       } else {
-        const maximumClippingHeight = height - overflow.top - overflow.bottom;
         availableHeight = alignment || noShift ? min(overflowAvailableHeight, maximumClippingHeight) : maximumClippingHeight;
       }
       if (noShift && !alignment) {
@@ -34761,7 +34571,7 @@ function r7(t7) {
   return null;
 }
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.JLIBGQ2M.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.JLIBGQ2M.js
 function isVirtualElement(e11) {
   return e11 !== null && typeof e11 === "object" && "getBoundingClientRect" in e11;
 }
@@ -35151,7 +34961,7 @@ __decorateClass2([
   n4({ attribute: "hover-bridge", type: Boolean })
 ], SlPopup.prototype, "hoverBridge", 2);
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.DL5222VR.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.DL5222VR.js
 var formCollections = /* @__PURE__ */ new WeakMap();
 var reportValidityOverloads = /* @__PURE__ */ new WeakMap();
 var checkValidityOverloads = /* @__PURE__ */ new WeakMap();
@@ -35442,7 +35252,7 @@ var customErrorValidityState = Object.freeze(__spreadProps(__spreadValues({}, va
   customError: true
 }));
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.DHU6MIVB.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.DHU6MIVB.js
 var defaultAnimationRegistry = /* @__PURE__ */ new Map();
 var customAnimationRegistry = /* @__PURE__ */ new WeakMap();
 function ensureAnimation(animation) {
@@ -35475,7 +35285,7 @@ function getAnimation(el, animationName, options) {
   };
 }
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.B4BZKR24.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.B4BZKR24.js
 function waitForEvent(el, eventName) {
   return new Promise((resolve) => {
     function done(event) {
@@ -35488,7 +35298,7 @@ function waitForEvent(el, eventName) {
   });
 }
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.LHI6QEL2.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.LHI6QEL2.js
 function animateTo(el, keyframes, options) {
   return new Promise((resolve) => {
     if ((options == null ? void 0 : options.duration) === Infinity) {
@@ -35516,7 +35326,7 @@ function stopAnimations(el) {
   );
 }
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.NYIIDP5N.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.NYIIDP5N.js
 var HasSlotController = class {
   constructor(host, ...slotNames) {
     this.slotNames = [];
@@ -35584,7 +35394,7 @@ var e10 = class extends i4 {
 e10.directiveName = "unsafeHTML", e10.resultType = 1;
 var o8 = e7(e10);
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.44XN5ATB.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.44XN5ATB.js
 var SlSelect = class extends ShoelaceElement {
   constructor() {
     super(...arguments);
@@ -36296,7 +36106,7 @@ setDefaultAnimation("select.hide", {
   options: { duration: 100, easing: "ease" }
 });
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.FXXKMG2P.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.FXXKMG2P.js
 var option_styles_default = i`
   :host {
     display: block;
@@ -36383,7 +36193,7 @@ var option_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.KWDN2DUL.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.KWDN2DUL.js
 var SlOption = class extends ShoelaceElement {
   constructor() {
     super(...arguments);
@@ -36499,7 +36309,7 @@ __decorateClass2([
   watch("value")
 ], SlOption.prototype, "handleValueChange", 1);
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.OZYH3LSG.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.OZYH3LSG.js
 var input_styles_default = i`
   :host {
     display: block;
@@ -36823,7 +36633,7 @@ var l4 = e7(class extends i4 {
   }
 });
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.54TJVTKO.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.54TJVTKO.js
 var SlInput = class extends ShoelaceElement {
   constructor() {
     super(...arguments);
@@ -37272,7 +37082,7 @@ __decorateClass2([
   watch("value", { waitUntilFirstUpdate: true })
 ], SlInput.prototype, "handleValueChange", 1);
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.7DUCI5S4.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.7DUCI5S4.js
 var spinner_styles_default = i`
   :host {
     --track-width: 2px;
@@ -37332,7 +37142,7 @@ var spinner_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.TY4GUJRD.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.TY4GUJRD.js
 var SlSpinner = class extends ShoelaceElement {
   constructor() {
     super(...arguments);
@@ -37349,7 +37159,7 @@ var SlSpinner = class extends ShoelaceElement {
 };
 SlSpinner.styles = [component_styles_default, spinner_styles_default];
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.QPYT3OK4.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.QPYT3OK4.js
 var button_styles_default = i`
   :host {
     display: inline-block;
@@ -37945,7 +37755,7 @@ var button_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.64QWL6LI.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.64QWL6LI.js
 var SlButton = class extends ShoelaceElement {
   constructor() {
     super(...arguments);
@@ -38199,7 +38009,7 @@ __decorateClass2([
   watch("disabled", { waitUntilFirstUpdate: true })
 ], SlButton.prototype, "handleDisabledChange", 1);
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.W7K6OMDR.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.W7K6OMDR.js
 var checkbox_styles_default = i`
   :host {
     display: inline-block;
@@ -38319,7 +38129,7 @@ var checkbox_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.FHOQLXTU.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.3/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.FHOQLXTU.js
 var SlCheckbox = class extends ShoelaceElement {
   constructor() {
     super(...arguments);

@@ -1,5 +1,46 @@
 # @inlang/paraglide-next
 
+## 0.5.2
+
+### Patch Changes
+
+- Updated dependencies [59c8b11]
+  - @inlang/paraglide-js@1.11.2
+
+## 0.5.1
+
+### Patch Changes
+
+- 7dfecf1: fix issue where path-segments that start with a language tag confused the router.
+
+  Eg: `/entropy` would match the language `en` & be resolved to `/tropy`
+
+- Updated dependencies [14d80b3]
+  - @inlang/paraglide-js@1.11.1
+
+## 0.5.0
+
+### Minor Changes
+
+- 4e1aefa: `PrefixStrategy` now has a `prefixes` option to customize which prefix a language uses in the url.
+
+  ```ts
+  const strategy = PrefixStrategy<AvailableLanguageTag>({
+  	prefixes: {
+  		"de-CH": "swiss", // use /swiss instead of /de-CH in the URL
+  	},
+  })
+  ```
+
+  Prefixes must be unique and may not include slashes.
+
+  Inspired by [Astro's custom locale paths](https://docs.astro.build/en/guides/internationalization/#custom-locale-paths).
+
+### Patch Changes
+
+- Updated dependencies [e37eabf]
+  - @inlang/paraglide-js@1.11.0
+
 ## 0.4.4
 
 ### Patch Changes

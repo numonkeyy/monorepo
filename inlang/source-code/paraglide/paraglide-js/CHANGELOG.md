@@ -1,5 +1,33 @@
 # @inlang/paraglide-js
 
+## 1.11.2
+
+### Patch Changes
+
+- 59c8b11: Fix Ninja recommendation and adoption if working directory is not the repo root
+
+## 1.11.1
+
+### Patch Changes
+
+- 14d80b3: Removed the "Which tech-stack are you using?" prompt from the `init` command as it was not providing any real value. All it did was link you to the appropriate documentation.
+
+  From now on we rely on the docuemntation site to guide people to the correct documenation for their framework.
+
+  - SvelteKit: https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n
+  - NextJs: https://inlang.com/m/osslbuzt/paraglide-next-i18n
+  - Astro: https://inlang.com/m/iljlwzfs/paraglide-astro-i18n
+  - SolidStart: https://inlang.com/m/n860p17j/paraglide-solidstart-i18n
+  - Vite: https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-vite
+
+## 1.11.0
+
+### Minor Changes
+
+- e37eabf: - renamed packages `@inlang/cross-sell-X` to `@inlang/recommend-X` be more descriptive
+  - refactor recommendation view in Sherlock VS Code extension
+  - introduce new `shouldRecommend` function to `@inlang/recommend-sherlock` & `@inlang/recommend-ninja`
+
 ## 1.10.1
 
 ### Patch Changes
@@ -144,7 +172,7 @@
 
 ### Patch Changes
 
-- afaaffa: Bundle `@inlang/cross-sell-sherlock`. This is used to promot _once_ during `paraglide-js init` to ask if you want to install the Sherlock vscode extension
+- afaaffa: Bundle `@inlang/recommend-sherlock`. This is used to promot _once_ during `paraglide-js init` to ask if you want to install the Sherlock vscode extension
 
 ## 1.3.0
 
@@ -156,15 +184,15 @@
 
 ### Patch Changes
 
-- @inlang/cross-sell-sherlock@0.0.2
+- @inlang/recommend-sherlock@0.0.2
 
 ## 1.2.9
 
 ### Patch Changes
 
-- a99e35fee: use `@inlang/cross-sell-sherlock` during vscode extension initialization
+- a99e35fee: use `@inlang/recommend-sherlock` during vscode extension initialization
 - Updated dependencies [a99e35fee]
-  - @inlang/cross-sell-sherlock@0.0.2
+  - @inlang/recommend-sherlock@0.0.2
 
 ## 1.2.8
 
