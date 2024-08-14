@@ -8,6 +8,18 @@ import {
 	createDialect,
 	type SqliteDatabase,
 } from "sqlite-wasm-kysely";
+import { minimatch } from "minimatch";
+
+// start a new normalize path function that has the absolute minimum implementation.
+function normalizePath(path: string) {
+	if (!path.startsWith("/")) {
+		return "/" + path;
+	}
+	return path;
+}
+
+// TODO: fix in fink to not use time ordering!
+// .orderBy("commit.created desc")
 
 /**
  * Common setup between different lix environments.
@@ -38,72 +50,118 @@ export async function openLix(args: {
 		plugins.push(...args.providePlugins);
 	}
 
-	// TODO better api for awaiting pending promises
-	const maybePendingPromises: Promise<any>[] = [];
-
 	args.database.createFunction({
-		name: "handle_file_change",
-		arity: 6,
+		name: "triggerWorker",
+		arity: 0,
 		// @ts-expect-error - dynamic function
-		xFunc: (_, ...args) => {
-			maybePendingPromises.push(
-				handleFileChange({
+		xFunc: () => {
+			// TODO: abort current running queue?
+			queueWorker();
+		},
+	});
+
+	
+	let pending: Promise<void> | undefined;
+	let resolve: () => void;
+	// run number counts the worker runs in a current batch and is used to prevent race conditions where a trigger is missed because a previous run is just about to reset the hasMoreEntriesSince flag
+	let runNumber = 1;
+	// If a queue trigger happens during an existing queue run we might miss updates and use hasMoreEntriesSince to make sure there is always a final immediate queue worker execution
+	let hasMoreEntriesSince: number | undefined = undefined;
+	async function queueWorker(trail = false) {
+		if (pending && !trail) {
+			hasMoreEntriesSince = runNumber;
+			// console.log({ hasMoreEntriesSince });
+			return;
+		}
+		runNumber++;
+
+		if (!pending) {
+			pending = new Promise((res) => {
+				resolve = res;
+			});
+		}
+
+		const entry = await db
+			.selectFrom("queue")
+			.selectAll()
+			.orderBy("id asc")
+			.limit(1)
+			.executeTakeFirst();
+
+		if (entry) {
+			const oldFile = await db
+				.selectFrom("file_internal")
+				.select("data")
+				.select("path")
+				.where("id", "=", entry.file_id)
+				.limit(1)
+				.executeTakeFirst();
+
+			if (oldFile?.data) {
+				await handleFileChange({
+					queueEntry: entry,
 					old: {
-						id: args[0] as any,
-						path: args[1] as any,
-						data: args[2] as any,
+						id: entry.file_id,
+						path: oldFile?.path,
+						data: oldFile?.data,
 					},
 					neu: {
-						id: args[3] as any,
-						path: args[4] as any,
-						data: args[5] as any,
+						id: entry.file_id,
+						path: entry.path,
+						data: entry.data,
 					},
 					plugins,
 					db,
-				}),
-			);
-			return;
-		},
-	});
-
-	await sql`
-	CREATE TEMP TRIGGER file_modified AFTER UPDATE ON file
-	BEGIN
-	  SELECT handle_file_change(OLD.id, OLD.path, OLD.data, NEW.id, NEW.path, NEW.data);
-	END;
-	`.execute(db);
-
-	args.database.createFunction({
-		name: "handle_file_insert",
-		arity: 3,
-		// @ts-expect-error - dynamic function
-		xFunc: (_, id: any, path: any, data: any) => {
-			maybePendingPromises.push(
-				handleFileInsert({
+				})
+			} else {
+				await handleFileInsert({
+					queueEntry: entry,
 					neu: {
-						id,
-						path,
-						data,
+						id: entry.file_id,
+						path: entry.path,
+						data: entry.data,
 					},
 					plugins,
 					db,
-				}),
-			);
-			return;
-		},
-	});
+				})
+			}
+		}
 
-	await sql`
-	CREATE TEMP TRIGGER file_inserted AFTER INSERT ON file
-	BEGIN
-	  SELECT handle_file_insert(NEW.id, NEW.path, NEW.data);
-	END;
-	`.execute(db);
+		// console.log("getrting { numEntries }");
+
+		const { numEntries } = await db
+			.selectFrom("queue")
+			.select((eb) => eb.fn.count<number>("id").as("numEntries"))
+			.executeTakeFirstOrThrow();
+
+		// console.log({ numEntries });
+
+		if (
+			!hasMoreEntriesSince ||
+			(numEntries === 0 && hasMoreEntriesSince < runNumber)
+		) {
+			resolve!(); // TODO: fix type
+			pending = undefined;
+			hasMoreEntriesSince = undefined;
+			// console.log("resolving");
+		}
+
+		// TODO: handle endless tries on failing quee entries
+		// we either execute the queue immediately if we know there is more work or fall back to polling
+		setTimeout(() => queueWorker(true), hasMoreEntriesSince ? 0 : 1000);
+	}
+	queueWorker();
+
+	async function settled() {
+		// console.log("settled", pending);
+		await pending;
+	}
 
 	return {
 		db,
+		settled,
 		toBlob: async () => {
-			await Promise.all(maybePendingPromises);
+			await settled();
 			return new Blob([contentFromDatabase(args.database)]);
 		},
 		plugins,
@@ -171,6 +229,7 @@ async function getChangeHistory({
 	db: Kysely<LixDatabase>;
 }): Promise<any[]> {
 	if (depth > 1) {
+		// TODO: walk change parents until depth
 		throw new Error("depth > 1 not supported yet");
 	}
 
@@ -207,21 +266,11 @@ async function getChangeHistory({
 
 	const changes: any[] = [firstChange];
 
-	// TODO: walk change parents until depth
-	// await db
-	// 	.selectFrom("change")
-	// 	.select("id")
-	// 	.where((eb) => eb.ref("value", "->>").key("id"), "=", atomId)
-	// 	.where("type", "=", diffType)
-	// 	.where("file_id", "=", fileId)
-	// 	.where("plugin_key", "=", pluginKey)
-	// 	.where("commit_id", "is not", null)
-	// 	.executeTakeFirst()
-
 	return changes;
 }
 
 async function handleFileChange(args: {
+	queueEntry: any;
 	old: LixFile;
 	neu: LixFile;
 	plugins: LixPlugin[];
@@ -229,113 +278,125 @@ async function handleFileChange(args: {
 }) {
 	const fileId = args.neu?.id ?? args.old?.id;
 
+	const pluginDiffs: any[] = [];
+
 	for (const plugin of args.plugins) {
-		const diffs = await plugin.diff?.file?.({
+		// glob expressions are expressed relative without leading / but path has leading /
+		if (!minimatch(normalizePath(args.neu.path), "/" + plugin.glob)) {
+			break;
+		}
+
+		const diffs = await plugin.diff!.file!({
 			old: args.old,
 			neu: args.neu,
 		});
 
-		for (const diff of diffs ?? []) {
-			// assume an insert or update operation as the default
-			// if diff.neu is not present, it's a delete operation
-			const value = diff.neu ?? diff.old;
+		pluginDiffs.push({
+			diffs,
+			pluginKey: plugin.key,
+			pluginDiffFunction: plugin.diff,
+		});
+	}
 
-			const previousUncomittedChange = await args.db
-				.selectFrom("change")
-				.selectAll()
-				.where((eb) => eb.ref("value", "->>").key("id"), "=", value.id)
-				.where("type", "=", diff.type)
-				.where("file_id", "=", fileId)
-				.where("plugin_key", "=", plugin.key)
-				.where("commit_id", "is", null)
-				.executeTakeFirst();
+	await args.db.transaction().execute(async (trx) => {
+		for (const { diffs, pluginKey, pluginDiffFunction } of pluginDiffs) {
+			for (const diff of diffs ?? []) {
+				// assume an insert or update operation as the default
+				// if diff.neu is not present, it's a delete operationd
+				const value = diff.neu ?? diff.old;
 
-			// no uncommitted change exists
-			if (previousUncomittedChange === undefined) {
-				const parent = (
+				// TODO: save hash of changed fles in every commit to discover inconsistent commits with blob?
+
+				const previousUncomittedChange = await trx
+					.selectFrom("change")
+					.selectAll()
+					.where((eb) => eb.ref("value", "->>").key("id"), "=", value.id)
+					.where("type", "=", diff.type)
+					.where("file_id", "=", fileId)
+					.where("plugin_key", "=", pluginKey)
+					.where("commit_id", "is", null)
+					.executeTakeFirst();
+
+				const previousCommittedChange = (
 					await getChangeHistory({
 						atomId: value.id,
 						depth: 1,
-						db: args.db,
 						fileId,
-						pluginKey: plugin.key,
+						pluginKey,
 						diffType: diff.type,
+						db: trx,
 					})
 				)[0];
 
-				await args.db
-					.insertInto("change")
-					.values({
-						id: v4(),
-						type: diff.type,
-						file_id: fileId,
-						operation: diff.operation,
-						parent_id: parent?.id,
-						plugin_key: plugin.key,
-						// @ts-expect-error - database expects stringified json
-						value: JSON.stringify(value),
-						meta: JSON.stringify(diff.meta),
-					})
-					.execute();
-				continue;
-			}
+				if (previousUncomittedChange) {
+					// working change exists but is different from previously committed change
+					// -> update the working change or delete if it is the same as previous uncommitted change
+					// overwrite the (uncomitted) change
+					// to avoid (potentially) saving every keystroke change
+					let previousCommittedDiff = [];
 
-			const previousCommittedChange = await args.db
-				.selectFrom("change")
-				.selectAll()
-				.where((eb) => eb.ref("value", "->>").key("id"), "=", value.id)
-				.where("type", "=", diff.type)
-				.where("file_id", "=", fileId)
-				.where("commit_id", "is not", null)
-				.where("plugin_key", "=", plugin.key)
-				.innerJoin("commit", "commit.id", "change.commit_id")
-				.orderBy("commit.created desc")
-				.executeTakeFirst();
+					// working change exists but is identical to previously committed change
+					if (previousCommittedChange) {
+						previousCommittedDiff = await pluginDiffFunction?.[diff.type]?.({
+							old: previousCommittedChange.value,
+							neu: diff.neu,
+						});
 
-			// working change exists but is identical to previously committed change
-			if (previousCommittedChange) {
-				const diffPreviousCommittedChange = await plugin.diff?.[diff.type]?.({
-					// @ts-expect-error - dynamic type
-					old: previousCommittedChange.value,
-					// @ts-expect-error - dynamic type
-					neu: diff.neu,
-				});
+						if (previousCommittedDiff.length === 0) {
+							// drop the change because it's identical
+							await trx
+								.deleteFrom("change")
+								.where((eb) => eb.ref("value", "->>").key("id"), "=", value.id)
+								.where("type", "=", diff.type)
+								.where("file_id", "=", fileId)
+								.where("plugin_key", "=", pluginKey)
+								.where("commit_id", "is", null)
+								.execute();
+							continue;
+						}
+					}
 
-				if (diffPreviousCommittedChange?.length === 0) {
-					// drop the change because it's identical
-					await args.db
-						.deleteFrom("change")
-						.where((eb) => eb.ref("value", "->>").key("id"), "=", value.id)
-						.where("type", "=", diff.type)
-						.where("file_id", "=", fileId)
-						.where("plugin_key", "=", plugin.key)
-						.where("commit_id", "is", null)
+					if (!previousCommittedChange || previousCommittedDiff.length) {
+						await trx
+							.updateTable("change")
+							.where((eb) => eb.ref("value", "->>").key("id"), "=", value.id)
+							.where("type", "=", diff.type)
+							.where("file_id", "=", fileId)
+							.where("plugin_key", "=", pluginKey)
+							.where("commit_id", "is", null)
+							.set({
+								id: v4(),
+								// @ts-expect-error - database expects stringified json
+								value: JSON.stringify(value),
+								operation: diff.operation,
+								meta: JSON.stringify(diff.meta),
+							})
+							.execute();
+					}
+				} else {
+					await trx
+						.insertInto("change")
+						.values({
+							id: v4(),
+							type: diff.type,
+							file_id: fileId,
+							plugin_key: pluginKey,
+							parent_id: previousCommittedChange?.id,
+							// @ts-expect-error - database expects stringified json
+							value: JSON.stringify(value),
+							meta: JSON.stringify(diff.meta),
+							operation: diff.operation,
+						})
 						.execute();
-					continue;
 				}
 			}
-
-			// working change exists but is different from previously committed change
-			// -> update the working change
-			// overwrite the (uncomitted) change
-			// to avoid (potentially) saving every keystroke change
-			await args.db
-				.updateTable("change")
-				.where((eb) => eb.ref("value", "->>").key("id"), "=", value.id)
-				.where("type", "=", diff.type)
-				.where("file_id", "=", fileId)
-				.where("plugin_key", "=", plugin.key)
-				.where("commit_id", "is", null)
-				.set({
-					id: v4(),
-					operation: diff.operation,
-					// @ts-expect-error - database expects stringified json
-					value: JSON.stringify(value),
-					meta: JSON.stringify(diff.meta),
-				})
-				.execute();
 		}
-	}
+
+		await trx
+			.deleteFrom("queue")
+			.where("id", "=", args.queueEntry.id)
+			.execute();
+	});
 }
 
 // creates initial changes for new files
@@ -343,28 +404,52 @@ async function handleFileInsert(args: {
 	neu: LixFile;
 	plugins: LixPlugin[];
 	db: Kysely<LixDatabase>;
+	queueEntry: any;
 }) {
+	const pluginDiffs: any[] = [];
+
+	// console.log({ args });
 	for (const plugin of args.plugins) {
-		const diffs = await plugin.diff?.file?.({
+		// glob expressions are expressed relative without leading / but path has leading /
+		if (!minimatch(normalizePath(args.neu.path), "/" + plugin.glob)) {
+			break;
+		}
+
+		const diffs = await plugin.diff!.file!({
 			old: undefined,
 			neu: args.neu,
 		});
-		for (const diff of diffs ?? []) {
-			const value = diff.neu ?? diff.old;
+		// console.log({ diffs });
 
-			await args.db
-				.insertInto("change")
-				.values({
-					id: v4(),
-					type: diff.type,
-					file_id: args.neu.id,
-					plugin_key: plugin.key,
-					operation: diff.operation,
-					// @ts-expect-error - database expects stringified json
-					value: JSON.stringify(value),
-					meta: JSON.stringify(diff.meta),
-				})
-				.execute();
-		}
+		pluginDiffs.push({ diffs, pluginKey: plugin.key });
 	}
+
+	await args.db.transaction().execute(async (trx) => {
+		for (const { diffs, pluginKey } of pluginDiffs) {
+			for (const diff of diffs ?? []) {
+				const value = diff.neu ?? diff.old;
+
+				await trx
+					.insertInto("change")
+					.values({
+						id: v4(),
+						type: diff.type,
+						file_id: args.neu.id,
+						plugin_key: pluginKey,
+						operation: diff.operation,
+						// @ts-expect-error - database expects stringified json
+						value: JSON.stringify(value),
+						meta: JSON.stringify(diff.meta),
+						// add queueId interesting for debugging or knowning what changes were generated in same worker run
+					})
+					.execute();
+			}
+		}
+
+		// TODO: decide if TRIGGER or in js land with await trx.insertInto('file_internal').values({ id: args.fileId, blob: args.newBlob, path: args.newPath }).execute()
+		await trx
+			.deleteFrom("queue")
+			.where("id", "=", args.queueEntry.id)
+			.execute();
+	});
 }
