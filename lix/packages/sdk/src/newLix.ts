@@ -56,7 +56,9 @@ export async function newLixFile(): Promise<Blob> {
         operation TEXT NOT NULL,
         value TEXT,
         meta TEXT,
-        commit_id TEXT
+        commit_id TEXT,
+        -- id of conflicting changes?
+        conflict TEXT
       ) strict;
         
       CREATE TABLE 'commit' (
