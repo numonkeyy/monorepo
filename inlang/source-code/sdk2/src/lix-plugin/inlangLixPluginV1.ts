@@ -1,4 +1,4 @@
-import type { DiffReport, LixPlugin } from "@lix-js/sdk";
+import type { Change, DiffReport, LixPlugin } from "@lix-js/sdk";
 import { Bundle, Message, Variant } from "../schema/schemaV2.js";
 import { loadDatabaseInMemory } from "sqlite-wasm-kysely";
 import { initKysely } from "../database/initKysely.js";
@@ -19,6 +19,82 @@ export const inlangLixPluginV1: LixPlugin<{
 	// 	message: Message,
 	// 	variant: Variant,
 	// },
+	merge: {
+		file: async ({ own, other ownLix, otherLix }) => {
+			const diffs = await this.diff.file({ old: own, neu: other });
+			const changes: Change[] = [];
+			// todo should operate on changes instead of diffs
+			for (const diff of diffs) {
+				// benefits of exposing lix:
+				//   - plugins can implement their own merging logic
+				//   - changes are loaded on demand by the plugin
+				//     (instead of lix assuming what the plugin needs)
+				const ownHistory = await ownLix.db
+					.selectFrom("change")
+					.selectAll()
+					.where("type", "=", diff.type)
+					.where("value.id", "=", diff.neu.id)
+					.execute();
+				const otherHistory = await otherLix.db
+					.selectFrom("change")
+					.selectAll()
+					.where("type", "=", diff.type)
+					.where("value.id", "=", diff.neu.id)
+					.execute();
+				const lastOwnChange = ownHistory.at(-1);
+				const lastOtherChange = otherHistory.at(-1);
+				if (diff.operation === "create") {
+					// the other history can only be of length 1 for a create operation
+					changes.push(otherHistory[0]);
+				} else if (
+					// very simple conflict resolution
+					// that does not account for "in-between" updates
+					// like someone changing the message.description
+					// while someone else edits the selectors
+					diff.operation === "update" ||
+					(diff.operation === "delete" &&
+						lastOwnChange.id !== lastOtherChange.parent_id)
+				) {
+					for (const change of otherHistory) {
+						const ownChange = ownLix.db.select("change")
+						if (ownHistory.some((c) => c.id === change.id)) {
+							// common change, skip. we care about changes when the history differs
+							continue;
+						}
+						if (changes.type === "variant"){
+							checkIfMessageHasNoConflictWithVariant(change)
+
+							const ownMessage =
+							const otherMessage 
+							if (otherMessage.locale !== ownMessage.locale) {
+								conflict.push({
+									change: change.id,
+									otherChange: ownMessage.lastChange.id
+								})
+							} 
+						}
+						// change is not in common, add it and mark the last
+						// other change as conflicting with the last own change
+						changes.push(change);
+						// TODO marking a change conflict is marked once, not N
+						// TODO times. hence, a change conflict table that i
+						// TODO could push "this change conflicts with that change"
+						// TODO seems easier
+						changes.at(-1).conflicts_with_change_id = lastOwnChange.id;
+					}
+				} else if (
+					diff.operation === "delete" &&
+					lastOwnChange.id === lastOtherChange.parent_id
+				) {
+					// the change has been deleted with no diverging history
+					changes.push(lastOtherChange);
+				} else {
+					throw new Error("Unexhaustive match");
+				}
+			}
+			return { changes };
+		},
+	},
 	diff: {
 		// TODO does not account for deletions
 		file: async ({ old, neu }) => {
