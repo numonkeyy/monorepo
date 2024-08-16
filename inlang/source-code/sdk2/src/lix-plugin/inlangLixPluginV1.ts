@@ -2,6 +2,7 @@ import type { Change, DiffReport, LixPlugin } from "@lix-js/sdk";
 import { Bundle, Message, Variant } from "../schema/schemaV2.js";
 import { loadDatabaseInMemory } from "sqlite-wasm-kysely";
 import { initKysely } from "../database/initKysely.js";
+import { Diff } from "@sinclair/typebox/value/delta";
 
 export const inlangLixPluginV1: LixPlugin<{
 	bundle: Bundle;
@@ -19,34 +20,36 @@ export const inlangLixPluginV1: LixPlugin<{
 	// 	message: Message,
 	// 	variant: Variant,
 	// },
-	merge: {
-		file: async ({ file, ownLix, incomingLix }) => {
-			const conflicts = [];
-			// todo: separate merge api because
-			//       - it simplifies the conflict api of a plugin by separating the concerns
-			//         of "reporting conflicts" and "auto resolving conflicts"
-			//       - the UX could be increased by offering an "autoResolveConficts = false" option
-			const merges: Change[] = [];
-			const incomingChanges = await relativeComplementOfIncomingChanges({
-				ownLix,
-				incomingLix,
-				fileId: file.id,
-			});
-			for (const incomingChange of incomingChanges) {
+	tryResolveConflict
+	applyChanges: (changes) => {
+		if (operation  === "create"){
+			project.db.insert()
+		} else if (operation === "update"){
+			project.db.update()
+		} else {
+			project.db.delete()
+		}
+	},
+	conflicts: {
+		file: async ({ file, ownChangesNotInB, incomingChangesNotInA, ownLix, incomingLix }) => {
+			for (const incomingChange of incomingChangesNotInA) {
 				if (incomingChange.operation === "create") {
 					// no conflict possible
 					continue;
 				} else if (incomingChange.operation === "update") {
-					// naive every update operation is a conflict in step 1
-					// the conflict detection can incrementally be improved
-					conflicts.push({
-						// optional metadata for the conflict
-						meta: {},
-						reason: "The changes are conflicting",
-						change_id: incomingChange.id,
-						other_change_id: incomingChange.id,
-					});
+					if (Diff()){
+
+						// naive every update operation is a conflict in step 1
+						// the conflict detection can incrementally be improved
+						conflicts.push({
+							// optional metadata for the conflictx
+							meta: {},
+							reason: "The changes are conflicting",
+							change_ids: [incomingChange],
+						});
+					}
 				} else if (incomingChange.operation === "delete") {
+					const ancestor = await findAncestor(incomingLix, ownLix, incomingChange)
 					const ownParent = await ownLix.db
 						.select("change")
 						.where("id", "=", incomingChange.parent_id)
@@ -56,16 +59,13 @@ export const inlangLixPluginV1: LixPlugin<{
 						.where("id", "=", incomingChange.parent_id)
 						.executeTakeFirst();
 					// pseudocode comparison, needs to use the diff functions
-					if (ownParent !== incomingParent) {
+					if (diff(ownParent, incomingParent)) {
 						// the parent changes differ, hence the child changes are conflicting
 						conflicts.push({
 							// optional metadata for the conflict
 							meta: {},
 							reason: `
-							  The ${incomingChange.type} has been deleted
-								in the incoming change but has been updated
-								in the meantime. The other person was not 
-								aware of the update.
+							  The parent of ${incomingChange.type} differs"
 							`,
 							change_id: incomingChange.id,
 							other_change_id: incomingChange.id,
