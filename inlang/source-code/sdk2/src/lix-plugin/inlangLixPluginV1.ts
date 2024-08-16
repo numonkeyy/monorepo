@@ -64,8 +64,8 @@ export const inlangLixPluginV1: LixPlugin<{
 							reason: `
 							  The ${incomingChange.type} has been deleted
 								in the incoming change but has been updated
-								in the meantime. The other person not aware
-								of the update.
+								in the meantime. The other person was not 
+								aware of the update.
 							`,
 							change_id: incomingChange.id,
 							other_change_id: incomingChange.id,
