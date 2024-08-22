@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { compileMessage } from "./compileMessage.js"
-import type { MessageNested } from "@inlang/sdk2"
+import type { MessageNested } from "@inlang/sdk"
 
 describe("compileMessage", () => {
 	it("compiles a message with variants", () => {

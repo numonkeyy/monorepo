@@ -64,7 +64,7 @@
 		"@inlang/plugin-message-format": "workspace:*",
 		"@inlang/recommend-ninja": "workspace:*",
 		"@inlang/recommend-sherlock": "workspace:*",
-		"@inlang/sdk": "workspace:^2.0.0",
+		"@inlang/sdk": "workspace:^2",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@rollup/plugin-terser": "0.4.3",

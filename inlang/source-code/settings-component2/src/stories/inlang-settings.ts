@@ -1,7 +1,7 @@
 import { html, LitElement, css } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import { baseStyling } from "../styling/base.js"
-import { ProjectSettings } from "@inlang/sdk2"
+import { ProjectSettings } from "@inlang/sdk"
 import checkRequired from "./../helper/checkRequired.js"
 import overridePrimitiveColors from "./../helper/overridePrimitiveColors.js"
 import { registry } from "@inlang/marketplace-registry"

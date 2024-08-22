@@ -1,4 +1,4 @@
-import type { Declaration, Message, BundleNested, ProjectSettings, Variant } from "@inlang/sdk2"
+import type { Declaration, Message, BundleNested, ProjectSettings, Variant } from "@inlang/sdk"
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import getInputs from "../helper/crud/input/get.js"

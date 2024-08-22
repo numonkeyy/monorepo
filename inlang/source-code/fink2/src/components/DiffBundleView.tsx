@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { projectAtom } from "../state.ts";
 import { useAtom } from "jotai";
-import { BundleNested, InlangProject, updateBundleNested, selectBundleNested } from "@inlang/sdk2";
+import {
+	BundleNested,
+	InlangProject,
+	updateBundleNested,
+	selectBundleNested,
+} from "@inlang/sdk";
 import SingleDiffBundle from "./SingleDiffBundle.tsx";
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 

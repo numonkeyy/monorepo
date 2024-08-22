@@ -1,4 +1,4 @@
-import type { MessageNested, Variant } from "@inlang/sdk2"
+import type { MessageNested, Variant } from "@inlang/sdk"
 
 /**
  * Upsert a variant into a message. If a variant with the same match already exists, it will be updated, otherwise a new variant will be added.

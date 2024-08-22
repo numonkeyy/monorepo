@@ -3,7 +3,7 @@ import {
 	type MessageNested,
 	type Declaration,
 	type ProjectSettings,
-} from "@inlang/sdk2"
+} from "@inlang/sdk"
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 

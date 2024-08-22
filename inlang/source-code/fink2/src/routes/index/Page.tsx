@@ -17,7 +17,7 @@ import VariantHistoryList from "../../components/VariantHistoryList.tsx";
 import { useState } from "react";
 import NoProjectView from "../../components/NoProjectView.tsx";
 import { demoBundles } from "../../../demo/bundles.ts";
-import { createBundle, insertBundleNested } from "@inlang/sdk2";
+import { createBundle, insertBundleNested } from "@inlang/sdk";
 
 // import VariantHistory from "../../components/VariantHistory.tsx";
 

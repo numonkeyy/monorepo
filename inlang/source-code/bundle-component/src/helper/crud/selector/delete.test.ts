@@ -1,4 +1,4 @@
-import { type MessageNested } from "@inlang/sdk2"
+import { type MessageNested } from "@inlang/sdk"
 import { describe, expect, it } from "vitest"
 import deleteSelector from "./delete.js"
 

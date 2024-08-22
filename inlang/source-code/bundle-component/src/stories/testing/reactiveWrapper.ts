@@ -3,9 +3,9 @@ import { customElement, property, state } from "lit/decorators.js"
 
 import "./../inlang-bundle.js"
 import "./../actions/inlang-bundle-action.js"
-import type { BundleNested, ProjectSettings } from "@inlang/sdk2"
-// import type { InstalledMessageLintRule } from "@inlang/sdk2"
-import { pluralBundle } from "@inlang/sdk2"
+import type { BundleNested, ProjectSettings } from "@inlang/sdk"
+// import type { InstalledMessageLintRule } from "@inlang/sdk"
+import { pluralBundle } from "@inlang/sdk"
 
 import { mockSettings } from "../../mock/settings.js"
 

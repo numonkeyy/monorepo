@@ -12,7 +12,7 @@ import {
 	type MessageNested,
 	type Expression,
 	type ProjectSettings,
-} from "@inlang/sdk2"
+} from "@inlang/sdk"
 import addSelector from "../helper/crud/selector/add.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
 import "./inlang-add-input.js"

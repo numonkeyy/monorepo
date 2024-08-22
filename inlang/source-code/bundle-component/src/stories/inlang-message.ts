@@ -1,5 +1,5 @@
-import type { MessageNested, Declaration, ProjectSettings, Variant, Message } from "@inlang/sdk2"
-import { createVariant } from "@inlang/sdk2"
+import type { MessageNested, Declaration, ProjectSettings, Variant, Message } from "@inlang/sdk"
+import { createVariant } from "@inlang/sdk"
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import deleteSelector from "../helper/crud/selector/delete.js"

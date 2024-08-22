@@ -1,4 +1,4 @@
-import type { BundleNested, MessageNested } from "@inlang/sdk2"
+import type { BundleNested, MessageNested } from "@inlang/sdk"
 import { bundleIndexFunction } from "./bundleIndex.js"
 import { compileMessage } from "./compileMessage.js"
 import { mergeTypeRestrictions, type Compilation } from "./types.js"

@@ -3,7 +3,7 @@ import { inputsType, type InputTypeMap } from "./inputsType.js"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 import { optionsType } from "./optionsType.js"
 import { escapeForDoubleQuoteString } from "~/services/codegen/escape.js"
-import type { BundleNested } from "@inlang/sdk2"
+import type { BundleNested } from "@inlang/sdk"
 
 export const bundleIndexFunction = (args: {
 	/**

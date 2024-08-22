@@ -5,7 +5,7 @@ import { Logger } from "~/services/logger/index.js"
 import { runCompiler } from "~/cli/steps/run-compiler2.js"
 import { DEFAULT_OUTDIR } from "~/cli/defaults.js"
 import { classifyProjectErrors } from "~/services/error-handling.js"
-import { loadProjectFromDirectoryInMemory } from "@inlang/sdk2"
+import { loadProjectFromDirectoryInMemory } from "@inlang/sdk"
 
 export const compileCommand2 = new Command()
 	.name("compile2")

@@ -1,4 +1,4 @@
-import { Bundle, InlangDatabaseSchema, Message, Variant } from "@inlang/sdk2";
+import { Bundle, InlangDatabaseSchema, Message, Variant } from "@inlang/sdk";
 import { Kysely } from "kysely";
 import { json } from "./toJSONRawBuilder.ts";
 
@@ -108,4 +108,3 @@ const queryHelper = {
 };
 
 export default queryHelper;
-

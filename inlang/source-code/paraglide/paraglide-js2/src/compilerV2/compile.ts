@@ -6,7 +6,7 @@ import { getPackageJson } from "../services/environment/package.js"
 import { createRuntime } from "./runtime.js"
 import { createRegistry } from "./registry.js"
 import { lookup } from "@inlang/sdk"
-import { type BundleNested, type ProjectSettings } from "@inlang/sdk2"
+import { type BundleNested, type ProjectSettings } from "@inlang/sdk"
 import fs from "node:fs/promises"
 import * as prettier from "prettier"
 import {

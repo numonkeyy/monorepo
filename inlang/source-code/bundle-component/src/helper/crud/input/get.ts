@@ -1,4 +1,4 @@
-import type { Declaration, BundleNested } from "@inlang/sdk2"
+import type { Declaration, BundleNested } from "@inlang/sdk"
 
 /**
  * Gets all inputs from a message bundle.

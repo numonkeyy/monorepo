@@ -3,7 +3,7 @@ import { InlangBundle as LitInlangBundle } from "@inlang/bundle-component";
 import React from "react";
 import { useAtom } from "jotai";
 import { pendingChangesAtom, projectAtom } from "../state.ts";
-import { BundleNested, MessageNested, Variant } from "@inlang/sdk2";
+import { BundleNested, MessageNested, Variant } from "@inlang/sdk";
 import queryHelper from "../helper/queryHelper.ts";
 
 export const ReactBundle = createComponent({

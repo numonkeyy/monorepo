@@ -1,4 +1,4 @@
-import type { Variant } from "@inlang/sdk2"
+import type { Variant } from "@inlang/sdk"
 
 /**
  * Returns true if the variant has a catch-all match.

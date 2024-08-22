@@ -1,4 +1,4 @@
-import { type Expression, type MessageNested } from "@inlang/sdk2"
+import { type Expression, type MessageNested } from "@inlang/sdk"
 import { describe, expect, it } from "vitest"
 import addSelector from "./add.js"
 

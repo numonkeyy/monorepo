@@ -9,8 +9,8 @@ import {
 	createVariant,
 	createMessage,
 	type Variant,
-} from "@inlang/sdk2"
-import type { BundleNested, MessageNested } from "@inlang/sdk2"
+} from "@inlang/sdk"
+import type { BundleNested, MessageNested } from "@inlang/sdk"
 
 //internal components
 import "./inlang-bundle-root.js"

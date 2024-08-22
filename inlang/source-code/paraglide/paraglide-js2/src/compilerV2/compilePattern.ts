@@ -1,4 +1,4 @@
-import type { Pattern } from "@inlang/sdk2"
+import type { Pattern } from "@inlang/sdk"
 import { escapeForTemplateLiteral } from "../services/codegen/escape.js"
 import { backtick } from "../services/codegen/quotes.js"
 import { compileExpression } from "./compileExpression.js"

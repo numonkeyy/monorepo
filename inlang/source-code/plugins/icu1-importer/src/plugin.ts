@@ -1,4 +1,4 @@
-import type { BundleNested, InlangPlugin, ResourceFile } from "@inlang/sdk2"
+import type { BundleNested, InlangPlugin, ResourceFile } from "@inlang/sdk"
 import { PluginSettings } from "./settings.js"
 import { createMessage } from "./parse.js"
 import { serializeMessage } from "./serialize.js"

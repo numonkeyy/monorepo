@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import getInput from "./get.js"
-import { createBundle } from "@inlang/sdk2"
+import { createBundle } from "@inlang/sdk"
 
 describe("getInput", () => {
 	it("Should return all found input declarations", () => {

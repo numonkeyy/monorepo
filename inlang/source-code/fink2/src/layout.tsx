@@ -8,7 +8,7 @@ import {
 } from "./state.ts";
 import { SetStateAction, useEffect, useMemo, useState } from "react";
 import SlDialog from "@shoelace-style/shoelace/dist/react/dialog/index.js";
-import { loadProjectInMemory, newProject } from "@inlang/sdk2";
+import { loadProjectInMemory, newProject } from "@inlang/sdk";
 import {
 	SlInput,
 	SlButton,

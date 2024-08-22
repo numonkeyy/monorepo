@@ -1,4 +1,4 @@
-import type { BundleNested } from "@inlang/sdk2"
+import type { BundleNested } from "@inlang/sdk"
 
 /**
  * Returns re-export statements for each alias of a MessageBundle.

@@ -1,6 +1,6 @@
 import { expect, test, describe, vi, beforeEach } from "vitest"
 import { createProject as typescriptProject, ts } from "@ts-morph/bootstrap"
-import { BundleNested, ProjectSettings } from "@inlang/sdk2"
+import { BundleNested, ProjectSettings } from "@inlang/sdk"
 import { compile } from "./compile.js"
 import { rollup } from "rollup"
 import virtual from "@rollup/plugin-virtual"

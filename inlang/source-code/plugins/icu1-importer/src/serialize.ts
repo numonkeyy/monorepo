@@ -1,4 +1,4 @@
-import type { Expression, MessageNested, Pattern, Variant } from "@inlang/sdk2"
+import type { Expression, MessageNested, Pattern, Variant } from "@inlang/sdk"
 import {
 	TYPE,
 	type MessageFormatElement,

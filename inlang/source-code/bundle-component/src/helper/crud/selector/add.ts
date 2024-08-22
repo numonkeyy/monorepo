@@ -1,4 +1,4 @@
-import { createVariant, type Expression, type MessageNested } from "@inlang/sdk2"
+import { createVariant, type Expression, type MessageNested } from "@inlang/sdk"
 
 /**
  * Adds a selector to a message.

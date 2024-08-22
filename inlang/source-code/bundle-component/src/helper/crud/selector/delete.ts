@@ -1,4 +1,4 @@
-import type { MessageNested } from "@inlang/sdk2"
+import type { MessageNested } from "@inlang/sdk"
 
 /**
  * Deletes a selector from a message.

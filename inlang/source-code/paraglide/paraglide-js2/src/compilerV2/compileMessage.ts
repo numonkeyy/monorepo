@@ -1,4 +1,4 @@
-import type { MessageNested, Variant } from "@inlang/sdk2"
+import type { MessageNested, Variant } from "@inlang/sdk"
 import { compilePattern } from "./compilePattern.js"
 import { escapeForDoubleQuoteString } from "../services/codegen/escape.js"
 import { compileExpression } from "./compileExpression.js"

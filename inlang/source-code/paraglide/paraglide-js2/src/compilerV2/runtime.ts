@@ -1,4 +1,4 @@
-import type { ProjectSettings } from "@inlang/sdk2"
+import type { ProjectSettings } from "@inlang/sdk"
 
 /**
  * Returns the code for the `runtime.js` module

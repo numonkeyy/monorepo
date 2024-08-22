@@ -9,7 +9,7 @@ import { html } from "lit"
 // } from "../mock/lint.ts"
 import { mockSettings } from "../mock/settings.ts"
 import { bundleWithoutSelectors } from "../mock/messageBundle.ts"
-import { pluralBundle } from "@inlang/sdk2"
+import { pluralBundle } from "@inlang/sdk"
 
 import "./actions/inlang-bundle-action.ts"
 import {

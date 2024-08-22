@@ -1,4 +1,4 @@
-import type { Expression, FunctionAnnotation } from "@inlang/sdk2"
+import type { Expression, FunctionAnnotation } from "@inlang/sdk"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 import {
 	escapeForDoubleQuoteString,

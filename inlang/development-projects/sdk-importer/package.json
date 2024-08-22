@@ -4,7 +4,7 @@
 	"private": true,
 	"type": "module",
 	"dependencies": {
-		"@inlang/sdk": "workspace:^2.0.0",
+		"@inlang/sdk": "workspace:^2",
 		"@inlang/plugin-icu1": "workspace:*"
 	}
 }

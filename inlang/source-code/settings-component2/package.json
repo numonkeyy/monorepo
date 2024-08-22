@@ -28,10 +28,10 @@
 		"@sinclair/typebox": "0.31.28"
 	},
 	"peerDependencies": {
-		"@inlang/sdk": "workspace:^2.0.0"
+		"@inlang/sdk": "workspace:^2"
 	},
 	"devDependencies": {
-		"@inlang/sdk": "workspace:^2.0.0",
+		"@inlang/sdk": "workspace:^2",
 		"@nx/storybook": "^18.0.4",
 		"@storybook/addon-essentials": "^7.6.16",
 		"@storybook/addon-links": "^7.6.16",

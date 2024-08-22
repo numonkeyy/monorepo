@@ -1,4 +1,4 @@
-import { type Expression, type Variant } from "@inlang/sdk2"
+import { type Expression, type Variant } from "@inlang/sdk"
 
 /**
  * Sort all variants by their match values.

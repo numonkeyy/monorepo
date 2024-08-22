@@ -1,4 +1,4 @@
-import { BundleNested } from "@inlang/sdk2"
+import { BundleNested } from "@inlang/sdk"
 import { describe, it, expect } from "vitest"
 import { createMessage } from "./parse.js"
 import { plugin } from "./plugin.js"

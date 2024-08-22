@@ -1,4 +1,4 @@
-import { BundleNested, ProjectSettings } from "@inlang/sdk2";
+import { BundleNested, ProjectSettings } from "@inlang/sdk";
 import { createComponent } from "@lit/react";
 import {
 	InlangBundleHeader as LitInlangBundleHeader,

@@ -3,7 +3,7 @@ import {
 	TYPE,
 	type MessageFormatElement,
 } from "@formatjs/icu-messageformat-parser"
-import type { MessageNested, Option, Pattern } from "@inlang/sdk2"
+import type { MessageNested, Option, Pattern } from "@inlang/sdk"
 
 /**
  * Represents a (partial) branch

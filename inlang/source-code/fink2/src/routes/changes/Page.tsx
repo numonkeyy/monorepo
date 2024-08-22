@@ -12,7 +12,7 @@ import {
 	SlInput,
 } from "@shoelace-style/shoelace/dist/react";
 import DiffBundleView from "../../components/DiffBundleView.tsx";
-import { BundleNested } from "@inlang/sdk2";
+import { BundleNested } from "@inlang/sdk";
 
 const bundleIdsWithPendingChangesAtom = atom(async (get) => {
 	const bundlesNested = await get(bundlesNestedAtom);

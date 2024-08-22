@@ -1,7 +1,7 @@
 import { useAtom } from "jotai";
 import { projectAtom } from "../state.ts";
 import { useEffect, useState } from "react";
-import { Pattern, Variant } from "@inlang/sdk2";
+import { Pattern, Variant } from "@inlang/sdk";
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import queryHelper from "../helper/queryHelper.ts";
 import timeAgo from "../helper/timeAgo.ts";
