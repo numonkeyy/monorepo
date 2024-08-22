@@ -23,7 +23,7 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/paraglide-vite": "workspace:*"
+		"@inlang/paraglide-vite": "workspace:^1.0.0"
 	},
 	"peerDependencies": {
 		"astro": "^4.0.0"

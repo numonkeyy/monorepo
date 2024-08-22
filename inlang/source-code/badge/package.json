@@ -19,7 +19,7 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/sdk": "workspace:*",
+		"@inlang/sdk": "workspace:^0",
 		"@lix-js/client": "workspace:*",
 		"@resvg/resvg-js": "2.6.0",
 		"@sentry/node": "^7.47.0",

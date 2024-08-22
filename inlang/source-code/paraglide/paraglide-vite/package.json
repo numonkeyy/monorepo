@@ -44,7 +44,7 @@
 		"test": "pnpm -r --filter=@inlang/paraglide-vite-test-basic run _build"
 	},
 	"dependencies": {
-		"@inlang/paraglide-unplugin": "workspace:*"
+		"@inlang/paraglide-unplugin": "workspace:^1.0.0"
 	},
 	"devDependencies": {
 		"@types/node": "20.9.3",

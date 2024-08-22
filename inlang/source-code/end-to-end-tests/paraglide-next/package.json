@@ -11,8 +11,8 @@
 		"clean": "rm -rf ./.tmp ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/paraglide-next": "workspace:*",
-		"@inlang/sdk": "workspace:*"
+		"@inlang/paraglide-next": "workspace:^0",
+		"@inlang/sdk": "workspace:^0"
 	},
 	"devDependencies": {
 		"@gmrchk/cli-testing-library": "^0.1.2",

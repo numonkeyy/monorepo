@@ -8,8 +8,8 @@
 		"clean": "rm -rf ./dist ./node_modules ./src/paraglide"
 	},
 	"devDependencies": {
-		"@inlang/paraglide-js": "workspace:*",
-		"@inlang/paraglide-rollup": "workspace:*",
+		"@inlang/paraglide-js": "workspace:^1.0.0",
+		"@inlang/paraglide-rollup": "workspace:^1.0.0",
 		"rollup": "3.29.1",
 		"@rollup/plugin-alias": "^5.0.1",
 		"typescript": "^5.5.2"

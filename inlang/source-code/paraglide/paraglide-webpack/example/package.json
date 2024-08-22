@@ -8,8 +8,8 @@
 		"clean": "rm -rf ./dist ./node_modules ./src/paraglide"
 	},
 	"devDependencies": {
-		"@inlang/paraglide-js": "workspace:*",
-		"@inlang/paraglide-webpack": "workspace:*",
+		"@inlang/paraglide-js": "workspace:^1.0.0",
+		"@inlang/paraglide-webpack": "workspace:^1.0.0",
 		"typescript": "^5.5.2",
 		"webpack": "^5.89.0",
 		"webpack-cli": "^5.1.4"

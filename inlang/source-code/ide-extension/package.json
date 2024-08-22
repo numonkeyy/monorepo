@@ -241,7 +241,7 @@
 		"@inlang/recommend-sherlock": "workspace:*",
 		"@inlang/result": "workspace:*",
 		"@inlang/rpc": "workspace:*",
-		"@inlang/sdk": "workspace:*",
+		"@inlang/sdk": "workspace:^0",
 		"@inlang/settings-component": "workspace:*",
 		"@inlang/telemetry": "workspace:*",
 		"@lix-js/client": "workspace:*",

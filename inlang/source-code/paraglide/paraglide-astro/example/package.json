@@ -26,7 +26,7 @@
 		".gitignore"
 	],
 	"devDependencies": {
-		"@inlang/paraglide-astro": "workspace:*",
-		"@inlang/paraglide-js": "workspace:*"
+		"@inlang/paraglide-astro": "workspace:^0",
+		"@inlang/paraglide-js": "workspace:^1"
 	}
 }

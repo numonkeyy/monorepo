@@ -62,7 +62,7 @@
 		"@inlang/rpc": "workspace:*",
 		"@inlang/language-tag": "workspace:*",
 		"@inlang/result": "workspace:*",
-		"@inlang/sdk": "workspace:*",
+		"@inlang/sdk": "workspace:^0",
 		"@lix-js/fs": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"fs-extra": "11.1.1",

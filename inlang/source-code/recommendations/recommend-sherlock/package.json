@@ -23,7 +23,7 @@
 	},
 	"devDependencies": {
 		"@lix-js/fs": "workspace:*",
-		"@inlang/sdk": "workspace:*",
+		"@inlang/sdk": "workspace:^0",
 		"@types/vscode": "^1.84.2",
 		"comment-json": "^4.2.3",
 		"patch-package": "6.5.1",

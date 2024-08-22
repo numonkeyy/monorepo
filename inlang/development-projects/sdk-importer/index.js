@@ -1,4 +1,4 @@
-import { loadProjectFromDirectoryInMemory, selectBundleNested } from "@inlang/sdk2"
+import { loadProjectFromDirectoryInMemory, selectBundleNested } from "@inlang/sdk"
 import icu1Importer from "@inlang/plugin-icu1"
 import fs from "node:fs/promises"
 import path from "node:path"

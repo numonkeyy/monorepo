@@ -22,7 +22,7 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/sdk": "workspace:*",
+		"@inlang/sdk": "workspace:^0",
 		"@lix-js/fs": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"@sinclair/typebox": "^0.31.17",

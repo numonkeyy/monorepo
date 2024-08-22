@@ -22,12 +22,11 @@
 	},
 	"dependencies": {
 		"@inlang/detect-json-formatting": "workspace:*",
-		"@inlang/sdk": "workspace:*",
+		"@inlang/sdk": "workspace:^0",
 		"@sinclair/typebox": "0.31.28"
 	},
 	"devDependencies": {
 		"@inlang/cli": "workspace:*",
-		"@inlang/sdk": "workspace:*",
 		"@inlang/plugin": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@size-limit/preset-small-lib": "^8.2.4",

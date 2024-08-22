@@ -47,9 +47,9 @@
 		"test": "vitest run --passWithNoTests"
 	},
 	"dependencies": {
-		"@inlang/paraglide-js": "workspace:*",
+		"@inlang/paraglide-js": "workspace:^1.0.0",
 		"@lix-js/client": "workspace:*",
-		"@inlang/sdk": "workspace:*",
+		"@inlang/sdk": "workspace:^0",
 		"unplugin": "1.5.1"
 	},
 	"devDependencies": {

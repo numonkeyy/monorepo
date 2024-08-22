@@ -12,7 +12,7 @@
 		"test": "tsc --noEmit && vitest run"
 	},
 	"devDependencies": {
-		"@inlang/sdk": "workspace:*",
+		"@inlang/sdk": "workspace:^0",
 		"@inlang/cli": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"typescript": "^5.5.2",

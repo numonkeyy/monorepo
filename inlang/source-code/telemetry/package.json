@@ -17,7 +17,7 @@
 	},
 	"dependencies": {
 		"@inlang/env-variables": "workspace:*",
-		"@inlang/sdk": "workspace:*",
+		"@inlang/sdk": "workspace:^0",
 		"http-proxy-middleware": "^2.0.6"
 	},
 	"devDependencies": {

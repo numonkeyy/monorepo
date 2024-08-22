@@ -20,7 +20,7 @@
 		"@inlang/marketplace-registry": "workspace:*",
 		"@inlang/message": "workspace:*",
 		"@inlang/result": "workspace:*",
-		"@inlang/sdk": "workspace:*",
+		"@inlang/sdk": "workspace:^0",
 		"@types/cors": "^2.8.17",
 		"body-parser": "^1.20.2",
 		"cors": "^2.8.5",
