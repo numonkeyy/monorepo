@@ -1,2 +1,58 @@
 @import "tailwindcss/utilities";
 @import "tailwindcss/theme";
+
+body {
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+* {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+table { 
+    margin-top: 20px;
+    border-spacing: 0px;
+    border-radius: 8px;
+    /* Elevation/100 */
+    box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.12);
+    color: var(--text-icon-primary-black, #1D2433);
+    font-feature-settings: 'liga' off, 'clig' off;
+    /* Paragraph/200/Light */
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 142.857% */
+}
+
+table > * {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    padding: 5px;
+}
+
+th {
+    background-color:#F1F3F9;
+    padding: 10px;
+    border: 1px solid #E4E7EB;
+    min-width: 160px;
+}
+
+td {
+    padding: 0px;
+    border: 1px solid #E4E7EB;
+}
+
+td input {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    background-color: transparent;
+}
+
+tr:nth-child(even) {
+    background: #F1F3F9;
+}

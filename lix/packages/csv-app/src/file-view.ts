@@ -5,10 +5,12 @@ import { BaseElement } from "./baseElement"
 
 @customElement("file-view")
 export class FileView extends BaseElement {
-	@state()
-	files: any = []
+	@state() files: any = []
 	lix: any
 	openFile: any
+	view: any
+
+	doOpen
 
 	connectedCallback() {
 		// @ts-ignore
@@ -25,7 +27,7 @@ export class FileView extends BaseElement {
 							.where("file_id", "=", file.id)
 							.where("commit_id", "is", null)
 							.execute()
-						file.hasUncommittedChanges = uncommittedChanges!.length > 0 ? true : false
+						file.uncommittedChanges = uncommittedChanges!.length
 					}
 				}
 
@@ -33,63 +35,80 @@ export class FileView extends BaseElement {
 			},
 			(files) => {
 				this.files = files
+				if (!this.openFile && files.length > 0) {
+					this.doOpen(files[0]?.path)
+				}
 			}
 		)
 	}
 
 	render() {
 		return html`
-			<h2>Files</h2>
-			${this.files.length === 0
-				? html`<p>No files</p>`
-				: html`<ul>
-						${this.files.map(
-							(file: any) =>
-								html`<li style="${this.openFile === file.path ? "font-weight: 800" : ""}">
-									<div style="display: flex; justify-content: space-between;">
-										<div class="flex items-center gap-2">
-											<p @click=${() => (this.openFile = file.path)}>${file.path}</p>
-											${file.hasUncommittedChanges
-												? html`
-														<div class="w-2 h-2 bg-orange-500 rounded-3xl"></div>
-														<p class="text-orange-500 text-sm">uncommitted changes</p>
-												  `
-												: nothing}
-										</div>
+			<div class="h-full bg-[#edf0f7] justify-center items-start inline-flex">
+				<div class="self-stretch pt-6 pb-2 flex-col justify-start items-start inline-flex">
+					${this.files.map((file: any) => {
+						const active = this.openFile === file.path || this.view === "review"
 
-										<div style="display: flex; gap: 1rem">
-											<button
-												@click=${async () => {
-													const result = await this.lix?.db
-														.selectFrom("file")
-														.select("data")
-														.where("path", "=", file.path)
-														.executeTakeFirstOrThrow()
-													const blob = new Blob([result!.blob])
-													const url = URL.createObjectURL(blob)
-													const a = document.createElement("a")
-													a.href = url
-													a.download = file.path
-													a.click()
-												}}
+						return html`
+							<div
+								@click=${() => this.doOpen(file.path)}
+								class="w-[258px] cursor-pointer px-4 py-3 ${active
+									? "bg-[#9aafd5]"
+									: ""} justify-start items-center gap-2.5 inline-flex"
+							>
+								<div
+									class="grow shrink basis-0 text-[#2d3648] text-sm font-medium leading-normal"
+									style="${active ? "font-weight: 800" : ""}"
+								>
+									${file.path}
+								</div>
+
+								${file.uncommittedChanges
+									? html`
+											<div
+												class="grow shrink basis-0 text-right text-[#4b5466] text-sm font-medium leading-normal whitespace-nowrap"
 											>
-												Download
-											</button>
-											<button
-												@click=${async () => {
-													await this.lix?.db
-														.deleteFrom("file")
-														.where("path", "=", file.path)
-														.execute()
-												}}
-											>
-												Delete
-											</button>
-										</div>
-									</div>
-								</li>`
-						)}
-				  </ul>`}
+												${file.uncommittedChanges} unconfirmed changes
+											</div>
+									  `
+									: nothing}
+							</div>
+						`
+					})}
+				</div>
+
+				<div class="w-[1px] h-full bg-[#2d3648]"></div>
+			</div>
 		`
 	}
 }
+
+// <div style="display: flex; gap: 1rem">
+// 		<button
+// 			@click=${async () => {
+// 				const result = await this.lix?.db
+// 					.selectFrom("file")
+// 					.select("data")
+// 					.where("path", "=", file.path)
+// 					.executeTakeFirstOrThrow()
+// 				const blob = new Blob([result!.blob])
+// 				const url = URL.createObjectURL(blob)
+// 				const a = document.createElement("a")
+// 				a.href = url
+// 				a.download = file.path
+// 				a.click()
+// 			}}
+// 		>
+// 			Download
+// 		</button>
+// 		<button
+// 			@click=${async () => {
+// 				await this.lix?.db
+// 					.deleteFrom("file")
+// 					.where("path", "=", file.path)
+// 					.execute()
+// 			}}
+// 		>
+// 			Delete
+// 		</button>
+// 	</div>

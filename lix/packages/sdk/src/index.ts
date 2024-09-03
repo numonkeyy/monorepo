@@ -8,6 +8,7 @@ export * from "./types.js";
 export * from "./query-utilities/index.js";
 export * from "./resolve-conflict/errors.js";
 export { merge } from "./merge/merge.js";
+export { getLeafChangesOnlyInSource } from "./query-utilities/get-leaf-changes-only-in-source.js";
 
 // TODO maybe move to `lix.*` api
 // https://github.com/opral/lix-sdk/issues/58

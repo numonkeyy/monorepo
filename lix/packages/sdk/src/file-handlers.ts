@@ -158,6 +158,7 @@ export async function handleFileChange(args: {
 
 	await args.db.transaction().execute(async (trx) => {
 		for (const { diffs, pluginKey, pluginDiffFunction } of pluginDiffs) {
+			console.log({ diffs, pluginKey, pluginDiffFunction });
 			for (const diff of diffs ?? []) {
 				// assume an insert or update operation as the default
 				// if diff.neu is not present, it's a delete operationd
@@ -224,7 +225,7 @@ export async function handleFileChange(args: {
 							.where("commit_id", "is", null)
 							.set({
 								// @ts-expect-error - database expects stringified json
-								value: JSON.stringify(value),
+								value: JSON.stringify(diff.neu),
 								operation: diff.operation,
 								// @ts-expect-error - database expects stringified json
 								meta: JSON.stringify(diff.meta),
@@ -242,7 +243,7 @@ export async function handleFileChange(args: {
 							author: args.currentAuthor,
 							parent_id: previousCommittedChange?.id,
 							// @ts-expect-error - database expects stringified json
-							value: JSON.stringify(value),
+							value: JSON.stringify(diff.neu),
 							// @ts-expect-error - database expects stringified json
 							meta: JSON.stringify(diff.meta),
 							operation: diff.operation,
