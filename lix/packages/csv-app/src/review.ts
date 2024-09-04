@@ -148,7 +148,7 @@ function renderChanges(changes, csvs, lix, undo: any = null) {
 											: ""}
 
 										<div class="flex px-6 py-4 text-green-700">
-											${!change.parent?.value.text ? "created:" : ""} ${row[field]}
+											${!change.parent?.value.text ? "created:" : ""} ${change.value.text}
 										</div>
 									</td>`
 								}
