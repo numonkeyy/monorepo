@@ -1,8 +1,7 @@
 import { html } from "lit"
 import { customElement, state } from "lit/decorators.js"
 import { Ref, createRef, ref } from "lit/directives/ref.js"
-import { newLixFile, openLixInMemory, merge } from "@lix-js/sdk"
-import { getLeafChangesOnlyInSource } from "@lix-js/sdk"
+import { newLixFile, openLixInMemory, merge, getLeafChangesOnlyInSource } from "@lix-js/sdk"
 
 import "./file-view"
 import "./review"
@@ -14,7 +13,7 @@ import { BaseElement } from "./baseElement"
 import "@shoelace-style/shoelace"
 import { v4 as uuid } from "uuid"
 
-let lixOPFSPath = "-country-project.lix"
+const lixOPFSPath = "-country-project.lix"
 
 function humanFileSize(bytes, si = false, dp = 1) {
 	const thresh = si ? 1000 : 1024
