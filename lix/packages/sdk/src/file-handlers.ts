@@ -2,8 +2,7 @@ import { v4 } from "uuid";
 import type { LixDatabaseSchema, LixFile } from "./database/schema.js";
 import type { LixPlugin } from "./plugin.js";
 import { minimatch } from "minimatch";
-import { Kysely } from "kysely";
-import { getLeafChange } from "./query-utilities/get-leaf-change.js";
+import { Kysely, sql } from "kysely";
 
 // start a new normalize path function that has the absolute minimum implementation.
 function normalizePath(path: string) {
@@ -12,6 +11,61 @@ function normalizePath(path: string) {
 	}
 	return path;
 }
+
+// async function getChangeHistory({
+// 	atomId,
+// 	depth,
+// 	fileId,
+// 	pluginKey,
+// 	diffType,
+// 	db,
+// 	branchId,
+// }: {
+// 	atomId: string;
+// 	depth: number;
+// 	fileId: string;
+// 	pluginKey: string;
+// 	diffType: string;
+// 	branchId: string;
+// 	db: Kysely<LixDatabaseSchema>;
+// }): Promise<any[]> {
+// 	if (depth > 1) {
+// 		// TODO: walk change parents until depth
+// 		throw new Error("depth > 1 not supported yet");
+// 	}
+// 	const { commit_id } = await db
+// 		.selectFrom("ref")
+// 		.select("commit_id")
+// 		.where("name", "=", "current")
+// 		.executeTakeFirstOrThrow();
+// 	let nextCommitId = commit_id;
+// 	let firstChange;
+// 	while (!firstChange && nextCommitId) {
+// 		const commit = await db
+// 			.selectFrom("commit")
+// 			.selectAll()
+// 			.where("id", "=", nextCommitId)
+// 			.executeTakeFirst();
+
+// 		if (!commit) {
+// 			break;
+// 		}
+
+// 		nextCommitId = commit.parent_id;
+
+// 		firstChange = await db
+// 			.selectFrom("change")
+// 			.selectAll()
+// 			.where("commit_id", "=", commit.id)
+// 			.where((eb) => eb.ref("value", "->>").key("id"), "=", atomId)
+// 			.where("plugin_key", "=", pluginKey)
+// 			.where("file_id", "=", fileId)
+// 			.where("type", "=", diffType)
+// 			.executeTakeFirst();
+// 	}
+// 	const changes: any[] = [firstChange];
+// 	return changes;
+// }
 
 // creates initial changes for new files
 export async function handleFileInsert(args: {
@@ -34,20 +88,28 @@ export async function handleFileInsert(args: {
 			old: undefined,
 			neu: args.neu,
 		});
-		// console.log({ diffs });
 
 		pluginDiffs.push({ diffs, pluginKey: plugin.key });
 	}
 
 	await args.db.transaction().execute(async (trx) => {
+		const currentBranch = await trx
+			.selectFrom("branch")
+			.selectAll()
+			.where("active", "=", true)
+			.executeTakeFirstOrThrow();
+
+		// console.log({ currentBranch });
+
 		for (const { diffs, pluginKey } of pluginDiffs) {
 			for (const diff of diffs ?? []) {
 				const value = diff.neu ?? diff.old;
+				const changeId = v4();
 
 				await trx
 					.insertInto("change")
 					.values({
-						id: v4(),
+						id: changeId,
 						type: diff.type,
 						file_id: args.neu.id,
 						author: args.currentAuthor,
@@ -58,6 +120,27 @@ export async function handleFileInsert(args: {
 						// @ts-expect-error - database expects stringified json
 						meta: JSON.stringify(diff.meta),
 						// add queueId interesting for debugging or knowning what changes were generated in same worker run
+					})
+					.execute();
+
+				const previousBranchChange = await trx
+					.selectFrom("branch_change")
+					.selectAll()
+					.where("branch_id", "=", currentBranch.id)
+					.orderBy("seq", "desc")
+					.executeTakeFirst();
+
+				// console.log({ previousBranchChange });
+
+				const lastSeq = previousBranchChange?.seq ?? 0;
+
+				await await trx
+					.insertInto("branch_change")
+					.values({
+						id: v4(),
+						seq: lastSeq + 1,
+						branch_id: currentBranch.id,
+						change_id: changeId,
 					})
 					.execute();
 			}
@@ -102,6 +185,12 @@ export async function handleFileChange(args: {
 	}
 
 	await args.db.transaction().execute(async (trx) => {
+		const currentBranch = await trx
+			.selectFrom("branch")
+			.selectAll()
+			.where("active", "=", true)
+			.executeTakeFirstOrThrow();
+
 		for (const { diffs, pluginKey, pluginDiffFunction } of pluginDiffs) {
 			for (const diff of diffs ?? []) {
 				// assume an insert or update operation as the default
@@ -110,27 +199,32 @@ export async function handleFileChange(args: {
 
 				// TODO: save hash of changed fles in every commit to discover inconsistent commits with blob?
 
-				const previousChanges = await trx
-					.selectFrom("change")
-					.selectAll()
-					.where("file_id", "=", fileId)
-					.where("plugin_key", "=", pluginKey)
-					.where("type", "=", diff.type)
+				const previousChange = await trx
+					.selectFrom("branch_change")
+					.leftJoin("change", "branch_change.change_id", "change.id")
+					.orderBy("branch_change.seq", "desc")
+					.where("change.file_id", "=", fileId)
+					.where("change.plugin_key", "=", pluginKey)
+					.where("change.type", "=", diff.type)
+					.where("branch_change.branch_id", "=", currentBranch.id)
 					.where((eb) => eb.ref("value", "->>").key("id"), "=", value.id)
-					// TODO don't rely on created at. a plugin should report the parent id.
-					.execute();
+					.selectAll()
+					.executeTakeFirst();
 
-				// we need to finde the real leaf change as multiple changes can be set in the same created timestamp second or clockskew
-				let previousChange; // = previousChanges.at(-1);
-				for (let i = previousChanges.length - 1; i >= 0; i--) {
-					for (const change of previousChanges) {
-						if (change.parent_id === previousChanges[i]?.id) {
-							break;
-						}
-					}
-					previousChange = previousChanges[i];
-					break;
-				}
+				// console.log({ previousChange });
+				// id: '74bf5a91-49ae-4540-8d45-c1430db867dd',
+				// change_id: '74bf5a91-49ae-4540-8d45-c1430db867dd',
+				// branch_id: '961582e6-ac9a-480c-ab62-4792821318fc',
+				// seq: 1,
+				// parent_id: null,
+				// author: null,
+				// type: 'text',
+				// file_id: 'test',
+				// plugin_key: 'mock-plugin',
+				// operation: 'create',
+				// value: { id: 'test', text: 'inserted text' },
+				// meta: null,
+				// commit_id: null,
 
 				// working change exists but is different from previously committed change
 				// -> update the working change or delete if it is the same as previous uncommitted change
@@ -141,30 +235,50 @@ export async function handleFileChange(args: {
 				// working change exists but is identical to previously committed change
 				if (previousChange) {
 					previousCommittedDiff = await pluginDiffFunction?.[diff.type]?.({
-						old: previousChange?.value,
+						old: previousChange.value,
 						neu: diff.neu,
 					});
 
-					if (previousCommittedDiff?.length === 0) {
-						// drop the change because it's identical
+					// console.log({ previousCommittedDiff, pluginDiffFunction, diff });
+
+					if (previousCommittedDiff.length === 0) {
 						continue;
 					}
 				}
 
+				const changeId = v4();
+
 				await trx
 					.insertInto("change")
 					.values({
-						id: v4(),
+						id: changeId,
+						value: value,
+						operation: diff.operation,
+						meta: diff.meta,
 						type: diff.type,
 						file_id: fileId,
 						plugin_key: pluginKey,
 						author: args.currentAuthor,
-						parent_id: previousChange?.id,
-						// @ts-expect-error - database expects stringified json
-						value: JSON.stringify(value),
-						// @ts-expect-error - database expects stringified json
-						meta: JSON.stringify(diff.meta),
-						operation: diff.operation,
+						parent_id: previousChange?.id || undefined,
+					})
+					.execute();
+
+				const previousBranchChange = await trx
+					.selectFrom("branch_change")
+					.selectAll()
+					.where("branch_id", "=", currentBranch.id)
+					.orderBy("seq", "desc")
+					.executeTakeFirst();
+
+				const lastSeq = previousBranchChange?.seq ?? 0;
+
+				await await trx
+					.insertInto("branch_change")
+					.values({
+						id: v4(),
+						seq: lastSeq + 1,
+						branch_id: currentBranch.id,
+						change_id: changeId,
 					})
 					.execute();
 			}

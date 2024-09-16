@@ -31,7 +31,6 @@ test("it should update the variant to the source's value", async () => {
 			}),
 			// @ts-expect-error - https://github.com/opral/inlang-message-sdk/issues/123
 			meta: JSON.stringify(undefined),
-			commit_id: "c8ad005b-a834-4ca3-84fb-9627546f2eba",
 		},
 		{
 			id: "24f74fec-fc8a-4c68-b31c-d126417ce3af",
@@ -50,7 +49,6 @@ test("it should update the variant to the source's value", async () => {
 			}),
 			// @ts-expect-error - https://github.com/opral/inlang-message-sdk/issues/123
 			meta: JSON.stringify(undefined),
-			commit_id: "c8ad005b-a834-4ca3-84fb-9627546f2eba",
 		},
 		{
 			id: "aaf0ec32-0c7f-4d07-af8c-922ce382aef1",
@@ -73,7 +71,6 @@ test("it should update the variant to the source's value", async () => {
 			}),
 			// @ts-expect-error - https://github.com/opral/inlang-message-sdk/issues/123
 			meta: JSON.stringify(undefined),
-			commit_id: "c8ad005b-a834-4ca3-84fb-9627546f2eba",
 		},
 	];
 
@@ -102,7 +99,6 @@ test("it should update the variant to the source's value", async () => {
 			meta: JSON.stringify({
 				id: "6a860f96-0cf3-477c-80ad-7893d8fde852",
 			}),
-			commit_id: "df455c78-b5ed-4df0-9259-7bb694c9d755",
 		},
 	];
 
