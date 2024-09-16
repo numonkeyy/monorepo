@@ -2,10 +2,7 @@
 import { test, expect } from "vitest";
 import { newProject } from "../project/newProject.js";
 import { loadProjectInMemory } from "../project/loadProjectInMemory.js";
-import {
-	isInSimulatedCurrentBranch,
-	resolveConflictBySelecting,
-} from "@lix-js/sdk";
+import { resolveConflictBySelecting } from "@lix-js/sdk";
 
 test("it should resolve a conflict with the selected change", async () => {
 	const project = await loadProjectInMemory({ blob: await newProject() });
@@ -122,6 +119,48 @@ test("it should resolve a conflict with the selected change", async () => {
 		.returningAll()
 		.execute();
 
+	const currentBranch = await project.lix.db
+		.selectFrom("branch")
+		.select("id")
+		.where("active", "=", true)
+		.executeTakeFirstOrThrow();
+
+	await project.lix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				id: "branch-change-1",
+				change_id: changes[0]?.id,
+				branch_id: currentBranch.id,
+				seq: 0,
+			},
+			{
+				id: "branch-change-2",
+				change_id: changes[1]?.id,
+				branch_id: currentBranch.id,
+				seq: 1,
+			},
+			{
+				id: "branch-change-3",
+				change_id: changes[2]?.id,
+				branch_id: currentBranch.id,
+				seq: 2,
+			},
+			{
+				id: "branch-change-4",
+				change_id: "samuels-change",
+				branch_id: currentBranch.id,
+				seq: 3,
+			},
+			{
+				id: "branch-change-5",
+				change_id: "peters-change",
+				branch_id: currentBranch.id,
+				seq: 4,
+			},
+		])
+		.execute();
+
 	const conflicts = await project.lix.db
 		.insertInto("conflict")
 		.values([
@@ -143,15 +182,18 @@ test("it should resolve a conflict with the selected change", async () => {
 	await project.lix.settled();
 
 	const changesInCurrentBranch = await project.lix.db
-		.selectFrom("change")
+		.selectFrom("branch_change")
+		.leftJoin("change", "change.id", "branch_change.change_id")
 		.selectAll()
-		.where(isInSimulatedCurrentBranch)
+		.where("branch_id", "=", currentBranch.id)
+		.orderBy("seq")
 		.execute();
 
 	expect(changesInCurrentBranch.map((c) => c.id)).toEqual([
 		changes[0]?.id,
 		changes[1]?.id,
 		changes[2]?.id,
+		"samuels-change",
 		"peters-change",
 	]);
 });

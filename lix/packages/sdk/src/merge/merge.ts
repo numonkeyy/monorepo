@@ -8,25 +8,48 @@ import { getLeafChangesOnlyInSource } from "../query-utilities/get-leaf-changes-
  * Combined the changes of the source lix into the target lix.
  */
 export async function merge(args: {
-	targetLix: Lix;
 	sourceLix: Lix;
+	targetLix: Lix;
+	sourceBranchId?: string;
+	targetBranchId?: string;
 	// TODO selectively merge changes
 	// onlyTheseChanges
 }): Promise<void> {
 	// TODO increase performance by using attach mode
 	//      and only get the changes and commits that
 	//      are not in target.
+
+	const sourceBranchId =
+		args.sourceBranchId ||
+		(
+			await args.sourceLix.db
+				.selectFrom("branch")
+				.select("id")
+				.where("name", "=", "main")
+				.executeTakeFirstOrThrow()
+		).id;
+
+	const targetBranchId =
+		args.targetBranchId ||
+		(
+			await args.targetLix.db
+				.selectFrom("branch")
+				.select("id")
+				.where("name", "=", "main")
+				.executeTakeFirstOrThrow()
+		).id;
+
 	const sourceChanges = await args.sourceLix.db
 		.selectFrom("change")
+		// .leftJoin("branch_change", "change.id", "branch_change.change_id")
+		// .where("branch_change.branch_id", "=", sourceBranchId)
 		.selectAll()
 		.execute();
 
-	// TODO increase performance by only getting commits
-	//      that are not in target in the future.
-	const sourceCommits = await args.sourceLix.db
-		.selectFrom("commit")
-		.selectAll()
-		.execute();
+	// const sourceCommits = await args.sourceLix.db
+	// 	.selectFrom("commit")
+	// 	.selectAll()
+	// 	.execute();
 
 	// TODO don't query the changes again. inefficient.
 	const leafChangesOnlyInSource = await getLeafChangesOnlyInSource({
@@ -103,15 +126,15 @@ export async function merge(args: {
 				.execute();
 		}
 
-		// 2. copy the commits from source
-		if (sourceCommits.length > 0) {
-			await trx
-				.insertInto("commit")
-				.values(sourceCommits)
-				// ignore if already exists
-				.onConflict((oc) => oc.doNothing())
-				.execute();
-		}
+		// // 2. copy the commits from source
+		// if (sourceCommits.length > 0) {
+		// 	await trx
+		// 		.insertInto("commit")
+		// 		.values(sourceCommits)
+		// 		// ignore if already exists
+		// 		.onConflict((oc) => oc.doNothing())
+		// 		.execute();
+		// }
 
 		// 3. insert the conflicts of those changes
 		if (conflicts.length > 0) {
