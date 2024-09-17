@@ -2,13 +2,26 @@ import { sql, type Kysely } from "kysely";
 
 export async function createSchema(args: { db: Kysely<any> }) {
 	return await sql`
-  CREATE TABLE ref (
-    name TEXT PRIMARY KEY,
-    commit_id TEXT
-  );
+
+  CREATE TABLE branch (
+    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
+    name TEXT NOT NULL UNIQUE,
+    active INTEGER DEFAULT FALSE,
+    base_branch TEXT
+  ) strict;
+
+  CREATE TABLE branch_change (
+    id TEXT DEFAULT (uuid_v4()),
+    change_id TEXT NOT NULL,
+    branch_id TEXT NOT NULL,
+    seq INTEGER NOT NULL
+  ) strict;
+
+  -- random uuid as the function is not available yet on creating the schema
+  INSERT INTO branch(id, name, active) values('961582e6-ac9a-480c-ab62-4792821318fc', 'main', true);
 
   CREATE TABLE file_internal (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
+    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),  
     path TEXT NOT NULL UNIQUE,
     data BLOB NOT NULL,
     metadata TEXT  -- Added metadata field
@@ -37,9 +50,10 @@ export async function createSchema(args: { db: Kysely<any> }) {
     operation TEXT NOT NULL,
     value TEXT,
     meta TEXT,
-    commit_id TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
   ) strict;
+
+  CREATE VIEW change_view AS SELECT author, change.id as id, change.file_id as file_id, change.parent_id as parent_id, type, plugin_key, operation, value, meta, created_at, branch_change.branch_id as branch_id,  branch_change.seq as seq FROM branch_change LEFT JOIN change ON branch_change.change_id = change.id ORDER BY seq;
 
   CREATE TABLE conflict (
     change_id TEXT NOT NULL,
@@ -49,17 +63,6 @@ export async function createSchema(args: { db: Kysely<any> }) {
     resolved_with_change_id TEXT,
     PRIMARY KEY (change_id, conflicting_change_id)
   ) strict;
-    
-  CREATE TABLE 'commit' (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v4()),
-    author TEXT,
-    parent_id TEXT NOT NULL,
-    description TEXT NOT NULL,
-    created TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
-  ) strict;
-
-  INSERT INTO ref values ('current', '00000000-0000-0000-0000-000000000000');
 
   CREATE TRIGGER file_update INSTEAD OF UPDATE ON file
   BEGIN

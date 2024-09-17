@@ -6,7 +6,17 @@ import { inlangLixPluginV1 } from "./inlangLixPluginV1.js";
 
 test("it should update the variant to the source's value", async () => {
 	const target = await loadProjectInMemory({ blob: await newProject() });
+	const currentTargetBranch = await target.lix.db
+		.selectFrom("branch")
+		.selectAll()
+		.where("active", "=", true)
+		.executeTakeFirstOrThrow();
 	const source = await loadProjectInMemory({ blob: await target.toBlob() });
+	const currentSourceBranch = await source.lix.db
+		.selectFrom("branch")
+		.selectAll()
+		.where("active", "=", true)
+		.executeTakeFirstOrThrow();
 
 	const dbFile = await target.lix.db
 		.selectFrom("file")
@@ -31,7 +41,6 @@ test("it should update the variant to the source's value", async () => {
 			}),
 			// @ts-expect-error - https://github.com/opral/inlang-message-sdk/issues/123
 			meta: JSON.stringify(undefined),
-			commit_id: "c8ad005b-a834-4ca3-84fb-9627546f2eba",
 		},
 		{
 			id: "24f74fec-fc8a-4c68-b31c-d126417ce3af",
@@ -50,7 +59,6 @@ test("it should update the variant to the source's value", async () => {
 			}),
 			// @ts-expect-error - https://github.com/opral/inlang-message-sdk/issues/123
 			meta: JSON.stringify(undefined),
-			commit_id: "c8ad005b-a834-4ca3-84fb-9627546f2eba",
 		},
 		{
 			id: "aaf0ec32-0c7f-4d07-af8c-922ce382aef1",
@@ -73,7 +81,6 @@ test("it should update the variant to the source's value", async () => {
 			}),
 			// @ts-expect-error - https://github.com/opral/inlang-message-sdk/issues/123
 			meta: JSON.stringify(undefined),
-			commit_id: "c8ad005b-a834-4ca3-84fb-9627546f2eba",
 		},
 	];
 
@@ -102,7 +109,6 @@ test("it should update the variant to the source's value", async () => {
 			meta: JSON.stringify({
 				id: "6a860f96-0cf3-477c-80ad-7893d8fde852",
 			}),
-			commit_id: "df455c78-b5ed-4df0-9259-7bb694c9d755",
 		},
 	];
 
@@ -111,9 +117,56 @@ test("it should update the variant to the source's value", async () => {
 		.values([...commonChanges, ...changesOnlyInSource])
 		.execute();
 
+	await source.lix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: "d92cdc2e-74cc-494c-8d51-958216272a17",
+				seq: 1,
+			},
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: "24f74fec-fc8a-4c68-b31c-d126417ce3af",
+				seq: 2,
+			},
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: "aaf0ec32-0c7f-4d07-af8c-922ce382aef1",
+				seq: 3,
+			},
+			{
+				branch_id: currentSourceBranch.id,
+				change_id: "01c059f9-8476-4aaa-aa6d-53ea3158b374",
+				seq: 4,
+			},
+		])
+		.execute();
+
 	await target.lix.db
 		.insertInto("change")
 		.values([...commonChanges, ...changesOnlyInTarget])
+		.execute();
+
+	await target.lix.db
+		.insertInto("branch_change")
+		.values([
+			{
+				branch_id: currentTargetBranch.id,
+				change_id: "d92cdc2e-74cc-494c-8d51-958216272a17",
+				seq: 1,
+			},
+			{
+				branch_id: currentTargetBranch.id,
+				change_id: "24f74fec-fc8a-4c68-b31c-d126417ce3af",
+				seq: 2,
+			},
+			{
+				branch_id: currentTargetBranch.id,
+				change_id: "aaf0ec32-0c7f-4d07-af8c-922ce382aef1",
+				seq: 3,
+			},
+		])
 		.execute();
 
 	await merge({ sourceLix: source.lix, targetLix: target.lix });
@@ -126,7 +179,8 @@ test("it should update the variant to the source's value", async () => {
 	});
 
 	const changes = await mergedProject.lix.db
-		.selectFrom("change")
+		.selectFrom("change_view")
+		.where("branch_id", "=", currentTargetBranch.id)
 		.selectAll()
 		.execute();
 

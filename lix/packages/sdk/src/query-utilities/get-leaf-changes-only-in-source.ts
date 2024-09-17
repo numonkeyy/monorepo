@@ -12,12 +12,33 @@ import type { Change, LixReadonly } from "@lix-js/sdk";
 export async function getLeafChangesOnlyInSource(args: {
 	sourceLix: LixReadonly;
 	targetLix: LixReadonly;
+	sourceBranchId?: string;
+	targetBranchId?: string;
 }): Promise<Change[]> {
+	if (!args.sourceBranchId) {
+		args.sourceBranchId = (
+			await args.sourceLix.db
+				.selectFrom("branch")
+				.select("id")
+				.where("active", "=", true)
+				.executeTakeFirstOrThrow()
+		).id;
+	}
+	if (!args.targetBranchId) {
+		args.targetBranchId = (
+			await args.targetLix.db
+				.selectFrom("branch")
+				.select("id")
+				.where("active", "=", true)
+				.executeTakeFirstOrThrow()
+		).id;
+	}
 	const result: Change[] = [];
 
 	const leafChangesInSource = await args.sourceLix.db
-		.selectFrom("change")
+		.selectFrom("change_view")
 		.selectAll()
+		.where("branch_id", "=", args.sourceBranchId)
 		.where(
 			"id",
 			"not in",

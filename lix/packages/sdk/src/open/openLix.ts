@@ -1,5 +1,4 @@
 import type { LixPlugin } from "../plugin.js";
-import { commit } from "../commit.js";
 import { handleFileChange, handleFileInsert } from "../file-handlers.js";
 import { loadPlugins } from "../load-plugin.js";
 import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
@@ -167,9 +166,6 @@ export async function openLix(args: {
 		close: async () => {
 			args.database.close();
 			await db.destroy();
-		},
-		commit: (args: { description: string }) => {
-			return commit({ ...args, db, currentAuthor });
 		},
 	};
 }
