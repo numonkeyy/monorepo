@@ -484,7 +484,6 @@ describe("it should keep files between the inlang directory and lix in sync", as
 		const project = await loadProjectFromDirectory({
 			fs: fs as any,
 			path: "/project.inlang",
-			syncInterval: syncInterval,
 		});
 
 		// console.log("wrting fs settings simultanous");

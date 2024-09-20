@@ -16,6 +16,7 @@ import { PluginImportError } from "../plugin/errors.js";
 import type { InlangProject, ResourceFile } from "./api.js";
 import { upsertBundleNestedMatchByProperties } from "../query-utilities/upsertBundleNestedMatchByProperties.js";
 
+
 /**
  * Loads a project from a directory.
  *
@@ -23,7 +24,7 @@ import { upsertBundleNestedMatchByProperties } from "../query-utilities/upsertBu
  * that is stored in git.
  */
 export async function loadProjectFromDirectory(
-	args: { path: string; fs: typeof fs; syncInterval?: number } & Omit<
+	args: { path: string; fs: typeof fs; onTopOfState?: Blob } & Omit<
 		Parameters<typeof loadProjectInMemory>[0],
 		"blob"
 	>
@@ -45,14 +46,13 @@ export async function loadProjectFromDirectory(
 	const project = await loadProjectInMemory({
 		...args,
 		providePlugins: providePluginsWithLocalPlugins,
-		blob: await newProject(),
+		blob: args.onTopOfState ?? (await newProject()),
 	});
 
 	await syncLixFsFiles({
 		fs: args.fs,
 		path: args.path,
 		lix: project.lix,
-		syncInterval: args.syncInterval,
 	});
 
 	const {
@@ -227,12 +227,7 @@ function arrayBuffersEqual(a: ArrayBuffer, b: ArrayBuffer) {
 /**
  * Watches a directory and copies files into lix, keeping them in sync.
  */
-async function syncLixFsFiles(args: {
-	fs: typeof fs;
-	path: string;
-	lix: Lix;
-	syncInterval?: number;
-}) {
+async function syncLixFsFiles(args: { fs: typeof fs; path: string; lix: Lix }) {
 	// NOTE this function is async - while it runs 100% sync in the naiv implementation - we may want to change to an async version to optimize
 	async function checkFsStateRecursive(
 		dirPath: string,
@@ -511,8 +506,7 @@ async function syncLixFsFiles(args: {
 		fileStates: {
 			lixFileStates: FsFileState;
 			fsFileStates: FsFileState;
-		},
-		interval?: number
+		}
 	) {
 		// mark all states as removed - checkFsStateRecursive will update those that exist on the disc correspondingly
 		for (const fsState of Object.values(fileStates.fsFileStates)) {
@@ -532,12 +526,6 @@ async function syncLixFsFiles(args: {
 
 		// sync fs<->lix
 		await syncUpFsAndLixFiles(fileStates);
-
-		if (interval) {
-			setTimeout(() => {
-				syncFiles(dirPath, fileStates, interval);
-			}, interval);
-		}
 
 		return;
 	}
