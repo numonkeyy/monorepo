@@ -531,11 +531,7 @@ async function syncLixFsFiles(args: { fs: typeof fs; path: string; lix: Lix }) {
 	}
 
 	// Initial copy of all files
-	await syncFiles(
-		args.path,
-		{ fsFileStates: {}, lixFileStates: {} },
-		args.syncInterval
-	);
+	await syncFiles(args.path, { fsFileStates: {}, lixFileStates: {} });
 
 	return;
 }

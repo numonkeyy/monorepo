@@ -8,8 +8,12 @@ import type {
 } from "../plugin/schema.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import type { InlangProject, ResourceFile } from "./api.js";
-import { loadProjectFromDirectory } from "./loadProjectFromDirectory.js";
+import {
+	loadProjectFromDirectory,
+	WarningLocalPluginImport,
+} from "./loadProjectFromDirectory.js";
 import { saveProjectToDirectory } from "./saveProjectToDirectory.js";
+import { PluginImportError } from "../plugin/errors.js";
 
 /**
  * Loads a project from a directory.
@@ -81,7 +85,9 @@ export async function loadProjectFromDirectorySynced(
 
 	return {
 		...project,
-		cancelSync: () => { canceled = true },
+		cancelSync: () => {
+			canceled = true;
+		},
 		errors: {
 			get: async () => {
 				const errors = await project.errors.get();
@@ -106,4 +112,16 @@ export async function loadProjectFromDirectorySynced(
 			},
 		},
 	};
+}
+
+function withLocallyImportedPluginWarning(errors: readonly Error[]) {
+	return errors.map((error) => {
+		if (
+			error instanceof PluginImportError &&
+			error.plugin.startsWith("http") === false
+		) {
+			return new WarningLocalPluginImport(error.plugin);
+		}
+		return error;
+	});
 }
