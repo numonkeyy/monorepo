@@ -24,6 +24,7 @@
 		"@nx/storybook": "^18.0.4",
 		"@rollup/plugin-commonjs": "^25.0.7",
 		"@rollup/plugin-node-resolve": "^15.2.3",
+		"@rollup/plugin-replace": "^5.0.5",
 		"@storybook/addon-essentials": "^7.6.16",
 		"@storybook/addon-links": "^7.6.16",
 		"@storybook/blocks": "^7.6.16",
