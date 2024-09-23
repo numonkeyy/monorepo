@@ -20,6 +20,11 @@ export async function merge(args: {
 		.selectFrom("change")
 		.selectAll()
 		.execute();
+	
+	if (sourceChanges.length === 0) {
+		// nothing to do
+		return;
+	}
 
 	// TODO increase performance by only getting commits
 	//      that are not in target in the future.
