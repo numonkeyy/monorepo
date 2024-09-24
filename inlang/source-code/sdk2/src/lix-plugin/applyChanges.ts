@@ -84,10 +84,8 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 		].map((v) => JSON.parse(v));
 
 		if (leafChange.length === 0) {
-			console.log("NO CHANGE", new TextDecoder().decode(file.data));
 			return { fileData: file.data };
 		}
-		console.log(leafChange.length);
 		if (leafChange.length !== 1) {
 			throw new Error(
 				"we only save a snapshot from the settings file - there must be only one change " +
@@ -97,11 +95,17 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 			);
 		}
 		if (leafChange[0].operation === "create") {
-			console.log("CREATE!!!! " + JSON.stringify(leafChange[0].value));
-			return { fileData: new TextEncoder().encode( JSON.stringify(leafChange[0].value.data)) };
+			return {
+				fileData: new TextEncoder().encode(
+					JSON.stringify(leafChange[0].value.data)
+				),
+			};
 		} else if (leafChange[0].operation === "update") {
-			console.log("UPDATE!!!! " + JSON.stringify(leafChange[0].value));
-			return { fileData: new TextEncoder().encode( JSON.stringify(leafChange[0].value.data)) };
+			return {
+				fileData: new TextEncoder().encode(
+					JSON.stringify(leafChange[0].value.data)
+				),
+			};
 		} else {
 			throw new Error(
 				`Operation ${leafChange[0].operation} on settings file currently not supported`

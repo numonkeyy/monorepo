@@ -294,39 +294,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 		expect(filesByPath["/settings.json"]).toBe(JSON.stringify(mockSettings));
 	});
 
-	test.skip("file created in fs should be avaialable in lix ", async () => {
-		const syncInterval = 100;
-		const fs = Volume.fromJSON(mockDirectory);
-
-		const project = await loadProjectFromDirectorySynced({
-			fs: fs as any,
-			path: "/project.inlang",
-			syncInterval: syncInterval,
-		});
-
-		fs.writeFileSync(
-			"/project.inlang/file-created-on-fs.txt",
-			"value written by fs",
-			{
-				encoding: "utf-8",
-			}
-		);
-
-		// lets wait a seconds to allow the sync process catch up
-		await new Promise((resolve) => setTimeout(resolve, syncInterval + 10));
-
-		const randomFileInLix = await project.lix.db
-			.selectFrom("file")
-			.selectAll()
-			.where("path", "=", "/file-created-on-fs.txt")
-			.executeTakeFirstOrThrow();
-
-		expect(new TextDecoder().decode(randomFileInLix.data)).toBe(
-			"value written by fs"
-		);
-	});
-
-	test("file updated in fs should be avaialable in lix ", async () => {
+	test("updates on settings.json should be avaialable in lix ", async () => {
 		const syncInterval = 100;
 		const fs = Volume.fromJSON(mockDirectory);
 
@@ -341,8 +309,6 @@ describe("it should keep files between the inlang directory and lix in sync", as
 			.selectAll()
 			.where("path", "=", "/settings.json")
 			.executeTakeFirstOrThrow();
-
-		console.log("fileContent before:", new TextDecoder().decode(fileInLixBefore.data));
 
 		// "changes to a file on disk should reflect in lix
 		fs.writeFileSync(
@@ -361,7 +327,6 @@ describe("it should keep files between the inlang directory and lix in sync", as
 			.where("path", "=", "/settings.json")
 			.executeTakeFirstOrThrow();
 
-		console.log("fileContent:", new TextDecoder().decode(fileInLix.data));
 		const settingsAfterUpdateOnDisk = JSON.parse(
 			new TextDecoder().decode(fileInLix.data)
 		);
@@ -371,66 +336,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 		);
 	});
 
-	test.skip("file deleted in fs should be droped from lix ", async () => {
-		const syncInterval = 100;
-		const fs = Volume.fromJSON(mockDirectory);
-
-		const project = await loadProjectFromDirectorySynced({
-			fs: fs as any,
-			path: "/project.inlang",
-			syncInterval: syncInterval,
-		});
-
-		const filesInLixBefore = await project.lix.db
-			.selectFrom("file")
-			.selectAll()
-			.where("path", "=", "/README.md")
-			.execute();
-
-		expect(filesInLixBefore.length).toBe(1);
-
-		// "changes to a file on disk should reflect in lix
-		fs.unlinkSync("/project.inlang/README.md");
-
-		// console.log("wrting fs settings");
-		await new Promise((resolve) => setTimeout(resolve, syncInterval + 10));
-		const fileInLixAfter = await project.lix.db
-			.selectFrom("file")
-			.selectAll()
-			.where("path", "=", "/README.md")
-			.execute();
-
-		expect(fileInLixAfter.length).toBe(0);
-	});
-
-	test.skip("file created in lix should be avaialable in fs ", async () => {
-		const syncInterval = 100;
-		const fs = Volume.fromJSON(mockDirectory);
-
-		const project = await loadProjectFromDirectorySynced({
-			fs: fs as any,
-			path: "/project.inlang",
-			syncInterval: syncInterval,
-		});
-
-		await project.lix.db
-			.insertInto("file")
-			.values({
-				path: "/file-created-in.lix.txt",
-				data: new TextEncoder().encode("random value lix"),
-			})
-			.execute();
-
-		// lets wait a seconds to allow the sync process catch up
-		await new Promise((resolve) => setTimeout(resolve, syncInterval + 10));
-
-		const randomFileOnDiskContent = fs
-			.readFileSync("/project.inlang/file-created-in.lix.txt")
-			.toString();
-		expect(randomFileOnDiskContent).toBe("random value lix");
-	});
-
-	test.skip("file updated in lix should be avaialable in fs ", async () => {
+	test("updates on settings.json file in lix should be avaialable in fs ", async () => {
 		const syncInterval = 100;
 		const fs = Volume.fromJSON(mockDirectory);
 
@@ -461,32 +367,8 @@ describe("it should keep files between the inlang directory and lix in sync", as
 		expect(settings.baseLocale).toBe("brand-new-locale2");
 	});
 
-	test.skip("file deleted in lix should be gone in fs as awell", async () => {
-		const syncInterval = 100;
-		const fs = Volume.fromJSON(mockDirectory);
-
-		const project = await loadProjectFromDirectorySynced({
-			fs: fs as any,
-			path: "/project.inlang",
-			syncInterval: syncInterval,
-		});
-
-		// console.log("wrting lix settings");
-		// changes to a file in lix should reflect in the project directory
-		await project.lix.db
-			.deleteFrom("file_internal")
-			.where("path", "=", "/.gitignore")
-			.execute();
-
-		// lets wait a seconds to allow the sync process catch up
-		await new Promise((resolve) => setTimeout(resolve, syncInterval + 10));
-
-		const fileExistsOnDisk = fs.existsSync("/project.inlang/.gitignore");
-
-		expect(fileExistsOnDisk).toBe(false);
-	});
-
-	test.skip("file updated in fs and lix (conflicting) should result in the fs state", async () => {
+	// TODO how should we model the conflict caese?
+	test.skip("settings.json file updated in fs and lix (conflicting) should result in the fs state", async () => {
 		const syncInterval = 100;
 		const fs = Volume.fromJSON(mockDirectory);
 
@@ -533,241 +415,4 @@ describe("it should keep files between the inlang directory and lix in sync", as
 
 		expect(settingsAfterUpdateOnDiskAndLix.baseLocale).toBe("fs-version");
 	});
-});
-
-test("errors from importing translation files should be shown", async () => {
-	const mock = {
-		"/project.inlang/settings.json": JSON.stringify({
-			baseLocale: "en",
-			locales: ["en", "de"],
-			modules: [],
-		} satisfies ProjectSettings),
-	};
-
-	const fs = Volume.fromJSON(mock);
-
-	const proxiedFs = new Proxy(fs, {
-		get: (target, prop) => {
-			if (prop === "promises") {
-				// Intercept the 'promises' object
-				return new Proxy(target.promises, {
-					get: (promisesTarget, promisesProp) => {
-						if (promisesProp === "readFile") {
-							// @ts-expect-error - we are mocking the fs
-							return (path, ...args) => {
-								if (path.endsWith("some-file.json")) {
-									throw new Error("MOCK ERROR");
-								}
-								return promisesTarget.readFile(path, ...args);
-							};
-						}
-						return Reflect.get(promisesTarget, promisesProp);
-					},
-				});
-			}
-			return Reflect.get(target, prop);
-		},
-	});
-
-	const mockPlugin: InlangPlugin = {
-		key: "mock-plugin",
-		importFiles: async () => {
-			return { bundles: [] };
-		},
-		toBeImportedFiles: async () => {
-			return [{ path: "./some-file.json", locale: "mock" }];
-		},
-	};
-
-	const project = await loadProjectFromDirectory({
-		fs: proxiedFs as any,
-		path: "/project.inlang",
-		providePlugins: [mockPlugin],
-	});
-
-	const errors = await project.errors.get();
-	// TODO deactivated for now - we need to proxy fs.promises or change the signature of loadProject
-	expect(errors).toHaveLength(1);
-	expect(errors[0]).toBeInstanceOf(ResourceFileImportError);
-});
-
-// it happens often that a resource file doesn't exist yet on import
-test("errors from importing translation files that are ENOENT should not be shown", async () => {
-	const mock = {
-		"/project.inlang/settings.json": JSON.stringify({
-			baseLocale: "en",
-			locales: ["en", "de"],
-			modules: [],
-		} satisfies ProjectSettings),
-	};
-
-	const fs = Volume.fromJSON(mock);
-
-	const mockPlugin: InlangPlugin = {
-		key: "mock-plugin",
-		importFiles: async () => {
-			return { bundles: [] };
-		},
-		toBeImportedFiles: async () => {
-			return [{ path: "./some-non-existing-file.json", locale: "mock" }];
-		},
-	};
-
-	const project = await loadProjectFromDirectory({
-		fs: fs as any,
-		path: "/project.inlang",
-		providePlugins: [mockPlugin],
-	});
-
-	const errors = await project.errors.get();
-	expect(errors).toHaveLength(0);
-});
-
-test("it should provide plugins from disk for backwards compatibility but warn that those plugins are not portable", async () => {
-	const mockRepo = {
-		"/local-plugins/mock-plugin.js": "export default { key: 'mock-plugin' }",
-		"/local-plugins/mock-rule.js":
-			"export default { id: 'messageLintRule.mock }",
-		"/website/project.inlang/settings.json": JSON.stringify({
-			baseLocale: "en",
-			locales: ["en", "de"],
-			modules: [
-				"../local-plugins/mock-plugin.js",
-				"../local-plugins/mock-rule.js",
-			],
-		} satisfies ProjectSettings),
-	};
-
-	const fs = Volume.fromJSON(mockRepo);
-
-	const project = await loadProjectFromDirectory({
-		fs: fs as any,
-		path: "/website/project.inlang",
-	});
-
-	const plugins = await project.plugins.get();
-	const errors = await project.errors.get();
-	const settings = await project.settings.get();
-
-	expect(plugins.length).toBe(1);
-	expect(plugins[0]?.key).toBe("mock-plugin");
-
-	// old mock lint rule import is number two import
-	// it's hard to model the import of a lint rule
-	// best if they are removed
-	expect(errors.length).toBe(3);
-	expect(errors[0]).toBeInstanceOf(WarningLocalPluginImport);
-	expect(errors[1]).toBeInstanceOf(WarningLocalPluginImport);
-	expect(errors[2]).toBeInstanceOf(WarningDeprecatedLintRule);
-
-	// it should not remove the module from the settings
-	// else roundtrips would not work
-	expect(settings.modules?.[0]).toBe("../local-plugins/mock-plugin.js");
-});
-
-// https://github.com/opral/inlang-sdk/issues/174
-test("plugin calls that use fs should be intercepted to use an absolute path", async () => {
-	process.cwd = () => "/";
-
-	const mockRepo = {
-		"/messages/en.json": JSON.stringify({
-			key1: "value1",
-			key2: "value2",
-		}),
-		"/project.inlang/settings.json": JSON.stringify({
-			baseLocale: "en",
-			locales: ["en", "de"],
-			"plugin.mock-plugin": {
-				pathPattern: "./messages/{locale}.json",
-			},
-		} satisfies ProjectSettings),
-	};
-
-	const mockPlugin: InlangPlugin = {
-		key: "mock-plugin",
-		loadMessages: async ({ nodeishFs, settings }) => {
-			const pathPattern = settings["plugin.mock-plugin"]?.pathPattern.replace(
-				"{locale}",
-				"en"
-			) as string;
-			const file = await nodeishFs.readFile(pathPattern);
-			// reading the file should be possible without an error
-			expect(file.toString()).toBe(
-				JSON.stringify({
-					key1: "value1",
-					key2: "value2",
-				})
-			);
-			return [];
-		},
-		saveMessages: async ({ nodeishFs, settings }) => {
-			const pathPattern = settings["plugin.mock-plugin"]?.pathPattern.replace(
-				"{locale}",
-				"en"
-			) as string;
-			const file = new TextEncoder().encode(
-				JSON.stringify({
-					key1: "value1",
-					key2: "value2",
-					key3: "value3",
-				})
-			);
-			await nodeishFs.writeFile(pathPattern, file);
-		},
-		toBeImportedFiles: async ({ settings }) => {
-			const pathPattern = settings["plugin.mock-plugin"]?.pathPattern.replace(
-				"{locale}",
-				"en"
-			) as string;
-			return [
-				{
-					path: pathPattern,
-					locale: "en",
-				},
-			];
-		},
-	};
-
-	const fs = Volume.fromJSON(mockRepo);
-
-	const loadMessagesSpy = vi.spyOn(mockPlugin, "loadMessages");
-	const saveMessagesSpy = vi.spyOn(mockPlugin, "saveMessages");
-	const toBeImportedFilesSpy = vi.spyOn(mockPlugin, "toBeImportedFiles");
-	const fsReadFileSpy = vi.spyOn(fs.promises, "readFile");
-	const fsWriteFileSpy = vi.spyOn(fs.promises, "writeFile");
-
-	const project = await loadProjectFromDirectory({
-		fs: fs as any,
-		path: "/project.inlang",
-		providePlugins: [mockPlugin],
-	});
-
-	expect(loadMessagesSpy).toHaveBeenCalled();
-	expect(fsReadFileSpy).toHaveBeenCalledWith("/messages/en.json", undefined);
-
-	// todo test that saveMessages works too.
-	// await project.db.insertInto("bundle").defaultValues().execute();
-
-	// const translationFile = await fs.readFile("/messages/en.json", "utf-8");
-
-	// expect(translationFile).toBe(
-	// 	JSON.stringify({
-	// 		key1: "value1",
-	// 		key2: "value2",
-	// 		key3: "value3",
-	// 	})
-	// );
-
-	// expect(fsWriteFileSpy).toHaveBeenCalledWith(
-	// 	"/messages/en.json",
-	// 	JSON.stringify({
-	// 		key1: "value1",
-	// 		key2: "value2",
-	// 		key3: "value3",
-	// 	}),
-	// 	"utf-8"
-	// );
-
-	// expect(saveMessagesSpy).toHaveBeenCalled();
-	// expect(toBeImportedFilesSpy).toHaveBeenCalled();
 });
