@@ -8,6 +8,17 @@ export const createInMemoryDatabase = async ({
   readOnly?: boolean;
 }) => {
   if (!sqliteModule) {
+    const log = console.log;
+    // @ts-ignore
+    globalThis.sqlite3ApiConfig = {
+      debug: log,
+      log: log,
+      warn: (...args: any) => {
+        if (args[0] !== "Ignoring inability to install OPFS sqlite3_vfs:")
+          console.log(...args);
+      },
+      error: log,
+    };
     await initSqlite();
   }
   const flags = [
