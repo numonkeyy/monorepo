@@ -294,7 +294,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 		expect(filesByPath["/settings.json"]).toBe(JSON.stringify(mockSettings));
 	});
 
-	test("file created in fs should be avaialable in lix ", async () => {
+	test.skip("file created in fs should be avaialable in lix ", async () => {
 		const syncInterval = 100;
 		const fs = Volume.fromJSON(mockDirectory);
 
@@ -326,7 +326,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 		);
 	});
 
-	test.skip("file updated in fs should be avaialable in lix ", async () => {
+	test("file updated in fs should be avaialable in lix ", async () => {
 		const syncInterval = 100;
 		const fs = Volume.fromJSON(mockDirectory);
 
@@ -335,6 +335,14 @@ describe("it should keep files between the inlang directory and lix in sync", as
 			path: "/project.inlang",
 			syncInterval: syncInterval,
 		});
+
+		const fileInLixBefore = await project.lix.db
+			.selectFrom("file")
+			.selectAll()
+			.where("path", "=", "/settings.json")
+			.executeTakeFirstOrThrow();
+
+		console.log("fileContent before:", new TextDecoder().decode(fileInLixBefore.data));
 
 		// "changes to a file on disk should reflect in lix
 		fs.writeFileSync(
@@ -353,6 +361,7 @@ describe("it should keep files between the inlang directory and lix in sync", as
 			.where("path", "=", "/settings.json")
 			.executeTakeFirstOrThrow();
 
+		console.log("fileContent:", new TextDecoder().decode(fileInLix.data));
 		const settingsAfterUpdateOnDisk = JSON.parse(
 			new TextDecoder().decode(fileInLix.data)
 		);

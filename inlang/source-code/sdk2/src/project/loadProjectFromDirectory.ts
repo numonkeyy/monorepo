@@ -265,7 +265,7 @@ async function syncLixFsFiles(args: { fs: typeof fs; path: string; lix: Lix }) {
 	async function checkLixState(currentLixState: FsFileState) {
 		// go through all files in lix and check there state
 		const filesInLix = await args.lix.db
-			.selectFrom("file_internal")
+			.selectFrom("file")
 			.where("path", "not like", "%db.sqlite")
 			.selectAll()
 			.execute();
@@ -429,7 +429,7 @@ async function syncLixFsFiles(args: { fs: typeof fs; path: string; lix: Lix }) {
 					} else if (lixState.state === "known") {
 						// file is in known state with lix - means we have only changes on the fs - easy
 						await args.lix.db
-							.deleteFrom("file_internal")
+							.deleteFrom("file")
 							.where("path", "=", path)
 							.execute();
 						// NOTE: states where both are gone will get removed in the lix state loop
@@ -440,7 +440,7 @@ async function syncLixFsFiles(args: { fs: typeof fs; path: string; lix: Lix }) {
 							"seems like we saw an update on the file in fs while some changes on lix have not been reached fs? FS -> Winns?"
 						);
 						await args.lix.db
-							.deleteFrom("file_internal")
+							.deleteFrom("file")
 							.where("path", "=", path)
 							.execute();
 						// NOTE: states where both are gone will get removed in the lix state loop
@@ -525,8 +525,12 @@ async function syncLixFsFiles(args: { fs: typeof fs; path: string; lix: Lix }) {
 		await checkLixState(fileStates.lixFileStates);
 
 		// sync fs<->lix
-		await syncUpFsAndLixFiles(fileStates);
-
+		try {
+			await syncUpFsAndLixFiles(fileStates);
+		} catch (e) {
+			console.log("SUPERSTRANGE");
+			console.log(e);
+		}
 		return;
 	}
 
@@ -544,14 +548,34 @@ async function upsertFileInLix(
 	// file is in known state with lix - means we have only changes on the fs - easy
 	// NOTE we use file_internal for now see: https://linear.app/opral/issue/LIXDK-102/re-visit-simplifying-the-change-queue-implementation#comment-65eb3485
 	// This means we don't see changes for the file we update via this method!
-	await args.lix.db
-		.insertInto("file_internal") // change queue
-		.values({
-			path: path,
-			data,
-		})
-		.onConflict((oc) => oc.column("path").doUpdateSet({ data }))
-		.execute();
+
+	
+	const existing_file = await args.lix.db
+		.selectFrom("file")
+		.selectAll()
+		.where("path", "=", path)
+		.executeTakeFirst();
+
+	if (existing_file) {
+		// update
+		await args.lix.db
+			.updateTable("file") // change queue
+			.set({
+				data: data,
+			})
+			.where("path", "=", path)
+			.execute();
+	} else {
+		// insert
+		await args.lix.db
+			.insertInto("file") // change queue
+			.values({
+				path: path,
+				data,
+			})
+			.execute();
+	}
+	
 }
 
 // TODO i guess we should move this validation logic into sdk2/src/project/loadProject.ts

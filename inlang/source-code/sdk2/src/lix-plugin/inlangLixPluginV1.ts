@@ -18,76 +18,113 @@ export const inlangLixPluginV1: LixPlugin<{
 		// TODO does not account for deletions
 		file: async ({ old, neu }) => {
 			// can only handle the database for now
-			if (neu === undefined || neu.path?.endsWith("db.sqlite") === false) {
+			if (neu === undefined) {
 				return [];
 			}
-			const result: DiffReport[] = [];
-			const oldDb = old
-				? initDb({ sqlite: await loadDatabaseInMemory(old.data) })
-				: undefined;
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			const newDb = neu
-				? initDb({
-						sqlite: await loadDatabaseInMemory(neu.data),
-				  })
-				: undefined;
 
-			const newProjectBundles = await newDb
-				?.selectFrom("bundle")
-				.selectAll()
-				.execute();
+			if (neu.path?.endsWith("db.sqlite")) {
+				const result: DiffReport[] = [];
+				const oldDb = old
+					? initDb({ sqlite: await loadDatabaseInMemory(old.data) })
+					: undefined;
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				const newDb = neu
+					? initDb({
+							sqlite: await loadDatabaseInMemory(neu.data),
+					  })
+					: undefined;
 
-			const newProjectMessages = await newDb
-				?.selectFrom("message")
-				.selectAll()
-				.execute();
-			const newProjectVariants = await newDb
-				?.selectFrom("variant")
-				.selectAll()
-				.execute();
-
-			for (const bundle of newProjectBundles ?? []) {
-				const oldBundle = await oldDb
+				const newProjectBundles = await newDb
 					?.selectFrom("bundle")
 					.selectAll()
-					.where("id", "=", bundle.id)
-					.executeTakeFirst();
-				result.push(
-					...(await inlangLixPluginV1.diff.bundle({
-						old: oldBundle,
-						neu: bundle,
-					}))
-				);
-			}
-			for (const message of newProjectMessages ?? []) {
-				const oldMessage = await oldDb
+					.execute();
+
+				const newProjectMessages = await newDb
 					?.selectFrom("message")
 					.selectAll()
-					.where("id", "=", message.id)
-					.executeTakeFirst();
-
-				result.push(
-					...(await inlangLixPluginV1.diff.message({
-						old: oldMessage,
-						neu: message,
-					}))
-				);
-			}
-			for (const variant of newProjectVariants ?? []) {
-				const oldVariant = await oldDb
+					.execute();
+				const newProjectVariants = await newDb
 					?.selectFrom("variant")
 					.selectAll()
-					.where("id", "=", variant.id)
-					.executeTakeFirst();
-				result.push(
-					...(await inlangLixPluginV1.diff.variant({
-						old: oldVariant,
-						neu: variant,
-					}))
-				);
-			}
+					.execute();
 
-			return result;
+				for (const bundle of newProjectBundles ?? []) {
+					const oldBundle = await oldDb
+						?.selectFrom("bundle")
+						.selectAll()
+						.where("id", "=", bundle.id)
+						.executeTakeFirst();
+					result.push(
+						...(await inlangLixPluginV1.diff.bundle({
+							old: oldBundle,
+							neu: bundle,
+						}))
+					);
+				}
+				for (const message of newProjectMessages ?? []) {
+					const oldMessage = await oldDb
+						?.selectFrom("message")
+						.selectAll()
+						.where("id", "=", message.id)
+						.executeTakeFirst();
+
+					result.push(
+						...(await inlangLixPluginV1.diff.message({
+							old: oldMessage,
+							neu: message,
+						}))
+					);
+				}
+				for (const variant of newProjectVariants ?? []) {
+					const oldVariant = await oldDb
+						?.selectFrom("variant")
+						.selectAll()
+						.where("id", "=", variant.id)
+						.executeTakeFirst();
+					result.push(
+						...(await inlangLixPluginV1.diff.variant({
+							old: oldVariant,
+							neu: variant,
+						}))
+					);
+				}
+
+				return result;
+			} else if (neu.path?.endsWith("settings.json")) {
+				if (old === undefined) {
+					return [
+						{
+							type: "settingsFile",
+							operation: "create",
+							old,
+							neu: {
+								id: "-",
+								data: JSON.parse(new TextDecoder().decode(neu.data)),
+							},
+						} satisfies DiffReport,
+					];
+				} else if (JSON.stringify(old) !== JSON.stringify(neu)) {
+					return [
+						{
+							type: "settingsFile",
+							operation: "update",
+							old: {
+								id: "-",
+								data: JSON.parse(new TextDecoder().decode(old.data)),
+							},
+							neu: {
+								id: "-",
+								data: JSON.parse(new TextDecoder().decode(neu.data)),
+							},
+						} satisfies DiffReport,
+					];
+				} else {
+					return [];
+				}
+			} else {
+				return [];
+			}
+			
 		},
 		bundle: ({ old, neu }) => diffSnapshot({ old, neu, type: "bundle" }),
 		message: ({ old, neu }) => diffSnapshot({ old, neu, type: "message" }),
