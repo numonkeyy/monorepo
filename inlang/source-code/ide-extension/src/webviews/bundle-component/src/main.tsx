@@ -13,6 +13,8 @@ declare global {
 
 const vscode = window.acquireVsCodeApi()
 
+console.log("initialData in main.tsx", window.initialData)
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
 	<React.StrictMode>
 		<App vscode={vscode} initialData={window.initialData} />

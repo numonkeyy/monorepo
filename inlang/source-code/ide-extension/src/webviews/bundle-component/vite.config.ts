@@ -1,24 +1,24 @@
 import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react"
 
-export default defineConfig(({}) => ({
+// https://vitejs.dev/config/
+export default defineConfig({
 	plugins: [react()],
-	base: "",
-	server: {
-		port: 3000,
-		strictPort: true,
-		hmr: {
-			protocol: "ws",
-			host: "localhost",
-			port: 3000,
-		},
-	},
 	build: {
 		outDir: "../../../dist/bundle-component",
-		emptyOutDir: true,
-		manifest: true, // Enable manifest file generation
 		rollupOptions: {
-			input: "./src/main.tsx", // Ensure this matches your entry point
+			output: {
+				entryFileNames: `assets/[name].js`,
+				chunkFileNames: `assets/[name].js`,
+				assetFileNames: `assets/[name].[ext]`,
+			},
 		},
 	},
-}))
+	server: {
+		port: 6543,
+		hmr: {
+			host: "localhost",
+			protocol: "ws",
+		},
+	},
+})

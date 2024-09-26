@@ -1,7 +1,7 @@
 import * as vscode from "vscode"
 import { state } from "../state.js"
 import { CONFIGURATION } from "../../configuration.js"
-import { getSelectedBundleByBundleIdOrAlias } from "../helper.js"
+import { Extension, getSelectedBundleByBundleIdOrAlias } from "../helper.js"
 import { msg } from "../messages/msg.js"
 import type { BundleNested } from "@inlang/sdk2"
 import * as path from "node:path"
@@ -25,10 +25,10 @@ export async function editorView(args: { bundleId: string; context: vscode.Exten
 		}
 	)
 
-	panel.webview.html = await getWebviewContent({
-		bundle,
-		context: args.context,
+	panel.webview.html = getHtmlForWebview({
 		webview: panel.webview,
+		context: args.context,
+		bundle,
 	})
 
 	panel.webview.onDidReceiveMessage(async (message) => {
@@ -41,6 +41,101 @@ export async function editorView(args: { bundleId: string; context: vscode.Exten
 		}
 	})
 }
+
+function getHtmlForWebview(args: {
+	webview: vscode.Webview
+	context: vscode.ExtensionContext
+	bundle: BundleNested
+}): string {
+	const file = "src/index.tsx"
+	const localPort = "6543"
+	const localServerUrl = `localhost:${localPort}`
+
+	const stylesUri = getUri(args.webview, args.context.extensionUri, [
+		"dist",
+		"bundle-component",
+		"assets",
+		"index.css",
+	])
+
+	const isProd = process.env.NODE_ENV !== "development"
+	const scriptUri = isProd
+		? getUri(args.webview, args.context.extensionUri, [
+				"dist",
+				"bundle-component",
+				"assets",
+				"index.js",
+			])
+		: `http://${localServerUrl}/${file}`
+
+	const nonce = getNonce()
+
+	const reactRefresh = /*html*/ `
+      <script type="module">
+        import RefreshRuntime from "http://localhost:5173/@react-refresh";
+        RefreshRuntime.injectIntoGlobalHook(window);
+        window.$RefreshReg$ = () => {};
+        window.$RefreshSig$ = () => (type) => type;
+        window.__vite_plugin_react_preamble_installed__ = true;
+      </script>`
+
+	const reactRefreshHash = "sha256-YmMpkm5ow6h+lfI3ZRp0uys+EUCt6FOyLkJERkfVnTY="
+
+	const csp = [
+		`default-src 'none';`,
+		`script-src 'unsafe-eval' https://* ${
+			isProd
+				? `'nonce-${nonce}'`
+				: `http://${localServerUrl} http://0.0.0.0:${localPort} '${reactRefreshHash}'`
+		}`,
+		`style-src ${args.webview.cspSource} 'self' 'unsafe-inline' https://*`,
+		`font-src ${args.webview.cspSource}`,
+		`connect-src https://* ${
+			isProd
+				? ``
+				: `ws://${localServerUrl} ws://0.0.0.0:${localPort} http://${localServerUrl} http://0.0.0.0:${localPort}`
+		}`,
+	]
+
+	const initialData = {
+		bundle: args.bundle,
+	}
+
+	return /*html*/ `<!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="Content-Security-Policy" content="${csp.join("; ")}">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" type="text/css" href="${stylesUri}">
+        <title>VSCode React Starter</title>
+      </head>
+      <body>
+        <div id="root"></div>
+        ${isProd ? "" : reactRefresh}
+		<script>
+    		window.acquireVsCodeApi = acquireVsCodeApi;
+    		window.initialData = ${JSON.stringify(initialData)};
+  		</script>
+        <script type="module" src="${scriptUri}"></script>
+      </body>
+    </html>`
+}
+
+export function getUri(webview: vscode.Webview, extensionUri: vscode.Uri, pathList: string[]) {
+	return webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, ...pathList))
+}
+
+export function getNonce() {
+	let text = ""
+	const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+	for (let i = 0; i < 32; i++) {
+		text += possible.charAt(Math.floor(Math.random() * possible.length))
+	}
+	return text
+}
+
+// NOT IN USE
 
 async function getWebviewContent(args: {
 	bundle: BundleNested

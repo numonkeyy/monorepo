@@ -998,7 +998,7 @@ importers:
         specifier: ^8.0.1
         version: 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.5.4)
       vite:
-        specifier: ^5.4.1
+        specifier: ^5.3.3
         version: 5.4.1(@types/node@22.5.2)(lightningcss@1.26.0)(terser@5.31.6)
 
   inlang/source-code/json-types:
