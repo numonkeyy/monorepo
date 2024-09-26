@@ -36,15 +36,15 @@ export const getPatternFromString = (args: { string: string }): Pattern => {
 		.flatMap((element) => {
 			if (element.startsWith("{") && element.endsWith("}")) {
 				return {
-					type: "expression" as const,
+					type: "expression",
 					arg: {
-						type: "variable-reference" as const,
+						type: "variable-reference",
 						name: element.slice(1, -1),
 					},
 				} as Expression // Return as an Expression with a VariableReference
 			} else if (element && element !== "") {
 				return {
-					type: "text" as const,
+					type: "text",
 					value: element,
 				} as Text // Return as Text
 			}

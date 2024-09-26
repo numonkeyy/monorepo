@@ -7,6 +7,7 @@ packages:
   - 'inlang/source-code/recommendations/*'
   - 'inlang/source-code/plugins/*'
   - 'inlang/source-code/paraglide/*'
+  - 'inlang/source-code/ide-extension/src/webviews/*'
   - 'inlang/source-code/end-to-end-tests/*'
   - 'inlang/source-code/paraglide/paraglide-vite/tests/*'
   - 'inlang/source-code/paraglide/*/example'

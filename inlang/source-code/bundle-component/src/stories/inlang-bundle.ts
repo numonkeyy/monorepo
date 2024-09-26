@@ -169,11 +169,11 @@ export default class InlangBundle extends LitElement {
 					</div>
 
 					<div class="header-right">
-						${this.bundle.declarations.length > 0
+						${this.bundle.declarations?.length > 0
 							? html`<div class="variables-wrapper">
 									Variables:
 									<div class="variables">
-										${this.bundle.declarations.map(
+										${this.bundle.declarations?.map(
 											(declaration) =>
 												html`<sl-dropdown
 													><sl-button
