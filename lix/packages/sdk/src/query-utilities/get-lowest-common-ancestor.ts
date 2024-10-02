@@ -12,7 +12,7 @@ export async function getLowestCommonAncestor(args: {
 	targetLix: LixReadonly;
 }): Promise<Change | undefined> {
 	// the change has no parent (it is the root change)
-	if (args.sourceChange?.parent_id === undefined) {
+	if (!args.sourceChange?.parent_id) {
 		return undefined;
 	}
 	const currentTargetBranch = await args.targetLix.db
@@ -78,7 +78,7 @@ export async function getLowestCommonAncestor(args: {
 			)
 			.executeTakeFirst()) as Change;
 
-		if (!nextChange) {
+		if (!nextChange || !nextChange.parent_id) {
 			// end of the change sequence. No common parent found.
 			return undefined;
 		}
