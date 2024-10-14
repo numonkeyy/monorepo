@@ -25,15 +25,8 @@ const TableEditor = () => {
 	const [screenHeight, setScreenHeight] = useState<number>(800);
 	const [selection, setSelection] = useAtom(editorSelectionAtom);
 
-	const handleUpdateCsvData = async (
-		newData: [
-			{
-				[key: string]: string;
-			},
-		]
-	) => {
-		console.log("newData", newData);
-		project?.db
+	const handleUpdateCsvData = async (newData: [{ [key: string]: string }]) => {
+		await project?.db
 			.updateTable("file")
 			.set("data", await new Blob([Papa.unparse(newData)]).arrayBuffer())
 			.where("path", "=", "/data.csv")
@@ -41,23 +34,20 @@ const TableEditor = () => {
 	};
 
 	const columns: Array<Record<string, unknown>> = [];
+
 	if (csvData.length > 0) {
 		for (const key in csvData[0]) {
+			const column = {
+				...keyColumn(key, textColumn),
+				title: key,
+				maxWidth: 200,
+			};
+			// to simplify plugin logic, disallow
+			// editing the unique column for now
 			if (key === uniqueColumn) {
-				const column = {
-					...keyColumn(key, textColumn),
-					title: key,
-					maxWidth: 200,
-				};
-				columns.push(column);
-			} else {
-				const column = {
-					...keyColumn(key, textColumn),
-					title: key,
-					maxWidth: 200,
-				};
-				columns.push(column);
+				column.disabled = true;
 			}
+			columns.push(column);
 		}
 	}
 
