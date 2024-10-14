@@ -47,7 +47,6 @@ const TableEditor = () => {
 				const column = {
 					...keyColumn(key, textColumn),
 					title: key,
-					disabled: true,
 					maxWidth: 200,
 				};
 				columns.push(column);
@@ -64,32 +63,21 @@ const TableEditor = () => {
 
 	useEffect(() => {
 		setScreenHeight(window.innerHeight - 82);
-	}, [window.innerHeight]);
+	}, []);
 
 	return (
 		<div className="relative h-[calc(100vh_-_82px)]">
 			<DynamicDataSheetGrid
 				disableContextMenu
-				value={
-					csvData as [
-						{
-							[key: string]: string;
-						},
-					]
-				}
+				value={csvData as [{ [key: string]: string }]}
 				height={screenHeight}
 				columns={columns}
-				onChange={(newData) =>
-					handleUpdateCsvData(
-						newData as [
-							{
-								[key: string]: string;
-							},
-						]
-					)
-				}
+				onChange={(newData) => {
+					console.log("change");
+					handleUpdateCsvData(newData as [{ [key: string]: string }]);
+				}}
 				rowKey={uniqueColumn}
-				// onFocus={(cell) => console.log("onFocus", cell)}
+				onFocus={(cell) => console.log("onFocus", cell)}
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				onSelectionChange={(e: { selection: any }) => {
 					if (e.selection) {
